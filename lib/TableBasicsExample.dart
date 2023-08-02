@@ -1,6 +1,4 @@
-// Copyright 2019 Aleksander Woźniak
-// SPDX-License-Identifier: Apache-2.0
-
+import 'package:day_condition/userData.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +7,8 @@ import 'package:intl/intl.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'dart:convert';
 
 import '../utils.dart';
 import 'globalVariables.dart';
@@ -23,12 +23,13 @@ class TableEventsExample extends StatefulWidget {
 class _TableEventsExampleState extends State<TableEventsExample> {
   late final ValueNotifier<List<Event>> _selectedEvents;
   CalendarFormat _calendarFormat = CalendarFormat.month;
-  RangeSelectionMode _rangeSelectionMode = RangeSelectionMode
-      .toggledOff; // Can be toggled on/off by longpressing a date
+  RangeSelectionMode _rangeSelectionMode = RangeSelectionMode.toggledOff; // Can be toggled on/off by longpressing a date
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
   DateTime? _rangeStart;
   DateTime? _rangeEnd;
+  FirebaseDatabase database = FirebaseDatabase.instance;
+  DatabaseReference ref = FirebaseDatabase.instance.ref("$G_uid");
 
   @override
   void initState() {
@@ -115,17 +116,9 @@ class _TableEventsExampleState extends State<TableEventsExample> {
 
   @override
   Widget build(BuildContext context) {
-    const isDebug = false;
-    final LocalStorage storage = LocalStorage('someKey');
-
-    if (kDebugMode) {
-      // print('wakeupTime: ${storage.getItem('wakeupTime')}');
-      // print('item 1: ${storage.getItem('1')}');
-    }
-
     return Scaffold(
       body: Container(
-        margin: EdgeInsets.fromLTRB(10, 0, 10, 0),
+        margin: const EdgeInsets.fromLTRB(10, 0, 10, 0),
         child: Column(
           children: [
             Center(
@@ -146,23 +139,11 @@ class _TableEventsExampleState extends State<TableEventsExample> {
                 ),
               ),
             ),
-            // Container(
-            //     width: 100,
-            //     padding: EdgeInsets.fromLTRB(20, 10, 20, 10), // 안쪽 여백 추가
-            //     decoration: BoxDecoration(
-            //     border: Border.all(color: Colors.black, width: 2),
-            //     shape: BoxShape.circle, // 타원형 모양으로 설정
-            //   ),
-            //   margin: EdgeInsets.only(top: 50),
-            //   child: Text("하루 체크")
-            // ),
             TableCalendar<Event>(
               availableCalendarFormats: const {
                 CalendarFormat.month: '월',
               },
               locale: 'ko_KR',
-              // daysOfWeekHeight: 20,
-              // tablePadding:
               rowHeight: 100,
               firstDay: kFirstDay,
               lastDay: kLastDay,
@@ -181,12 +162,10 @@ class _TableEventsExampleState extends State<TableEventsExample> {
                 selectedDecoration: BoxDecoration(
                   color: Color(0xFF5C6BC0),
                   shape: BoxShape.rectangle,
-                  // borderRadius: BorderRadius.all(Radius.circular(1.0)),
                 ),
                 todayDecoration: BoxDecoration(
                   color: Color(0xFF9FA8DA),
                   shape: BoxShape.rectangle,
-                  // borderRadius: BorderRadius.all(Radius.circular(1.0)),
                 ),
               ),
               onDaySelected: _onDaySelected,
@@ -203,128 +182,114 @@ class _TableEventsExampleState extends State<TableEventsExample> {
               },
               calendarBuilders: CalendarBuilders(
                   markerBuilder: (context, day, events){
-                    final key = DateFormat('yyyy.MM.dd').format(day);
+                    final key = DateFormat('yyyyMMdd').format(day);
 
-                    return Container(
-                      width: MediaQuery.of(context).size.width * 0.11,
-                      padding: const EdgeInsets.only(top: 30),
-                      // decoration: const BoxDecoration(
-                      //   color: Colors.lightBlue,
-                      //   shape: BoxShape.circle,
-                      // ),
-                      // child: Row(
-                      //   children: const [
-                      //     Icon(Icons.sunny, size: 12,),
-                      //     Text('06:30', style: TextStyle(fontSize: 12),),
-                      //     // Column(
-                      //     //   children: [
-                      //     //     Icon(Icons.sunny, size: 15,),
-                      //     //     Text('06:30', style: TextStyle(fontSize: 5),),
-                      //     //   ]
-                      //     // )
-                      //   ]
-                      // )
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              if (storage.getItem('wakeupTime.$key') != null)
-                                Container(
-                                  padding: const EdgeInsets.all(3),
-                                  margin: const EdgeInsets.only(bottom: 4),
-                                  decoration: BoxDecoration(
-                                    color: G_wakeUpColor,
-                                    borderRadius: BorderRadius.circular(500),
-                                  ),
-                                  // child: Text(storage.getItem(day.toString()), style: TextStyle(color: Colors.black),),
-                                  child: Text(storage.getItem('wakeupTime.$key'), style: const TextStyle(color: Colors.black),),
-                                )
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              if (storage.getItem('bedTime.$key') != null)
-                                Container(
-                                  padding: const EdgeInsets.all(3),
-                                  margin: const EdgeInsets.only(bottom: 4),
-                                  decoration: BoxDecoration(
-                                    color: G_sleepColor,
-                                    borderRadius: BorderRadius.circular(500),
-                                  ),
-                                  child: Text(storage.getItem('bedTime.$key'), style: TextStyle(color: Colors.white),),
-                                )
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              if (storage.getItem('rating.$key') != null)
-                                RatingBar.builder(
-                                  ignoreGestures: true,
-                                  initialRating: storage.getItem('rating.$key'),
-                                  minRating: 1,
-                                  direction: Axis.horizontal,
-                                  allowHalfRating: true,
-                                  itemCount: 5,
-                                  itemPadding: const EdgeInsets.symmetric(horizontal: 0.0),
-                                  itemBuilder: (context, _) => Icon(
-                                    // Image.asset(name),
-                                    Icons.rectangle_rounded,
-                                    color: G_energyColor,
-                                  ),
-                                  onRatingUpdate: (rating) {
-                                  },
-                                  itemSize: 8,
-                                )
-                            ],
-                          ),
-                          // Row(
-                          //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          //   children: const [
-                          //     Icon(Icons.star, color: Colors.yellow, size: 30,),
-                          //   ],
-                          // ),
-                          // Row(
-                          //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          //   children: const [
-                          //     Text('메모메모', style: TextStyle(fontSize: 12, backgroundColor: Colors.indigo),),
-                          //   ],
-                          // ),
-                        ],
-                      ),
+                    Future<Map<dynamic, dynamic>> getMarkersAsync() async {
+                      DataSnapshot snapshot = await ref.child(key).get();
+                      return snapshot.value as Map<dynamic, dynamic>;
+                    }
+
+                    return FutureBuilder(
+                      future: getMarkersAsync(),
+                      builder: (context, snapShot) {
+                        if (snapShot.hasData) {
+                          String wakeupTime = snapShot.data?["wakeupTime"];
+                          String bedTime = snapShot.data?["bedTime"];
+                          dynamic energy = snapShot.data?["energy"];
+                          if (energy is int) {
+                            energy = energy.toDouble();
+                          }
+                          return Container(
+                            width: MediaQuery.of(context).size.width * 0.11,
+                            padding: const EdgeInsets.only(top: 30),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(3),
+                                        margin: const EdgeInsets.only(bottom: 4),
+                                        decoration: BoxDecoration(
+                                          color: G_wakeUpColor,
+                                          borderRadius: BorderRadius.circular(500),
+                                        ),
+                                        // child: Text(storage.getItem(day.toString()), style: TextStyle(color: Colors.black),),
+                                        child: Text(wakeupTime, style: const TextStyle(color: Colors.black),),
+                                      )
+                                    ]
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(3),
+                                      margin: const EdgeInsets.only(bottom: 4),
+                                      decoration: BoxDecoration(
+                                        color: G_sleepColor,
+                                        borderRadius: BorderRadius.circular(500),
+                                      ),
+                                      child: Text(bedTime, style: const TextStyle(color: Colors.white),),
+                                    )
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    RatingBar.builder(
+                                      ignoreGestures: true,
+                                      initialRating: energy,
+                                      minRating: 1,
+                                      direction: Axis.horizontal,
+                                      allowHalfRating: true,
+                                      itemCount: 5,
+                                      itemPadding: const EdgeInsets.symmetric(horizontal: 0.0),
+                                      itemBuilder: (context, _) => Icon(
+                                        // Image.asset(name),
+                                        Icons.rectangle_rounded,
+                                        color: G_energyColor,
+                                      ),
+                                      onRatingUpdate: (rating) {
+                                      },
+                                      itemSize: 8,
+                                    )
+                                  ],
+                                ),
+                              ],
+                            ),
+                          );
+                        } else {
+                          return const SizedBox();
+                        }
+                      }
                     );
                   },
                   dowBuilder: (context, day) {
-                    // return Container(
-                    //
-                    // );
+                    return null;
                   },
                   defaultBuilder: (context, day, focusedDay) {
-                    // return Container(
-                    //   height: MediaQuery.of(context).size.width * 0.01,
-                    // );
+                    return null;
                   },
               ),
-              onDayLongPressed: (DateTime selectedDay, DateTime focusedDay) {
+              onDayLongPressed: (DateTime selectedDay, DateTime focusedDay) async {
                 int wakeupTimeHH = 6;
                 int bedTimeHH = 10;
                 int wakeupTimeMM = 0;
                 int bedTimeMM = 0;
-                double ratingValue = 2.5;
-                final key = DateFormat('yyyy.MM.dd').format(selectedDay);
-                if (storage.getItem('wakeupTime.$key') != null) {
-                  wakeupTimeHH = int.parse(storage.getItem('wakeupTime.$key').split(':')[0]);
-                  wakeupTimeMM = int.parse(storage.getItem('wakeupTime.$key').split(':')[1]);
-                }
-                if (storage.getItem('bedTime.$key') != null) {
-                  bedTimeHH = int.parse(storage.getItem('bedTime.$key').split(':')[0]);
-                  bedTimeMM = int.parse(storage.getItem('bedTime.$key').split(':')[1]);
-                }
-                if (storage.getItem('rating.$key') != null) {
-                  ratingValue = storage.getItem('rating.$key');
+                dynamic ratingValue = 2.5;
+                final key = DateFormat('yyyyMMdd').format(selectedDay);
+                DataSnapshot snapshot = await ref.child(key).get();
+                if (snapshot.exists) {
+                  Map<dynamic, dynamic> value = snapshot.value as Map<dynamic, dynamic>;
+                  wakeupTimeHH = int.parse(value['wakeupTime'].split(':')[0]);
+                  wakeupTimeMM = int.parse(value['wakeupTime'].split(':')[1]);
+                  bedTimeHH = int.parse(value['bedTime'].split(':')[0]);
+                  bedTimeMM = int.parse(value['bedTime'].split(':')[1]);
+                  ratingValue = value['energy'];
+                  if (ratingValue is int) {
+                    ratingValue = value['energy'].toDouble();
+                  }
                 }
                 DateTime wakeupTime = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, wakeupTimeHH, wakeupTimeMM);
                 DateTime bedTime = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, bedTimeHH, bedTimeMM);
@@ -344,7 +309,6 @@ class _TableEventsExampleState extends State<TableEventsExample> {
                               children: [
                                 Container(
                                   padding: const EdgeInsets.only(top: 10, bottom: 10),
-                                  decoration: isDebug ? BoxDecoration(border: Border.all()) : null,
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     // crossAxisAlignment: CrossAxisAlignment.start,
@@ -355,9 +319,16 @@ class _TableEventsExampleState extends State<TableEventsExample> {
                                       ),
                                       TextButton(
                                         onPressed: () async => {
-                                          await Future.wait([storage.setItem('wakeupTime.$key', DateFormat('HH:mm').format(wakeupTime))]),
-                                          await Future.wait([storage.setItem('bedTime.$key', DateFormat('HH:mm').format(bedTime))]),
-                                          await Future.wait([storage.setItem('rating.$key', ratingValue),]),
+                                          // await Future.wait([storage.setItem('wakeupTime.$key', DateFormat('HH:mm').format(wakeupTime))]),
+                                          // await Future.wait([storage.setItem('bedTime.$key', DateFormat('HH:mm').format(bedTime))]),
+                                          // await Future.wait([storage.setItem('rating.$key', ratingValue),]),
+                                          await ref.update({
+                                            key: {
+                                              "wakeupTime": DateFormat('HH:mm').format(wakeupTime),
+                                              "bedTime": DateFormat('HH:mm').format(bedTime),
+                                              "energy": ratingValue
+                                            }
+                                          }),
                                           setState(() {
                                             Navigator.pop(context);
                                           })
@@ -368,84 +339,75 @@ class _TableEventsExampleState extends State<TableEventsExample> {
                                     ],
                                   ),
                                 ),
-                                Container(
-                                  decoration: isDebug ? BoxDecoration(border: Border.all()) : null,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Icon(
-                                        Icons.sunny,
-                                        color: Colors.yellow,
-                                        size: 50,
-                                      ),
-                                      CupertinoButton(
-                                        // Display a CupertinoDatePicker in dateTime picker mode.
-                                        onPressed: () => _showDialog(
-                                          CupertinoDatePicker(
-                                            initialDateTime: wakeupTime,
-                                            mode: CupertinoDatePickerMode.time,
-                                            use24hFormat: false,
-                                            // This is called when the user changes the dateTime.
-                                            onDateTimeChanged: (DateTime newDateTime) {
-                                              modalSetState(() => {
-                                                wakeupTime = newDateTime,
-                                              });
-                                            },
-                                          ),
-                                        ),
-                                        // In this example, the time value is formatted manually. You
-                                        // can use the intl package to format the value based on the
-                                        // user's locale settings.
-                                        child: Text(
-                                          DateFormat('HH:mm').format(wakeupTime),
-                                          style: const TextStyle(
-                                            fontSize: 50,
-                                          ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.sunny,
+                                      color: Colors.yellow,
+                                      size: 50,
+                                    ),
+                                    CupertinoButton(
+                                      // Display a CupertinoDatePicker in dateTime picker mode.
+                                      onPressed: () => _showDialog(
+                                        CupertinoDatePicker(
+                                          initialDateTime: wakeupTime,
+                                          mode: CupertinoDatePickerMode.time,
+                                          use24hFormat: false,
+                                          // This is called when the user changes the dateTime.
+                                          onDateTimeChanged: (DateTime newDateTime) {
+                                            modalSetState(() => wakeupTime = newDateTime);
+                                          },
                                         ),
                                       ),
-                                    ],
-                                  ),
+                                      // In this example, the time value is formatted manually. You
+                                      // can use the intl package to format the value based on the
+                                      // user's locale settings.
+                                      child: Text(
+                                        DateFormat('HH:mm').format(wakeupTime),
+                                        style: const TextStyle(
+                                          fontSize: 50,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                Container(
-                                  decoration: isDebug ? BoxDecoration(border: Border.all()) : null,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Icon(
-                                        Icons.nightlight_round_rounded,
-                                        color: Colors.indigo,
-                                        size: 50,
-                                      ),
-                                      CupertinoButton(
-                                        // Display a CupertinoDatePicker in dateTime picker mode.
-                                        onPressed: () => _showDialog(
-                                          CupertinoDatePicker(
-                                            initialDateTime: bedTime,
-                                            mode: CupertinoDatePickerMode.time,
-                                            use24hFormat: false,
-                                            // This is called when the user changes the dateTime.
-                                            onDateTimeChanged: (DateTime newDateTime) {
-                                              modalSetState(() => bedTime = newDateTime);
-                                            },
-                                          ),
-                                        ),
-                                        // In this example, the time value is formatted manually. You
-                                        // can use the intl package to format the value based on the
-                                        // user's locale settings.
-                                        child: Text(
-                                          DateFormat('HH:mm').format(bedTime),
-                                          // '${bedTime.hour}:${bedTime.minute}',
-                                          style: const TextStyle(
-                                            fontSize: 50,
-                                          ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.nightlight_round_rounded,
+                                      color: Colors.indigo,
+                                      size: 50,
+                                    ),
+                                    CupertinoButton(
+                                      // Display a CupertinoDatePicker in dateTime picker mode.
+                                      onPressed: () => _showDialog(
+                                        CupertinoDatePicker(
+                                          initialDateTime: bedTime,
+                                          mode: CupertinoDatePickerMode.time,
+                                          use24hFormat: false,
+                                          // This is called when the user changes the dateTime.
+                                          onDateTimeChanged: (DateTime newDateTime) {
+                                            modalSetState(() => bedTime = newDateTime);
+                                          },
                                         ),
                                       ),
-                                    ],
-                                  ),
+                                      // In this example, the time value is formatted manually. You
+                                      // can use the intl package to format the value based on the
+                                      // user's locale settings.
+                                      child: Text(
+                                        DateFormat('HH:mm').format(bedTime),
+                                        // '${bedTime.hour}:${bedTime.minute}',
+                                        style: const TextStyle(
+                                          fontSize: 50,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                 Container(
                                   padding: const EdgeInsets.only(top: 10, bottom: 10),
-                                  decoration: isDebug ? BoxDecoration(border: Border.all()) : null,
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
@@ -471,7 +433,6 @@ class _TableEventsExampleState extends State<TableEventsExample> {
                                 )
                               ],
                             ),
-
                           )
                       );
                     });

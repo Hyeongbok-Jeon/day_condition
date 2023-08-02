@@ -40,6 +40,9 @@ dependencies:
   localstorage: ^4.0.1+4
   table_calendar: ^3.0.9
   intl: ^0.18.1
+  firebase_database: ^10.2.4
+  firebase_core: ^2.15.0
+  firebase_auth: ^4.7.2
 
 dev_dependencies:
   flutter_test:

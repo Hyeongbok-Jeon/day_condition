@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "784631214517",
+    "firebase_url": "https://daycondition-198dd-default-rtdb.firebaseio.com",
+    "project_id": "daycondition-198dd",
+    "storage_bucket": "daycondition-198dd.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:784631214517:android:eb84b0a9ea572fbf8fa9fc",
+        "android_client_info": {
+          "package_name": "com.example.day_condition"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "784631214517-4min50m6r6mth13ql88520vakp81cfgm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCTMHpX_0Lyn-f1j8lhOjP-AwnYyKcFr1c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "784631214517-4min50m6r6mth13ql88520vakp81cfgm.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "784631214517-6svs4m7mtulb7aovtsn8tsbu93h2qjmq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.dayCondition"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

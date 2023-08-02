@@ -1,8 +1,34 @@
 import 'package:flutter/material.dart';
-
 import 'bottomNavigation.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-void main() {
+import 'globalVariables.dart';
+
+Future<void> main() async {
+  // 없으면 에러
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // firebase 초기화
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  try {
+    final userCredential = await FirebaseAuth.instance.signInAnonymously();
+    G_uid = userCredential.user?.uid.toString();
+    print("uid: $G_uid");
+  } on FirebaseAuthException catch (e) {
+    switch (e.code) {
+      case "operation-not-allowed":
+        print("Anonymous auth hasn't been enabled for this project.");
+        break;
+      default:
+        print("Unknown error.");
+    }
+  }
+
   runApp(const MyApp());
 }
 

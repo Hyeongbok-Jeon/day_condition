@@ -147,7 +147,7 @@ class _TableEventsExampleState extends State<TableEventsExample> {
                 CalendarFormat.month: '월',
               },
               locale: 'ko_KR',
-              rowHeight: MediaQuery.of(context).size.height * 0.12,
+              rowHeight: MediaQuery.of(context).size.height * 0.11,
               firstDay: kFirstDay,
               lastDay: kLastDay,
               focusedDay: _focusedDay,
@@ -203,7 +203,7 @@ class _TableEventsExampleState extends State<TableEventsExample> {
                             energy = energy.toDouble();
                           }
                           return Container(
-                            width: MediaQuery.of(context).size.width * 0.11,
+                            // width: MediaQuery.of(context).size.width * 0.2,
                             padding: EdgeInsets.only(top: MediaQuery.of(context).size.width * 0.07),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
@@ -219,7 +219,13 @@ class _TableEventsExampleState extends State<TableEventsExample> {
                                           borderRadius: BorderRadius.circular(500),
                                         ),
                                         // child: Text(storage.getItem(day.toString()), style: TextStyle(color: Colors.black),),
-                                        child: Text(wakeupTime, style: const TextStyle(color: Colors.black),),
+                                        child: Text(
+                                          wakeupTime,
+                                          style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: MediaQuery.of(context).size.width * 0.025
+                                          ),
+                                        ),
                                       )
                                     ]
                                 ),
@@ -233,7 +239,13 @@ class _TableEventsExampleState extends State<TableEventsExample> {
                                         color: G_sleepColor,
                                         borderRadius: BorderRadius.circular(500),
                                       ),
-                                      child: Text(bedTime, style: const TextStyle(color: Colors.white),),
+                                      child: Text(
+                                        bedTime,
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: MediaQuery.of(context).size.width * 0.025
+                                        ),
+                                      ),
                                     )
                                   ],
                                 ),
@@ -255,7 +267,7 @@ class _TableEventsExampleState extends State<TableEventsExample> {
                                       ),
                                       onRatingUpdate: (rating) {
                                       },
-                                      itemSize: 8,
+                                      itemSize: MediaQuery.of(context).size.width * 0.017,
                                     )
                                   ],
                                 ),

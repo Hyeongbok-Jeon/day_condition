@@ -144,7 +144,7 @@ class _TableEventsExampleState extends State<TableEventsExample> {
                 CalendarFormat.month: '월',
               },
               locale: 'ko_KR',
-              rowHeight: 100,
+              rowHeight: MediaQuery.of(context).size.height * 0.13,
               firstDay: kFirstDay,
               lastDay: kLastDay,
               focusedDay: _focusedDay,
@@ -274,7 +274,7 @@ class _TableEventsExampleState extends State<TableEventsExample> {
               ),
               onDayLongPressed: (DateTime selectedDay, DateTime focusedDay) async {
                 int wakeupTimeHH = 6;
-                int bedTimeHH = 10;
+                int bedTimeHH = 22;
                 int wakeupTimeMM = 0;
                 int bedTimeMM = 0;
                 dynamic ratingValue = 2.5;
@@ -293,6 +293,7 @@ class _TableEventsExampleState extends State<TableEventsExample> {
                 }
                 DateTime wakeupTime = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, wakeupTimeHH, wakeupTimeMM);
                 DateTime bedTime = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, bedTimeHH, bedTimeMM);
+                if(!mounted) return;
                 showModalBottomSheet<void>(
                   shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.only(topLeft: Radius.circular(30.0), topRight: Radius.circular(30.0)),
@@ -319,9 +320,6 @@ class _TableEventsExampleState extends State<TableEventsExample> {
                                       ),
                                       TextButton(
                                         onPressed: () async => {
-                                          // await Future.wait([storage.setItem('wakeupTime.$key', DateFormat('HH:mm').format(wakeupTime))]),
-                                          // await Future.wait([storage.setItem('bedTime.$key', DateFormat('HH:mm').format(bedTime))]),
-                                          // await Future.wait([storage.setItem('rating.$key', ratingValue),]),
                                           await ref.update({
                                             key: {
                                               "wakeupTime": DateFormat('HH:mm').format(wakeupTime),

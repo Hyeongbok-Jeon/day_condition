@@ -1,3 +1,4 @@
+import 'package:day_condition/statistics.dart';
 import 'package:flutter/material.dart';
 
 import 'TableBasicsExample.dart';
@@ -36,6 +37,10 @@ class _BottomNavigationExampleState extends State<BottomNavigationExample> {
             label: '',
           ),
           BottomNavigationBarItem(
+            icon: Icon(Icons.bar_chart, size: 32),
+            label: '',
+          ),
+          BottomNavigationBarItem(
             icon: Icon(Icons.settings, size: 32),
             label: '',
           ),
@@ -48,30 +53,15 @@ class _BottomNavigationExampleState extends State<BottomNavigationExample> {
     switch (index) {
       case 0:
       // 홈 페이지 위젯 반환
-        return TableEventsExample();
+        return const TableEventsExample();
       case 1:
+      // 홈 페이지 위젯 반환
+        return const Statistics();
+      case 2:
       // 검색 페이지 위젯 반환
-        return Settings();
+        return const Settings();
       default:
         return Container();
     }
-  }
-}
-
-class HomeWidget extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text('Home Page'),
-    );
-  }
-}
-
-class SettingsWidget extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text('Settings Page'),
-    );
   }
 }

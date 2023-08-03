@@ -117,34 +117,37 @@ class _TableEventsExampleState extends State<TableEventsExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text("App bar")
+      ),
       body: Container(
         margin: const EdgeInsets.fromLTRB(10, 0, 10, 0),
         child: Column(
           children: [
-            Center(
-              child: Container(
-                margin: const EdgeInsets.fromLTRB(0, 55, 0, 20),
-                width: 200,
-                height: 50,
-                // color: Colors.blue,
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.black, width: 2),
-                  // shape: BoxShape.circle, // 타원형 모양으로 설정
-                ),// 네모난 박스의 색상
-                child: const Center(
-                  child: Text(
-                    'Day Condition',
-                    style: TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-            ),
+            // Center(
+            //   child: Container(
+            //     margin: const EdgeInsets.fromLTRB(0, 55, 0, 20),
+            //     width: 200,
+            //     height: MediaQuery.of(context).size.height * 0.05,
+            //     // color: Colors.blue,
+            //     decoration: BoxDecoration(
+            //       border: Border.all(color: Colors.black, width: 2),
+            //       // shape: BoxShape.circle, // 타원형 모양으로 설정
+            //     ),// 네모난 박스의 색상
+            //     child: const Center(
+            //       child: Text(
+            //         'Day Condition',
+            //         style: TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.bold),
+            //       ),
+            //     ),
+            //   ),
+            // ),
             TableCalendar<Event>(
               availableCalendarFormats: const {
                 CalendarFormat.month: '월',
               },
               locale: 'ko_KR',
-              rowHeight: MediaQuery.of(context).size.height * 0.13,
+              rowHeight: MediaQuery.of(context).size.height * 0.12,
               firstDay: kFirstDay,
               lastDay: kLastDay,
               focusedDay: _focusedDay,
@@ -201,7 +204,7 @@ class _TableEventsExampleState extends State<TableEventsExample> {
                           }
                           return Container(
                             width: MediaQuery.of(context).size.width * 0.11,
-                            padding: const EdgeInsets.only(top: 30),
+                            padding: EdgeInsets.only(top: MediaQuery.of(context).size.width * 0.07),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [

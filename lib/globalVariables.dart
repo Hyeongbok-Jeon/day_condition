@@ -1,5 +1,9 @@
-import 'dart:ui';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+
+bool G_isDebug = true;
+
+var borderForDebug = G_isDebug ? BoxDecoration(border: Border.all(width: 1, color: Colors.black38),) : null;
 
 String? G_uid = "";
 

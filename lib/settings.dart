@@ -38,7 +38,10 @@ class _SettingsState extends State<Settings> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              child: const Icon(Icons.check, size: 30,),
+              child: const Icon(
+                Icons.check,
+                size: 30,
+              ),
             ),
           ],
         );
@@ -59,13 +62,13 @@ class _SettingsState extends State<Settings> {
                 // '취소' 버튼을 눌렀을 때 실행되는 동작
                 Navigator.of(context).pop();
               },
-              child: Text('취소'),
+              child: const Text('취소'),
             ),
             TextButton(
               onPressed: () {
                 setState(() {
                   if (type == '기상') {
-                    G_wakeUpColor = Color(0xFFF8DAA0);
+                    G_wakeUpColor = const Color(0xFFF8DAA0);
                   } else if (type == '취침') {
                     G_sleepColor = Colors.indigo;
                   } else if (type == '에너지') {
@@ -74,7 +77,7 @@ class _SettingsState extends State<Settings> {
                 });
                 Navigator.of(context).pop(); // 다이얼로그 닫기
               },
-              child: Text('확인'),
+              child: const Text('확인'),
             ),
           ],
         );
@@ -82,7 +85,7 @@ class _SettingsState extends State<Settings> {
     );
   }
 
-  Widget widgetSetColor (String type) {
+  Widget widgetSetColor(String type) {
     Color color = Colors.black;
     if (type == '기상') {
       color = G_wakeUpColor;
@@ -92,51 +95,75 @@ class _SettingsState extends State<Settings> {
       color = G_energyColor;
     }
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        Text(type, style: TextStyle(fontSize: 30),),
-        const SizedBox(width: 30,),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            minimumSize: const Size(50, 50),
-            backgroundColor: color,
-            shape: const CircleBorder(), // 원 모양으로 버튼 꾸미기
-            // padding: EdgeInsets.all(16), // 버튼 안의 컨텐츠(아이콘) 패딩 설정
+    return Container(
+      decoration: borderForDebug,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Container(
+              decoration: borderForDebug,
+              width: 90,
+              child: Center(
+                  child: Text(
+                type,
+                style: const TextStyle(fontSize: 30),
+              ))),
+          Container(
+            decoration: borderForDebug,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(50, 50),
+                backgroundColor: color,
+                shape: const CircleBorder(), // 원 모양으로 버튼 꾸미기
+                // padding: EdgeInsets.all(16), // 버튼 안의 컨텐츠(아이콘) 패딩 설정
+              ),
+              onPressed: () {
+                _openColorPicker(type);
+              },
+              child: const Text(''),
+            ),
           ),
-          onPressed: () {
-            _openColorPicker(type);
-          },
-          child: const Text(''),
-        ),
-        const SizedBox(width: 30,),
-        TextButton(
-          onPressed: () {
-            _showConfirmationDialog(type);
-          },
-          child: const Text('기본값으로 변경'),
-        ),
-      ],
+          Container(
+            decoration: borderForDebug,
+            child: TextButton(
+              onPressed: () {
+                _showConfirmationDialog(type);
+              },
+              child: const Text('기본값으로 변경'),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 350,
-      margin: const EdgeInsets.all(50),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Row(
-            children: const [
-              Text("색상 변경", style: TextStyle(fontSize: 40),)
-            ]
-          ),
-          widgetSetColor('기상'),
-          widgetSetColor('취침'),
-          widgetSetColor('에너지'),
-        ],
+    return Scaffold(
+      appBar: AppBar(title: const Text("설정")),
+      body: Container(
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          children: [
+            Container(
+              decoration: borderForDebug,
+              height: 300,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    alignment: AlignmentDirectional.topStart,
+                      decoration: borderForDebug,
+                      child: Text("색상", style: TextStyle(fontSize: 40),)
+                  ),
+                  widgetSetColor('기상'),
+                  widgetSetColor('취침'),
+                  widgetSetColor('에너지'),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

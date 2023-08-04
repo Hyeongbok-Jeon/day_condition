@@ -1,8 +1,8 @@
 import 'package:day_condition/statistics.dart';
 import 'package:flutter/material.dart';
 
-import 'TableBasicsExample.dart';
-import 'Settings.dart';
+import 'canlendar.dart';
+import 'settings.dart';
 
 class BottomNavigationExample extends StatefulWidget {
   const BottomNavigationExample({super.key});

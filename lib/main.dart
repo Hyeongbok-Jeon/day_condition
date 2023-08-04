@@ -15,6 +15,7 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  // firebase 익명 로그인
   try {
     final userCredential = await FirebaseAuth.instance.signInAnonymously();
     G_uid = userCredential.user?.uid.toString();

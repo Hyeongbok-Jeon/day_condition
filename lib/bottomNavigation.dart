@@ -33,15 +33,15 @@ class _BottomNavigationExampleState extends State<BottomNavigationExample> {
           //   label: 'Home',
           // ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month, size: 32),
+            icon: Icon(Icons.calendar_month, size: 28),
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart, size: 32),
+            icon: Icon(Icons.bar_chart, size: 28),
             label: '',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings, size: 32),
+            icon: Icon(Icons.settings, size: 28),
             label: '',
           ),
         ],
@@ -53,7 +53,7 @@ class _BottomNavigationExampleState extends State<BottomNavigationExample> {
     switch (index) {
       case 0:
       // 홈 페이지 위젯 반환
-        return const TableEventsExample();
+        return const Canlendar();
       case 1:
       // 홈 페이지 위젯 반환
         return const Statistics();

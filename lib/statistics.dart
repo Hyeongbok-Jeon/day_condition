@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:firebase_database/firebase_database.dart';
@@ -24,12 +25,13 @@ class _StatisticsState extends State<Statistics> {
 
     final query = FirebaseDatabase.instance.ref("$G_uid").orderByKey().limitToLast(7);
     query.onValue.listen((event) {
-      setState(() {
-        for (final child in event.snapshot.children) {
-          print('${child.key} ${child.value}');
-          snapshotValue[child.key] = child.value;
-        }
-      });
+      if(mounted) {
+        setState(() {
+          for (final child in event.snapshot.children) {
+            snapshotValue[child.key] = child.value;
+          }
+        });
+      }
     });
   }
 
@@ -38,16 +40,14 @@ class _StatisticsState extends State<Statistics> {
     List<BarChartGroupData> setBarGroupsData() {
       List<BarChartGroupData> processedData = [];
       for (int i = 0; i < 7; i++) {
-        // final today = DateTime.now();
-        // print(today);
-        // print(DateFormat('yyyyMMdd').format(today.subtract(Duration(days: 1))) == null);
-        // print(snapshotValue[today.subtract(Duration(days: i))]);
+        final today = DateTime.now();
+        final dayAgo = DateFormat('yyyyMMdd').format(today.subtract(Duration(days: 6 - i)));
         processedData.add(
           BarChartGroupData(
             x: i,
             barRods: [
               BarChartRodData(
-                toY: snapshotValue[i] != null ? snapshotValue[i]['timeDiff'].toDouble() / 60 : 0,
+                toY: snapshotValue[dayAgo] != null ? snapshotValue[dayAgo]['timeDiff'].toDouble() / 60 : 0,
                 gradient: _barsGradient,
               )
             ],
@@ -76,14 +76,28 @@ class _StatisticsState extends State<Statistics> {
     }
 
     Widget getTitles(double value, TitleMeta meta) {
-      print(value);
       const style = TextStyle(
         color: AppColors.contentColorBlue,
         fontWeight: FontWeight.bold,
         fontSize: 14,
       );
-      String text = 'tmp';
-      // text = '${text.substring(4, 6)}/${text.substring(6, 8)}';
+      final today = DateTime.now();
+      String text = DateFormat('MM/dd').format(today.subtract(Duration(days: 6 - value.toInt())));
+      // String text;
+      // switch (value.toInt()) {
+      //   case 0: text = '08/04'; break;
+      //   case 1: text = '08/05'; break;
+      //   case 2: text = '08/06'; break;
+      //   case 3: text = '08/07'; break;
+      //   case 4: text = '08/08'; break;
+      //   case 5: text = '08/09'; break;
+      //   case 6: text = '08/10'; break;
+      //   default: text = ''; break;
+      // }
+      // String text = snapshotValue.keys.elementAtOrNull(value.toInt()) ?? 'tmp';
+      // if (text != 'tmp') {
+      //   text = '${text.substring(4, 6)}/${text.substring(6, 8)}';
+      // }
       return SideTitleWidget(
         axisSide: meta.axisSide,
         space: 4,

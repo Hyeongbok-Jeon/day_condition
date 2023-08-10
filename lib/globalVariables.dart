@@ -1,7 +1,7 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
-bool G_isDebug = true;
+bool G_isDebug = false;
 
 var borderForDebug = G_isDebug ? BoxDecoration(border: Border.all(width: 1, color: Colors.black38),) : null;
 

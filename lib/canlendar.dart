@@ -138,7 +138,7 @@ class _TableEventsExampleState extends State<TableEventsExample> {
             startingDayOfWeek: StartingDayOfWeek.monday,
             calendarStyle: const CalendarStyle(
               // Use `CalendarStyle` to customize the UI
-              outsideDaysVisible: false,
+              outsideDaysVisible: true,
               cellAlignment: Alignment.topCenter,
               selectedDecoration: BoxDecoration(
                 color: Color(0xFF5C6BC0),
@@ -190,6 +190,26 @@ class _TableEventsExampleState extends State<TableEventsExample> {
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
                                   Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(3),
+                                        margin: const EdgeInsets.only(bottom: 4),
+                                        decoration: BoxDecoration(
+                                          color: G_sleepColor,
+                                          borderRadius: BorderRadius.circular(500),
+                                        ),
+                                        child: Text(
+                                          bedTime,
+                                          style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: MediaQuery.of(context).size.height * 0.01
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                  Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                       children: [
                                         Container(
@@ -209,26 +229,6 @@ class _TableEventsExampleState extends State<TableEventsExample> {
                                           ),
                                         )
                                       ]
-                                  ),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(3),
-                                        margin: const EdgeInsets.only(bottom: 4),
-                                        decoration: BoxDecoration(
-                                          color: G_sleepColor,
-                                          borderRadius: BorderRadius.circular(500),
-                                        ),
-                                        child: Text(
-                                          bedTime,
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: MediaQuery.of(context).size.height * 0.01
-                                          ),
-                                        ),
-                                      )
-                                    ],
                                   ),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -271,6 +271,30 @@ class _TableEventsExampleState extends State<TableEventsExample> {
                 },
             ),
             onDayLongPressed: (DateTime selectedDay, DateTime focusedDay) async {
+              int dateCompareResult = selectedDay.compareTo(DateTime.now());
+              print(dateCompareResult);
+              if (selectedDay.compareTo(DateTime.now()) == 1) {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      // title: Text('Confirmation'),
+                      content: const Text('오늘 이전 날짜만 선택 가능합니다.'),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop(); // 다이얼로그 닫기
+                          },
+                          child: const Text('확인'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+                return;
+              }
+
+
               int wakeupTimeHH = 6;
               int bedTimeHH = 22;
               int wakeupTimeMM = 0;
@@ -296,7 +320,6 @@ class _TableEventsExampleState extends State<TableEventsExample> {
 
               DateTime wakeupTime = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, wakeupTimeHH, wakeupTimeMM);
               DateTime bedTime = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, bedTimeHH, bedTimeMM);
-              Duration timeDiff = bedTime.difference(wakeupTime);
 
               // Don't use 'BuildContext's across async gaps. (Documentation)  Try rewriting the code to not reference the 'BuildContext'.
               // 위 에러 해결 코드
@@ -309,6 +332,7 @@ class _TableEventsExampleState extends State<TableEventsExample> {
                 context: context,
                 builder: (BuildContext context) {
                   return StatefulBuilder(builder: (BuildContext context, StateSetter modalSetState) {
+                    int dateCompareResult = wakeupTime.compareTo(bedTime);
                     return SizedBox(
                         height: 400,
                         child: Container(
@@ -333,11 +357,15 @@ class _TableEventsExampleState extends State<TableEventsExample> {
                                             "wakeupTime": DateFormat('HH:mm').format(wakeupTime),
                                             "bedTime": DateFormat('HH:mm').format(bedTime),
                                             "energy": ratingValue,
-                                            "timeDiff": (24 * 60) - timeDiff.inMinutes
+                                            "timeDiff": dateCompareResult == -1
+                                                ? (24 * 60) - bedTime.difference(wakeupTime).inMinutes
+                                                : wakeupTime.difference(bedTime).inMinutes
                                           }
-                                        }),
-                                        setState(() {
-                                          Navigator.pop(context);
+                                        })
+                                        .then((value) {
+                                          setState(() {
+                                            Navigator.pop(context);
+                                          });
                                         })
                                       },
                                       child: const Icon(Icons.check, size: 30,),
@@ -345,39 +373,6 @@ class _TableEventsExampleState extends State<TableEventsExample> {
                                     ),
                                   ],
                                 ),
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(
-                                    Icons.sunny,
-                                    color: Colors.yellow,
-                                    size: 50,
-                                  ),
-                                  CupertinoButton(
-                                    // Display a CupertinoDatePicker in dateTime picker mode.
-                                    onPressed: () => _showDialog(
-                                      CupertinoDatePicker(
-                                        initialDateTime: wakeupTime,
-                                        mode: CupertinoDatePickerMode.time,
-                                        use24hFormat: false,
-                                        // This is called when the user changes the dateTime.
-                                        onDateTimeChanged: (DateTime newDateTime) {
-                                          modalSetState(() => wakeupTime = newDateTime);
-                                        },
-                                      ),
-                                    ),
-                                    // In this example, the time value is formatted manually. You
-                                    // can use the intl package to format the value based on the
-                                    // user's locale settings.
-                                    child: Text(
-                                      DateFormat('HH:mm').format(wakeupTime),
-                                      style: const TextStyle(
-                                        fontSize: 50,
-                                      ),
-                                    ),
-                                  ),
-                                ],
                               ),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -406,6 +401,39 @@ class _TableEventsExampleState extends State<TableEventsExample> {
                                     child: Text(
                                       DateFormat('HH:mm').format(bedTime),
                                       // '${bedTime.hour}:${bedTime.minute}',
+                                      style: const TextStyle(
+                                        fontSize: 50,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(
+                                    Icons.sunny,
+                                    color: Colors.yellow,
+                                    size: 50,
+                                  ),
+                                  CupertinoButton(
+                                    // Display a CupertinoDatePicker in dateTime picker mode.
+                                    onPressed: () => _showDialog(
+                                      CupertinoDatePicker(
+                                        initialDateTime: wakeupTime,
+                                        mode: CupertinoDatePickerMode.time,
+                                        use24hFormat: false,
+                                        // This is called when the user changes the dateTime.
+                                        onDateTimeChanged: (DateTime newDateTime) {
+                                          modalSetState(() => wakeupTime = newDateTime);
+                                        },
+                                      ),
+                                    ),
+                                    // In this example, the time value is formatted manually. You
+                                    // can use the intl package to format the value based on the
+                                    // user's locale settings.
+                                    child: Text(
+                                      DateFormat('HH:mm').format(wakeupTime),
                                       style: const TextStyle(
                                         fontSize: 50,
                                       ),

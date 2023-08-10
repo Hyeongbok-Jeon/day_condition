@@ -1,3 +1,4 @@
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
@@ -11,6 +12,8 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
+  DatabaseReference ref = FirebaseDatabase.instance.ref("$G_uid");
+
   // 색상 변경 다이얼로그 호출
   void _openColorPicker(String type) {
     showDialog(
@@ -49,7 +52,7 @@ class _SettingsState extends State<Settings> {
     );
   }
 
-  void _showConfirmationDialog(String type) {
+  void _showConfirmationDialog(String? type) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -153,13 +156,51 @@ class _SettingsState extends State<Settings> {
                 children: [
                   Container(
                     alignment: AlignmentDirectional.topStart,
-                      decoration: borderForDebug,
-                      child: Text("색상", style: TextStyle(fontSize: 40),)
+                    decoration: borderForDebug,
+                    child: Text("색상", style: TextStyle(fontSize: 30),)
                   ),
                   widgetSetColor('기상'),
                   widgetSetColor('취침'),
                   widgetSetColor('에너지'),
                 ],
+              ),
+            ),
+            SizedBox(height: 30,),
+            Container(
+              decoration: borderForDebug,
+              child: TextButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        // title: Text('Confirmation'),
+                        content: const Text('데이터를 초기화 하시겠습니까?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              // '취소' 버튼을 눌렀을 때 실행되는 동작
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('취소'),
+                          ),
+                          TextButton(
+                            onPressed: () async => {
+                              await ref.remove()
+                              .then((value) {
+                                setState(() {
+                                  Navigator.pop(context);
+                                });
+                              })
+                            },
+                            child: const Text('확인'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+                child: const Text('데이터 초기화'),
               ),
             ),
           ],

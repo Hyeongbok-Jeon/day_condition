@@ -113,7 +113,231 @@ class _CanlendarState extends State<Canlendar> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("캘린더"),
+        title: Text("현재시간: ${DateFormat('yyyy-MM-dd hh:mm').format(DateTime.now())}"),
+        actions: [
+          if (_selectedDay!.compareTo(DateTime.now()) == -1)
+            IconButton(
+              icon: Icon(Icons.add),
+              onPressed: () async {
+                // int dateCompareResult = _selectedDay!.compareTo(DateTime.now());
+                // if (dateCompareResult == 1) {
+                //   showDialog(
+                //     context: context,
+                //     builder: (BuildContext context) {
+                //       return AlertDialog(
+                //         // title: Text('Confirmation'),
+                //         content: Text('오늘 이전 날짜만 선택 가능합니다.\n현재시간: ${DateTime.now()}'),
+                //         actions: [
+                //           TextButton(
+                //             onPressed: () {
+                //               Navigator.of(context).pop(); // 다이얼로그 닫기
+                //             },
+                //             child: const Text('확인'),
+                //           ),
+                //         ],
+                //       );
+                //     },
+                //   );
+                //   return;
+                // }
+
+                int wakeupTimeHH = 6;
+                int bedTimeHH = 22;
+                int wakeupTimeMM = 0;
+                int bedTimeMM = 0;
+                dynamic ratingValue = 2.5;
+
+                /**
+                 * DB에 데이터가 존재 시 가져옴
+                 */
+                final key = DateFormat('yyyyMMdd').format(_selectedDay!);
+                DataSnapshot snapshot = await ref.child(key).get();
+                if (snapshot.exists) {
+                  Map<dynamic, dynamic> snapshotValue = snapshot.value as Map<dynamic, dynamic>;
+                  wakeupTimeHH = int.parse(snapshotValue['wakeupTime'].split(':')[0]);
+                  wakeupTimeMM = int.parse(snapshotValue['wakeupTime'].split(':')[1]);
+                  bedTimeHH = int.parse(snapshotValue['bedTime'].split(':')[0]);
+                  bedTimeMM = int.parse(snapshotValue['bedTime'].split(':')[1]);
+                  ratingValue = snapshotValue['energy'];
+                  // db의 값이 flutter 변수로 할당되면서 정수는 int로 소수점은 float으로 됨
+                  // 때문에 int는 double로 변환
+                  ratingValue = ratingValue is int ? snapshotValue['energy'].toDouble() : ratingValue;
+                }
+
+                DateTime wakeupTime = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, wakeupTimeHH, wakeupTimeMM);
+                DateTime bedTime = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, bedTimeHH, bedTimeMM);
+
+                // Don't use 'BuildContext's across async gaps. (Documentation)  Try rewriting the code to not reference the 'BuildContext'.
+                // 위 에러 해결 코드
+                if(!mounted) return;
+
+                showModalBottomSheet<void>(
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.only(topLeft: Radius.circular(30.0), topRight: Radius.circular(30.0)),
+                  ),
+                  context: context,
+                  builder: (BuildContext context) {
+                    return StatefulBuilder(builder: (BuildContext context, StateSetter modalSetState) {
+                      int dateCompareResult = wakeupTime.compareTo(bedTime);
+                      return SizedBox(
+                          height: 400,
+                          child: Container(
+                            padding: const EdgeInsets.all(30),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.only(top: 10, bottom: 10),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    // crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        DateFormat('yyyy.MM.dd').format(_selectedDay!),
+                                        style: const TextStyle(fontSize: 30),
+                                      ),
+                                      TextButton(
+                                        onPressed: () async => {
+                                          await ref.update({
+                                            key: {
+                                              "wakeupTime": DateFormat('HH:mm').format(wakeupTime),
+                                              "bedTime": DateFormat('HH:mm').format(bedTime),
+                                              "energy": ratingValue,
+                                              "timeDiff": dateCompareResult == -1
+                                                  ? (24 * 60) - bedTime.difference(wakeupTime).inMinutes
+                                                  : wakeupTime.difference(bedTime).inMinutes
+                                            }
+                                          })
+                                              .then((value) {
+                                            setState(() {
+                                              Navigator.pop(context);
+                                            });
+                                          })
+                                        },
+                                        child: const Icon(Icons.check, size: 30,),
+                                        // child: const Text('완료', style: TextStyle(fontSize: 30),),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.nightlight_round_rounded,
+                                      color: Colors.indigo,
+                                      size: 50,
+                                    ),
+                                    CupertinoButton(
+                                      // Display a CupertinoDatePicker in dateTime picker mode.
+                                      onPressed: () => _showDialog(
+                                        CupertinoDatePicker(
+                                          initialDateTime: bedTime,
+                                          mode: CupertinoDatePickerMode.time,
+                                          use24hFormat: false,
+                                          // This is called when the user changes the dateTime.
+                                          onDateTimeChanged: (DateTime newDateTime) {
+                                            modalSetState(() => bedTime = newDateTime);
+                                          },
+                                        ),
+                                      ),
+                                      // In this example, the time value is formatted manually. You
+                                      // can use the intl package to format the value based on the
+                                      // user's locale settings.
+                                      child: Text(
+                                        DateFormat('HH:mm').format(bedTime),
+                                        // '${bedTime.hour}:${bedTime.minute}',
+                                        style: const TextStyle(
+                                          fontSize: 50,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const Icon(
+                                      Icons.sunny,
+                                      color: Colors.yellow,
+                                      size: 50,
+                                    ),
+                                    CupertinoButton(
+                                      // Display a CupertinoDatePicker in dateTime picker mode.
+                                      onPressed: () => _showDialog(
+                                        CupertinoDatePicker(
+                                          initialDateTime: wakeupTime,
+                                          mode: CupertinoDatePickerMode.time,
+                                          use24hFormat: false,
+                                          // This is called when the user changes the dateTime.
+                                          onDateTimeChanged: (DateTime newDateTime) {
+                                            modalSetState(() => wakeupTime = newDateTime);
+                                          },
+                                        ),
+                                      ),
+                                      // In this example, the time value is formatted manually. You
+                                      // can use the intl package to format the value based on the
+                                      // user's locale settings.
+                                      child: Text(
+                                        DateFormat('HH:mm').format(wakeupTime),
+                                        style: const TextStyle(
+                                          fontSize: 50,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.only(top: 10, bottom: 10),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      RatingBar.builder(
+                                        initialRating: ratingValue,
+                                        minRating: 1,
+                                        direction: Axis.horizontal,
+                                        allowHalfRating: true,
+                                        itemCount: 5,
+                                        itemBuilder: (context, _) => const Icon(
+                                          // Image.asset(name),
+                                          Icons.rectangle_rounded,
+                                          color: Colors.green,
+                                        ),
+                                        onRatingUpdate: (rating) {
+                                          ratingValue = rating;
+                                        },
+                                        itemSize: 60,
+                                      )
+                                    ],
+                                  ),
+                                )
+                              ],
+                            ),
+                          )
+                      );
+                    });
+                    // return Container(
+                    //   height: 500,
+                    //   color: Colors.amber,
+                    //   child: Center(
+                    //     child: Column(
+                    //       mainAxisAlignment: MainAxisAlignment.center,
+                    //       mainAxisSize: MainAxisSize.min,
+                    //       children: <Widget>[
+                    //         const Text('Modal BottomSheet'),
+                    //         ElevatedButton(
+                    //           child: const Text('Done!'),
+                    //           onPressed: () => Navigator.pop(context),
+                    //         )
+                    //       ],
+                    //     ),
+                    //   ),
+                    // );
+                  },
+                );
+              },
+            )
+        ],
       ),
       body: Column(
         children: [
@@ -138,17 +362,30 @@ class _CanlendarState extends State<Canlendar> {
                 rangeSelectionMode: _rangeSelectionMode,
                 eventLoader: _getEventsForDay,
                 startingDayOfWeek: StartingDayOfWeek.monday,
-                calendarStyle: const CalendarStyle(
+                calendarStyle: CalendarStyle(
                   // Use `CalendarStyle` to customize the UI
-                  outsideDaysVisible: true,
-                  cellAlignment: Alignment.topCenter,
+                  // outsideDaysVisible: true,
+                  cellAlignment: Alignment.topLeft,
+                  selectedTextStyle: const TextStyle(
+                    color: Colors.black,
+                    // backgroundColor: Colors.redAccent,
+                  ),
                   selectedDecoration: BoxDecoration(
-                    color: Color(0xFF5C6BC0),
+                    border: Border.all(width: 2, color: Colors.blueAccent),
+                    color: Colors.transparent,
                     shape: BoxShape.rectangle,
                   ),
-                  todayDecoration: BoxDecoration(
-                    color: Color(0xFF9FA8DA),
-                    shape: BoxShape.rectangle,
+                  // markerDecoration: BoxDecoration(
+                  //   color: Colors.green,
+                  //   // shape: BoxShape.rectangle,
+                  // ),
+                  todayTextStyle: const TextStyle(
+                    color: Colors.blueAccent,
+                    // backgroundColor: Colors.redAccent,
+                  ),
+                  todayDecoration: const BoxDecoration(
+                    color: Colors.transparent,
+                    // shape: BoxShape.rectangle,
                   ),
                 ),
                 onDaySelected: _onDaySelected,
@@ -304,224 +541,7 @@ class _CanlendarState extends State<Canlendar> {
                       return null;
                     },
                 ),
-                onDayLongPressed: (DateTime selectedDay, DateTime focusedDay) async {
-                  int dateCompareResult = selectedDay.compareTo(DateTime.now());
-                  if (dateCompareResult == 1) {
-                    showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          // title: Text('Confirmation'),
-                          content: const Text('오늘 이전 날짜만 선택 가능합니다.'),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.of(context).pop(); // 다이얼로그 닫기
-                              },
-                              child: const Text('확인'),
-                            ),
-                          ],
-                        );
-                      },
-                    );
-                    return;
-                  }
-
-                  int wakeupTimeHH = 6;
-                  int bedTimeHH = 22;
-                  int wakeupTimeMM = 0;
-                  int bedTimeMM = 0;
-                  dynamic ratingValue = 2.5;
-
-                  /**
-                   * DB에 데이터가 존재 시 가져옴
-                   */
-                  final key = DateFormat('yyyyMMdd').format(selectedDay);
-                  DataSnapshot snapshot = await ref.child(key).get();
-                  if (snapshot.exists) {
-                    Map<dynamic, dynamic> snapshotValue = snapshot.value as Map<dynamic, dynamic>;
-                    wakeupTimeHH = int.parse(snapshotValue['wakeupTime'].split(':')[0]);
-                    wakeupTimeMM = int.parse(snapshotValue['wakeupTime'].split(':')[1]);
-                    bedTimeHH = int.parse(snapshotValue['bedTime'].split(':')[0]);
-                    bedTimeMM = int.parse(snapshotValue['bedTime'].split(':')[1]);
-                    ratingValue = snapshotValue['energy'];
-                    // db의 값이 flutter 변수로 할당되면서 정수는 int로 소수점은 float으로 됨
-                    // 때문에 int는 double로 변환
-                    ratingValue = ratingValue is int ? snapshotValue['energy'].toDouble() : ratingValue;
-                  }
-
-                  DateTime wakeupTime = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, wakeupTimeHH, wakeupTimeMM);
-                  DateTime bedTime = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, bedTimeHH, bedTimeMM);
-
-                  // Don't use 'BuildContext's across async gaps. (Documentation)  Try rewriting the code to not reference the 'BuildContext'.
-                  // 위 에러 해결 코드
-                  if(!mounted) return;
-
-                  showModalBottomSheet<void>(
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.only(topLeft: Radius.circular(30.0), topRight: Radius.circular(30.0)),
-                    ),
-                    context: context,
-                    builder: (BuildContext context) {
-                      return StatefulBuilder(builder: (BuildContext context, StateSetter modalSetState) {
-                        int dateCompareResult = wakeupTime.compareTo(bedTime);
-                        return SizedBox(
-                            height: 400,
-                            child: Container(
-                              padding: const EdgeInsets.all(30),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.only(top: 10, bottom: 10),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      // crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          DateFormat('yyyy.MM.dd').format(selectedDay),
-                                          style: const TextStyle(fontSize: 30),
-                                        ),
-                                        TextButton(
-                                          onPressed: () async => {
-                                            await ref.update({
-                                              key: {
-                                                "wakeupTime": DateFormat('HH:mm').format(wakeupTime),
-                                                "bedTime": DateFormat('HH:mm').format(bedTime),
-                                                "energy": ratingValue,
-                                                "timeDiff": dateCompareResult == -1
-                                                    ? (24 * 60) - bedTime.difference(wakeupTime).inMinutes
-                                                    : wakeupTime.difference(bedTime).inMinutes
-                                              }
-                                            })
-                                            .then((value) {
-                                              setState(() {
-                                                Navigator.pop(context);
-                                              });
-                                            })
-                                          },
-                                          child: const Icon(Icons.check, size: 30,),
-                                          // child: const Text('완료', style: TextStyle(fontSize: 30),),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Icon(
-                                        Icons.nightlight_round_rounded,
-                                        color: Colors.indigo,
-                                        size: 50,
-                                      ),
-                                      CupertinoButton(
-                                        // Display a CupertinoDatePicker in dateTime picker mode.
-                                        onPressed: () => _showDialog(
-                                          CupertinoDatePicker(
-                                            initialDateTime: bedTime,
-                                            mode: CupertinoDatePickerMode.time,
-                                            use24hFormat: false,
-                                            // This is called when the user changes the dateTime.
-                                            onDateTimeChanged: (DateTime newDateTime) {
-                                              modalSetState(() => bedTime = newDateTime);
-                                            },
-                                          ),
-                                        ),
-                                        // In this example, the time value is formatted manually. You
-                                        // can use the intl package to format the value based on the
-                                        // user's locale settings.
-                                        child: Text(
-                                          DateFormat('HH:mm').format(bedTime),
-                                          // '${bedTime.hour}:${bedTime.minute}',
-                                          style: const TextStyle(
-                                            fontSize: 50,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const Icon(
-                                        Icons.sunny,
-                                        color: Colors.yellow,
-                                        size: 50,
-                                      ),
-                                      CupertinoButton(
-                                        // Display a CupertinoDatePicker in dateTime picker mode.
-                                        onPressed: () => _showDialog(
-                                          CupertinoDatePicker(
-                                            initialDateTime: wakeupTime,
-                                            mode: CupertinoDatePickerMode.time,
-                                            use24hFormat: false,
-                                            // This is called when the user changes the dateTime.
-                                            onDateTimeChanged: (DateTime newDateTime) {
-                                              modalSetState(() => wakeupTime = newDateTime);
-                                            },
-                                          ),
-                                        ),
-                                        // In this example, the time value is formatted manually. You
-                                        // can use the intl package to format the value based on the
-                                        // user's locale settings.
-                                        child: Text(
-                                          DateFormat('HH:mm').format(wakeupTime),
-                                          style: const TextStyle(
-                                            fontSize: 50,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.only(top: 10, bottom: 10),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        RatingBar.builder(
-                                          initialRating: ratingValue,
-                                          minRating: 1,
-                                          direction: Axis.horizontal,
-                                          allowHalfRating: true,
-                                          itemCount: 5,
-                                          itemBuilder: (context, _) => const Icon(
-                                            // Image.asset(name),
-                                            Icons.rectangle_rounded,
-                                            color: Colors.green,
-                                          ),
-                                          onRatingUpdate: (rating) {
-                                            ratingValue = rating;
-                                          },
-                                          itemSize: 60,
-                                        )
-                                      ],
-                                    ),
-                                  )
-                                ],
-                              ),
-                            )
-                        );
-                      });
-                      // return Container(
-                      //   height: 500,
-                      //   color: Colors.amber,
-                      //   child: Center(
-                      //     child: Column(
-                      //       mainAxisAlignment: MainAxisAlignment.center,
-                      //       mainAxisSize: MainAxisSize.min,
-                      //       children: <Widget>[
-                      //         const Text('Modal BottomSheet'),
-                      //         ElevatedButton(
-                      //           child: const Text('Done!'),
-                      //           onPressed: () => Navigator.pop(context),
-                      //         )
-                      //       ],
-                      //     ),
-                      //   ),
-                      // );
-                    },
-                  );
-                },
+                onDayLongPressed: (DateTime selectedDay, DateTime focusedDay) async {},
               ),
             ),
           ),

@@ -182,11 +182,11 @@ class _CanlendarState extends State<Canlendar> {
                   context: context,
                   builder: (BuildContext context) {
                     return SizedBox(
-                      height: 600,
+                      height: 500 + (MediaQuery.of(context).viewInsets.bottom / 2),
                       child: StatefulBuilder(builder: (BuildContext context, StateSetter modalSetState) {
                         int dateCompareResult = wakeupTime.compareTo(bedTime);
                         return Container(
-                          padding: const EdgeInsets.all(30),
+                          padding: EdgeInsets.fromLTRB(30, 0, 30, MediaQuery.of(context).viewInsets.bottom),
                           child: Container(
                             decoration: borderForDebug,
                             child: Column(
@@ -382,21 +382,18 @@ class _CanlendarState extends State<Canlendar> {
                                     ],
                                   ),
                                 ),
-                                Container(
-                                  decoration: borderForDebug,
-                                  child: Center(
-                                    child: TextField(
-                                      controller: TextEditingController(text: memo),
-                                      decoration: const InputDecoration(
-                                        labelText: 'memo',
-                                        border: OutlineInputBorder(),
-                                        contentPadding: EdgeInsets.symmetric(vertical: 100),
-                                      ),
-                                      onChanged: (value) {
-                                        memo = value;
-                                      },
-                                    ),
+                                TextField(
+                                  maxLines: 5,
+                                  controller: TextEditingController(text: memo),
+                                  decoration: const InputDecoration(
+                                    labelText: 'memo',
+                                    border: OutlineInputBorder(),
+                                    // contentPadding: EdgeInsets.symmetric(vertical: 50),
                                   ),
+                                  onChanged: (value) {
+                                    memo = value;
+                                  },
+                                  keyboardType: TextInputType.multiline,
                                 )
                               ],
                             ),

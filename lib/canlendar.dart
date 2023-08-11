@@ -117,7 +117,7 @@ class _CanlendarState extends State<Canlendar> {
         actions: [
           if (_selectedDay!.compareTo(DateTime.now()) == -1)
             IconButton(
-              icon: Icon(Icons.add),
+              icon: const Icon(Icons.add),
               onPressed: () async {
                 // int dateCompareResult = _selectedDay!.compareTo(DateTime.now());
                 // if (dateCompareResult == 1) {
@@ -146,6 +146,7 @@ class _CanlendarState extends State<Canlendar> {
                 int wakeupTimeMM = 0;
                 int bedTimeMM = 0;
                 dynamic ratingValue = 2.5;
+                String? memo;
 
                 /**
                  * DB에 데이터가 존재 시 가져옴
@@ -162,6 +163,7 @@ class _CanlendarState extends State<Canlendar> {
                   // db의 값이 flutter 변수로 할당되면서 정수는 int로 소수점은 float으로 됨
                   // 때문에 int는 double로 변환
                   ratingValue = ratingValue is int ? snapshotValue['energy'].toDouble() : ratingValue;
+                  memo = snapshotValue['memo'];
                 }
 
                 DateTime wakeupTime = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day, wakeupTimeHH, wakeupTimeMM);
@@ -172,25 +174,28 @@ class _CanlendarState extends State<Canlendar> {
                 if(!mounted) return;
 
                 showModalBottomSheet<void>(
+                  // modal 높이 조절을 위해서는 true로 설정
+                  isScrollControlled: true,
                   shape: const RoundedRectangleBorder(
                     borderRadius: BorderRadius.only(topLeft: Radius.circular(30.0), topRight: Radius.circular(30.0)),
                   ),
                   context: context,
                   builder: (BuildContext context) {
-                    return StatefulBuilder(builder: (BuildContext context, StateSetter modalSetState) {
-                      int dateCompareResult = wakeupTime.compareTo(bedTime);
-                      return SizedBox(
-                          height: 400,
+                    return SizedBox(
+                      height: 600,
+                      child: StatefulBuilder(builder: (BuildContext context, StateSetter modalSetState) {
+                        int dateCompareResult = wakeupTime.compareTo(bedTime);
+                        return Container(
+                          padding: const EdgeInsets.all(30),
                           child: Container(
-                            padding: const EdgeInsets.all(30),
+                            decoration: borderForDebug,
                             child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
                                 Container(
-                                  padding: const EdgeInsets.only(top: 10, bottom: 10),
+                                  decoration: borderForDebug,
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    // crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         DateFormat('yyyy.MM.dd').format(_selectedDay!),
@@ -205,7 +210,8 @@ class _CanlendarState extends State<Canlendar> {
                                               "energy": ratingValue,
                                               "timeDiff": dateCompareResult == -1
                                                   ? (24 * 60) - bedTime.difference(wakeupTime).inMinutes
-                                                  : wakeupTime.difference(bedTime).inMinutes
+                                                  : wakeupTime.difference(bedTime).inMinutes,
+                                              'memo': memo
                                             }
                                           })
                                               .then((value) {
@@ -220,74 +226,139 @@ class _CanlendarState extends State<Canlendar> {
                                     ],
                                   ),
                                 ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(
-                                      Icons.nightlight_round_rounded,
-                                      color: Colors.indigo,
-                                      size: 50,
-                                    ),
-                                    CupertinoButton(
-                                      // Display a CupertinoDatePicker in dateTime picker mode.
-                                      onPressed: () => _showDialog(
-                                        CupertinoDatePicker(
-                                          initialDateTime: bedTime,
-                                          mode: CupertinoDatePickerMode.time,
-                                          use24hFormat: false,
-                                          // This is called when the user changes the dateTime.
-                                          onDateTimeChanged: (DateTime newDateTime) {
-                                            modalSetState(() => bedTime = newDateTime);
-                                          },
+                                Container(
+                                  decoration: borderForDebug,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Container(
+                                        decoration: borderForDebug,
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Container(
+                                              decoration: borderForDebug,
+                                              child: const Icon(
+                                                Icons.nightlight_round_rounded,
+                                                color: Colors.indigo,
+                                                size: 40,
+                                              ),
+                                            ),
+                                            // Container(
+                                            //   decoration: borderForDebug,
+                                            //   child: CupertinoButton(
+                                            //     // Display a CupertinoDatePicker in dateTime picker mode.
+                                            //     onPressed: () => _showDialog(
+                                            //       CupertinoDatePicker(
+                                            //         initialDateTime: bedTime,
+                                            //         mode: CupertinoDatePickerMode.time,
+                                            //         use24hFormat: false,
+                                            //         // This is called when the user changes the dateTime.
+                                            //         onDateTimeChanged: (DateTime newDateTime) {
+                                            //           modalSetState(() => bedTime = newDateTime);
+                                            //         },
+                                            //       ),
+                                            //     ),
+                                            //     // In this example, the time value is formatted manually. You
+                                            //     // can use the intl package to format the value based on the
+                                            //     // user's locale settings.
+                                            //     child: Text(
+                                            //       DateFormat('HH:mm').format(bedTime),
+                                            //       // '${bedTime.hour}:${bedTime.minute}',
+                                            //       style: const TextStyle(
+                                            //         fontSize: 20,
+                                            //       ),
+                                            //     ),
+                                            //   ),
+                                            // ),
+                                            Container(
+                                              decoration: borderForDebug,
+                                              child: TextButton(
+                                                onPressed: () => _showDialog(
+                                                  CupertinoDatePicker(
+                                                    initialDateTime: bedTime,
+                                                    mode: CupertinoDatePickerMode.time,
+                                                    use24hFormat: true,
+                                                    // This is called when the user changes the dateTime.
+                                                    onDateTimeChanged: (DateTime newDateTime) {
+                                                      modalSetState(() => bedTime = newDateTime);
+                                                    },
+                                                  ),
+                                                ),
+                                                child: Text(
+                                                    DateFormat('HH:mm').format(bedTime),
+                                                    style: const TextStyle(fontSize: 30),
+                                                ),
+                                              )
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                      // In this example, the time value is formatted manually. You
-                                      // can use the intl package to format the value based on the
-                                      // user's locale settings.
-                                      child: Text(
-                                        DateFormat('HH:mm').format(bedTime),
-                                        // '${bedTime.hour}:${bedTime.minute}',
-                                        style: const TextStyle(
-                                          fontSize: 50,
+                                      Container(
+                                        decoration: borderForDebug,
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Container(
+                                              decoration: borderForDebug,
+                                              child: const Icon(
+                                                Icons.sunny,
+                                                color: Colors.yellow,
+                                                size: 40,
+                                              ),
+                                            ),
+                                            // CupertinoButton(
+                                            //   padding: const EdgeInsets.only(top: 0, bottom: 0),
+                                            //   // Display a CupertinoDatePicker in dateTime picker mode.
+                                            //   onPressed: () => _showDialog(
+                                            //     CupertinoDatePicker(
+                                            //       initialDateTime: wakeupTime,
+                                            //       mode: CupertinoDatePickerMode.time,
+                                            //       use24hFormat: false,
+                                            //       // This is called when the user changes the dateTime.
+                                            //       onDateTimeChanged: (DateTime newDateTime) {
+                                            //         modalSetState(() => wakeupTime = newDateTime);
+                                            //       },
+                                            //     ),
+                                            //   ),
+                                            //   // In this example, the time value is formatted manually. You
+                                            //   // can use the intl package to format the value based on the
+                                            //   // user's locale settings.
+                                            //   child: Text(
+                                            //     DateFormat('HH:mm').format(wakeupTime),
+                                            //     style: const TextStyle(
+                                            //       fontSize: 40,
+                                            //     ),
+                                            //   ),
+                                            // ),
+                                            Container(
+                                                decoration: borderForDebug,
+                                                child: TextButton(
+                                                  onPressed: () => _showDialog(
+                                                    CupertinoDatePicker(
+                                                      initialDateTime: wakeupTime,
+                                                      mode: CupertinoDatePickerMode.time,
+                                                      use24hFormat: true,
+                                                      // This is called when the user changes the dateTime.
+                                                      onDateTimeChanged: (DateTime newDateTime) {
+                                                        modalSetState(() => wakeupTime = newDateTime);
+                                                      },
+                                                    ),
+                                                  ),
+                                                  child: Text(
+                                                    DateFormat('HH:mm').format(wakeupTime),
+                                                    style: const TextStyle(fontSize: 30),
+                                                  ),
+                                                )
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(
-                                      Icons.sunny,
-                                      color: Colors.yellow,
-                                      size: 50,
-                                    ),
-                                    CupertinoButton(
-                                      // Display a CupertinoDatePicker in dateTime picker mode.
-                                      onPressed: () => _showDialog(
-                                        CupertinoDatePicker(
-                                          initialDateTime: wakeupTime,
-                                          mode: CupertinoDatePickerMode.time,
-                                          use24hFormat: false,
-                                          // This is called when the user changes the dateTime.
-                                          onDateTimeChanged: (DateTime newDateTime) {
-                                            modalSetState(() => wakeupTime = newDateTime);
-                                          },
-                                        ),
-                                      ),
-                                      // In this example, the time value is formatted manually. You
-                                      // can use the intl package to format the value based on the
-                                      // user's locale settings.
-                                      child: Text(
-                                        DateFormat('HH:mm').format(wakeupTime),
-                                        style: const TextStyle(
-                                          fontSize: 50,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                                 Container(
+                                  decoration: borderForDebug,
                                   padding: const EdgeInsets.only(top: 10, bottom: 10),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
@@ -306,16 +377,33 @@ class _CanlendarState extends State<Canlendar> {
                                         onRatingUpdate: (rating) {
                                           ratingValue = rating;
                                         },
-                                        itemSize: 60,
+                                        itemSize: 50,
                                       )
                                     ],
+                                  ),
+                                ),
+                                Container(
+                                  decoration: borderForDebug,
+                                  child: Center(
+                                    child: TextField(
+                                      controller: TextEditingController(text: memo),
+                                      decoration: const InputDecoration(
+                                        labelText: 'memo',
+                                        border: OutlineInputBorder(),
+                                        contentPadding: EdgeInsets.symmetric(vertical: 100),
+                                      ),
+                                      onChanged: (value) {
+                                        memo = value;
+                                      },
+                                    ),
                                   ),
                                 )
                               ],
                             ),
-                          )
-                      );
-                    });
+                          ),
+                        );
+                      }),
+                    );
                     // return Container(
                     //   height: 500,
                     //   color: Colors.amber,

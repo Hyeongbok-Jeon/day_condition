@@ -441,6 +441,7 @@ class _CanlendarState extends State<Canlendar> {
                 lastDay: kLastDay,
                 focusedDay: _focusedDay,
                 selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                enabledDayPredicate: (day) => DateTime.now().compareTo(day) == 1,
                 rangeStartDay: _rangeStart,
                 rangeEndDay: _rangeEnd,
                 calendarFormat: _calendarFormat,
@@ -538,7 +539,9 @@ class _CanlendarState extends State<Canlendar> {
                             }
                             return Column(
                               children: [
-                                SizedBox(height: MediaQuery.of(context).size.height * 0.035,),
+                                Container(
+                                  decoration: borderForDebug,
+                                ),
                                 Container(
                                   // width: MediaQuery.of(context).size.width * 0.2,
                                   // padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.035),

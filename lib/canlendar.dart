@@ -536,28 +536,28 @@ class _CanlendarState extends State<Canlendar> {
                         }
                         String memo = snapShot.data?["memo"];
                         return Padding(
-                          padding: const EdgeInsets.all(8),
+                          padding: const EdgeInsets.all(6),
                           child: Container(
                             decoration: borderForDebug,
                             child: Column(
                               children: [
                                 Container(
                                   decoration: borderForDebug,
-                                  height: MediaQuery.of(context).size.height * 0.022,
+                                  height: 20,
                                   child: Row(
                                     children: [
                                       Container(
                                         decoration: borderForDebug,
-                                        width: MediaQuery.of(context).size.width * 0.041,
+                                        width: 16,
                                       ),
                                       if (memo.replaceAll(' ', '') != '')
                                         Expanded(
                                           child: Container(
                                             decoration: borderForDebug,
-                                            child: Icon(
+                                            child: const Icon(
                                               Icons.comment_outlined,
                                               color: Colors.red,
-                                              size: MediaQuery.of(context).size.height * 0.015,
+                                              size: 10,
                                             ),
                                           ),
                                         )
@@ -584,19 +584,19 @@ class _CanlendarState extends State<Canlendar> {
                                                   children: [
                                                     Container(
                                                       decoration: borderForDebug,
-                                                      child: Icon(
+                                                      child: const Icon(
                                                         Icons.nightlight_round_rounded,
                                                         color: Colors.indigo,
-                                                        size: MediaQuery.of(context).size.height * 0.011,
+                                                        size: 9,
                                                       ),
                                                     ),
                                                     Container(
                                                       decoration: borderForDebug,
                                                       child: Text(
                                                         bedTime,
-                                                        style: TextStyle(
+                                                        style: const TextStyle(
                                                           color: Colors.black,
-                                                          fontSize: MediaQuery.of(context).size.height * 0.011,
+                                                          fontSize: 9,
                                                         ),
                                                         textAlign: TextAlign.center,
                                                       ),
@@ -622,7 +622,7 @@ class _CanlendarState extends State<Canlendar> {
                                                       child: Icon(
                                                         Icons.sunny,
                                                         color: Colors.yellow,
-                                                        size: MediaQuery.of(context).size.height * 0.011,
+                                                        size: 9,
                                                       ),
                                                     ),
                                                     Container(
@@ -631,7 +631,7 @@ class _CanlendarState extends State<Canlendar> {
                                                         wakeupTime,
                                                         style: TextStyle(
                                                           color: Colors.black,
-                                                          fontSize: MediaQuery.of(context).size.height * 0.011,
+                                                          fontSize: 9,
                                                         ),
                                                         textAlign: TextAlign.center,
                                                       ),

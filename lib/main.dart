@@ -1,5 +1,8 @@
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:table_calendar/table_calendar.dart';
 import 'bottomNavigation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -16,6 +19,8 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  await initializeDateFormatting('ko_KR', null);
+
   // firebase 익명 로그인
   try {
     final userCredential = await FirebaseAuth.instance.signInAnonymously();
@@ -30,6 +35,17 @@ Future<void> main() async {
         print("Unknown error.");
     }
   }
+
+  // 기본 설정값 셋팅
+  final snapshotValue = <dynamic, dynamic>{};
+  final ref = FirebaseDatabase.instance.ref('$G_uid/settings');
+  final snapshot = await ref.get();
+  for (final child in snapshot.children) {
+    snapshotValue[child.key] = child.value;
+  }
+  ref.update({
+    'startingDayOfWeek': snapshotValue['startingDayOfWeek'] ?? 'sunday'
+  });
 
   runApp(const MyApp());
 }

@@ -1,6 +1,7 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 import 'globalVariables.dart';
 
@@ -12,8 +13,27 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
-  DatabaseReference ref = FirebaseDatabase.instance.ref("$G_uid");
+  final ref = FirebaseDatabase.instance.ref('$G_uid');
+  Map<dynamic, dynamic> snapshotValue = <dynamic, dynamic>{};
+  String? startingDayOfWeek;
 
+  @override
+  void initState() {
+    super.initState();
+
+    final query = ref.child('/settings');
+    query.onValue.listen((event) {
+      if(mounted) {
+        setState(() {
+          for (final child in event.snapshot.children) {
+            snapshotValue[child.key] = child.value;
+          }
+          startingDayOfWeek = snapshotValue['startingDayOfWeek'];
+        });
+      }
+    });
+  }
+  
   // 색상 변경 다이얼로그 호출
   void _openColorPicker(String type) {
     showDialog(
@@ -109,13 +129,13 @@ class _SettingsState extends State<Settings> {
               child: Center(
                   child: Text(
                 type,
-                style: const TextStyle(fontSize: 30),
+                style: const TextStyle(fontSize: 25),
               ))),
           Container(
             decoration: borderForDebug,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                minimumSize: const Size(50, 50),
+                minimumSize: const Size(40, 40),
                 backgroundColor: color,
                 shape: const CircleBorder(), // 원 모양으로 버튼 꾸미기
                 // padding: EdgeInsets.all(16), // 버튼 안의 컨텐츠(아이콘) 패딩 설정
@@ -150,7 +170,7 @@ class _SettingsState extends State<Settings> {
           children: [
             Container(
               decoration: borderForDebug,
-              height: 300,
+              height: 500,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -162,47 +182,125 @@ class _SettingsState extends State<Settings> {
                   widgetSetColor('기상'),
                   widgetSetColor('취침'),
                   widgetSetColor('에너지'),
+                  Container(
+                      decoration: borderForDebug,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Container(
+                              child: const Text(
+                                "시작 요일",
+                                style: TextStyle(fontSize: 20),
+                              )
+                          ),
+                          Row(
+                            children: [
+                              Container(
+                                decoration: borderForDebug,
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      decoration: borderForDebug,
+                                      child: Text('월요일')
+                                    ),
+                                    Container(
+                                      decoration: borderForDebug,
+                                      child: Radio(
+                                        value: 'monday',
+                                        groupValue: startingDayOfWeek,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            startingDayOfWeek = value;
+                                            ref.child('settings').update({
+                                              'startingDayOfWeek': value,
+                                            });
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Container(
+                                decoration: borderForDebug,
+                                child: Row(
+                                  children: [
+                                    Container(
+                                        decoration: borderForDebug,
+                                        child: Text('일요일')
+                                    ),
+                                    Container(
+                                      decoration: borderForDebug,
+                                      child: Radio(
+                                        value: 'sunday',
+                                        groupValue: startingDayOfWeek,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            startingDayOfWeek = value;
+                                            ref.child('settings').update({
+                                              'startingDayOfWeek': value,
+                                            });
+                                          });
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      )
+                  ),
+                  Container(
+                    decoration: borderForDebug,
+                    child: TextButton(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              // title: Text('Confirmation'),
+                              content: const Text('데이터를 초기화 하시겠습니까?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    // '취소' 버튼을 눌렀을 때 실행되는 동작
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: const Text('취소'),
+                                ),
+                                TextButton(
+                                  onPressed: () async => {
+                                    await ref.remove()
+                                    .then((value) {
+                                      ref.child('settings').update({
+                                        'startingDayOfWeek': 'sunday'
+                                      });
+                                    }).then((value) {
+                                      setState(() {
+                                        Navigator.pop(context);
+                                      });
+                                    })
+                                  },
+                                  child: const Text('확인'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                      child: const Text('데이터 초기화'),
+                    ),
+                  ),
                 ],
               ),
             ),
-            SizedBox(height: 30,),
-            Container(
-              decoration: borderForDebug,
-              child: TextButton(
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        // title: Text('Confirmation'),
-                        content: const Text('데이터를 초기화 하시겠습니까?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              // '취소' 버튼을 눌렀을 때 실행되는 동작
-                              Navigator.of(context).pop();
-                            },
-                            child: const Text('취소'),
-                          ),
-                          TextButton(
-                            onPressed: () async => {
-                              await ref.remove()
-                              .then((value) {
-                                setState(() {
-                                  Navigator.pop(context);
-                                });
-                              })
-                            },
-                            child: const Text('확인'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
-                child: const Text('데이터 초기화'),
-              ),
-            ),
+
           ],
         ),
       ),

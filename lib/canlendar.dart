@@ -4,6 +4,7 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:http/http.dart' as http;
 
 import '../utils.dart';
 import 'globalVariables.dart';
@@ -463,289 +464,329 @@ class _CanlendarState extends State<Canlendar> {
     }
   }
 
+  bool isHoliday (day) {
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
+    Future<Map<int, int>> getHolidayOfMonth() async {
+      String solYear = '${_focusedDay.year}';
+      String solMonth = '${_focusedDay.month}';
+      if (solMonth.length == 1) {
+        solMonth = '0$solMonth';
+      }
+      const serviceKey = 'vGcOnDW+ywhtts/PnIk6QDB+J7JTcwVdOysxn74uzxJ6/TUtkKU5PHLf4z6yXJinJnU5qKALxEbYIz4WhemGQA==';
+
+      var url = Uri.http(
+          'apis.data.go.kr',
+          '/B090041/openapi/service/SpcdeInfoService/getRestDeInfo',
+          {
+            'solYear': solYear,
+            'solMonth': solMonth,
+            'ServiceKey': serviceKey,
+            '_type': 'json'
+          }
+      );
+
+      var response = await http.get(url);
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body.length}');
+
+      return {15: 15};
+      // print(await http.read(Uri.https('example.com', 'foobar.txt')));
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text("현재시간: ${DateFormat('yyyy-MM-dd hh:mm').format(DateTime.now())}"),
       ),
       body: isLoading
-          ? Scaffold()
+          ? const Scaffold()
           : Container(
               padding: const EdgeInsets.all(10),
               child: Container(
                 decoration: borderForDebug,
-                child: TableCalendar<Event>(
-                  // 공휴일 표시
-                  holidayPredicate: (day) => day.weekday == 7,
-                  availableCalendarFormats: const {
-                    CalendarFormat.month: '월',
-                  },
-                  locale: 'ko_KR',
-                  rowHeight: 80,
-                  daysOfWeekHeight: 30,
-                  firstDay: kFirstDay,
-                  lastDay: kLastDay,
-                  focusedDay: _focusedDay,
-                  // selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-                  enabledDayPredicate: (day) => DateTime.now().compareTo(day) != -1, // 날짜 비활성화
-                  rangeStartDay: _rangeStart,
-                  rangeEndDay: _rangeEnd,
-                  calendarFormat: _calendarFormat,
-                  rangeSelectionMode: _rangeSelectionMode,
-                  eventLoader: _getEventsForDay,
-                  startingDayOfWeek: snapshotValue['settings']['startingDayOfWeek'] == 'monday'
-                                      ? StartingDayOfWeek.monday
-                                      : StartingDayOfWeek.sunday,
-                  calendarStyle: const CalendarStyle(
-                    cellAlignment: Alignment.topCenter,
-                    holidayTextStyle: TextStyle(color: Colors.red),
-                    holidayDecoration: BoxDecoration(),
-                    selectedTextStyle: TextStyle(),
-                    selectedDecoration: BoxDecoration(),
-                    todayTextStyle: TextStyle(color: Colors.blue),
-                    todayDecoration: BoxDecoration(),
-                  ),
-                  onDaySelected: _onDaySelected,
-                  onRangeSelected: _onRangeSelected,
-                  onFormatChanged: (format) {
-                    if (_calendarFormat != format) {
-                      setState(() {
-                        _calendarFormat = format;
-                      });
-                    }
-                  },
-                  onPageChanged: (focusedDay) {
-                    _focusedDay = focusedDay;
-                  },
-                  calendarBuilders: CalendarBuilders(
-                      headerTitleBuilder: (BuildContext context, DateTime day) {
-                        return Container(
-                          decoration: borderForDebug,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Container(
-                                  decoration: borderForDebug,
-                                  child: Text(
-                                    '${day.year}년 ${day.month}월',
-                                    style: const TextStyle(fontSize: 18),
-                                  )
-                              ),
-                              Container(
-                                decoration: borderForDebug,
-                                child: TextButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      _selectedDay = DateTime.now();
-                                      _focusedDay = DateTime.now();
-                                    });
-                                  },
-                                  child: const Text(
-                                    '오늘',
-                                    style: TextStyle(fontSize: 18),
-                                  )
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
+                child: FutureBuilder(
+                  future: getHolidayOfMonth(),
+                  builder: (context, snapShot) {
+                    // if (snapShot.hasData) {
+                    //   print(snapShot);
+                    // }
+                    return TableCalendar<Event>(
+                      // 공휴일 표시
+                      holidayPredicate: (day) => isHoliday(day),
+                      availableCalendarFormats: const {
+                        CalendarFormat.month: '월',
                       },
-                      markerBuilder: (context, day, events) {
-                        final key = DateFormat('yyyyMMdd').format(day);
-
-                        Future<Map<dynamic, dynamic>> getMarkersAsync() async {
-                          DataSnapshot snapshot = await ref.child(key).get();
-                          return snapshot.value as Map<dynamic, dynamic>;
+                      locale: 'ko_KR',
+                      rowHeight: 80,
+                      daysOfWeekHeight: 30,
+                      firstDay: kFirstDay,
+                      lastDay: kLastDay,
+                      focusedDay: _focusedDay,
+                      // selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                      enabledDayPredicate: (day) => DateTime.now().compareTo(day) != -1, // 날짜 비활성화
+                      rangeStartDay: _rangeStart,
+                      rangeEndDay: _rangeEnd,
+                      calendarFormat: _calendarFormat,
+                      rangeSelectionMode: _rangeSelectionMode,
+                      eventLoader: _getEventsForDay,
+                      startingDayOfWeek: snapshotValue['settings']['startingDayOfWeek'] == 'monday'
+                          ? StartingDayOfWeek.monday
+                          : StartingDayOfWeek.sunday,
+                      calendarStyle: const CalendarStyle(
+                        cellAlignment: Alignment.topCenter,
+                        holidayTextStyle: TextStyle(color: Colors.red),
+                        holidayDecoration: BoxDecoration(),
+                        selectedTextStyle: TextStyle(),
+                        selectedDecoration: BoxDecoration(),
+                        todayTextStyle: TextStyle(color: Colors.blue),
+                        todayDecoration: BoxDecoration(),
+                      ),
+                      onDaySelected: _onDaySelected,
+                      onRangeSelected: _onRangeSelected,
+                      onFormatChanged: (format) {
+                        if (_calendarFormat != format) {
+                          setState(() {
+                            _calendarFormat = format;
+                          });
                         }
+                      },
+                      onPageChanged: (focusedDay) {
+                        setState(() {
+                          _focusedDay = focusedDay;
+                        });
+                      },
+                      calendarBuilders: CalendarBuilders(
+                        headerTitleBuilder: (BuildContext context, DateTime day) {
+                          return Container(
+                            decoration: borderForDebug,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                    decoration: borderForDebug,
+                                    child: Text(
+                                      '${day.year}년 ${day.month}월',
+                                      style: const TextStyle(fontSize: 18),
+                                    )
+                                ),
+                                // Container(
+                                //   decoration: borderForDebug,
+                                //   child: TextButton(
+                                //     onPressed: () {
+                                //       setState(() {
+                                //         _selectedDay = DateTime.now();
+                                //         _focusedDay = DateTime.now();
+                                //       });
+                                //     },
+                                //     child: const Text(
+                                //       '오늘',
+                                //       style: TextStyle(fontSize: 18),
+                                //     )
+                                //   ),
+                                // ),
+                              ],
+                            ),
+                          );
+                        },
+                        markerBuilder: (context, day, events) {
+                          final key = DateFormat('yyyyMMdd').format(day);
 
-                        return FutureBuilder(
-                          future: getMarkersAsync(),
-                          builder: (context, snapShot) {
-                            if (snapShot.hasData) {
-                              String wakeupTime = snapShot.data?["wakeupTime"];
-                              String bedTime = snapShot.data?["bedTime"];
-                              double energy = snapShot.data?["energy"].toDouble();
-                              // if (energy is int) {
-                              //   energy = energy.toDouble();
-                              // }
-                              String memo = snapShot.data?["memo"];
-                              return Padding(
-                                padding: const EdgeInsets.all(6),
-                                child: Container(
-                                  decoration: borderForDebug,
-                                  child: Column(
-                                    children: [
-                                      Container(
-                                        decoration: borderForDebug,
-                                        height: 16,
-                                        // child: Row(
-                                        //   children: [
-                                        //     Container(
-                                        //       decoration: borderForDebug,
-                                        //       width: 28,
-                                        //     ),
-                                        //     if (memo.replaceAll(' ', '') != '')
-                                        //       Expanded(
-                                        //         child: Container(
-                                        //           decoration: borderForDebug,
-                                        //           child: const Icon(
-                                        //             Icons.comment_outlined,
-                                        //             color: Colors.red,
-                                        //             size: 8,
-                                        //           ),
-                                        //         ),
-                                        //       )
-                                        //   ],
-                                        // ),
-                                      ),
-                                      Expanded(
-                                        child: Container(
-                                          decoration: borderForDebug,
-                                          // width: MediaQuery.of(context).size.width * 0.2,
-                                          // padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.035),
-                                          child: Column(
-                                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                            children: [
-                                              Container(
-                                                decoration: borderForDebug,
-                                                child: Row(
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  children: [
-                                                    Container(
-                                                      decoration: borderForDebug,
-                                                      child: Row(
-                                                        mainAxisAlignment: MainAxisAlignment.center,
-                                                        children: [
+                          Future<Map<dynamic, dynamic>> getMarkersAsync() async {
+                            DataSnapshot snapshot = await ref.child(key).get();
+                            return snapshot.value as Map<dynamic, dynamic>;
+                          }
+
+                          return FutureBuilder(
+                              future: getMarkersAsync(),
+                              builder: (context, snapShot) {
+                                if (snapShot.hasData) {
+                                  String wakeupTime = snapShot.data?["wakeupTime"];
+                                  String bedTime = snapShot.data?["bedTime"];
+                                  double energy = snapShot.data?["energy"].toDouble();
+                                  // if (energy is int) {
+                                  //   energy = energy.toDouble();
+                                  // }
+                                  String memo = snapShot.data?["memo"];
+                                  return Padding(
+                                    padding: const EdgeInsets.all(6),
+                                    child: Container(
+                                      decoration: borderForDebug,
+                                      child: Column(
+                                        children: [
+                                          Container(
+                                            decoration: borderForDebug,
+                                            height: 16,
+                                            // child: Row(
+                                            //   children: [
+                                            //     Container(
+                                            //       decoration: borderForDebug,
+                                            //       width: 28,
+                                            //     ),
+                                            //     if (memo.replaceAll(' ', '') != '')
+                                            //       Expanded(
+                                            //         child: Container(
+                                            //           decoration: borderForDebug,
+                                            //           child: const Icon(
+                                            //             Icons.comment_outlined,
+                                            //             color: Colors.red,
+                                            //             size: 8,
+                                            //           ),
+                                            //         ),
+                                            //       )
+                                            //   ],
+                                            // ),
+                                          ),
+                                          Expanded(
+                                            child: Container(
+                                              decoration: borderForDebug,
+                                              // width: MediaQuery.of(context).size.width * 0.2,
+                                              // padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.035),
+                                              child: Column(
+                                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                children: [
+                                                  Container(
+                                                    decoration: borderForDebug,
+                                                    child: Row(
+                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                      children: [
+                                                        Container(
+                                                          decoration: borderForDebug,
+                                                          child: Row(
+                                                            mainAxisAlignment: MainAxisAlignment.center,
+                                                            children: [
+                                                              Container(
+                                                                decoration: borderForDebug,
+                                                                child: const Icon(
+                                                                  Icons.nightlight_round_rounded,
+                                                                  color: Colors.indigo,
+                                                                  size: 9,
+                                                                ),
+                                                              ),
+                                                              Container(
+                                                                decoration: borderForDebug,
+                                                                child: Text(
+                                                                  bedTime,
+                                                                  style: const TextStyle(
+                                                                    color: Colors.black,
+                                                                    fontSize: 9,
+                                                                  ),
+                                                                  textAlign: TextAlign.center,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  Container(
+                                                    decoration: borderForDebug,
+                                                    child: Row(
+                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                      children: [
+                                                        Container(
+                                                          decoration: borderForDebug,
+                                                          child: Row(
+                                                            mainAxisAlignment: MainAxisAlignment.center,
+                                                            children: [
+                                                              Container(
+                                                                decoration: borderForDebug,
+                                                                child: Icon(
+                                                                  Icons.sunny,
+                                                                  color: Colors.yellow,
+                                                                  size: 9,
+                                                                ),
+                                                              ),
+                                                              Container(
+                                                                decoration: borderForDebug,
+                                                                child: Text(
+                                                                  wakeupTime,
+                                                                  style: TextStyle(
+                                                                    color: Colors.black,
+                                                                    fontSize: 9,
+                                                                  ),
+                                                                  textAlign: TextAlign.center,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                  Container(
+                                                    decoration: borderForDebug,
+                                                    child: Row(
+                                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                      children: [
+                                                        Container(
+                                                          decoration: borderForDebug,
+                                                          child: Icon(
+                                                            Icons.circle,
+                                                            size: 7,
+                                                            color: energyToColor(energy),
+                                                          ),
+                                                        ),
+                                                        if (memo.replaceAll(' ', '') != '')
                                                           Container(
                                                             decoration: borderForDebug,
                                                             child: const Icon(
-                                                              Icons.nightlight_round_rounded,
-                                                              color: Colors.indigo,
-                                                              size: 9,
+                                                              Icons.comment_outlined,
+                                                              color: Colors.red,
+                                                              size: 8,
                                                             ),
                                                           ),
-                                                          Container(
-                                                            decoration: borderForDebug,
-                                                            child: Text(
-                                                              bedTime,
-                                                              style: const TextStyle(
-                                                                color: Colors.black,
-                                                                fontSize: 9,
-                                                              ),
-                                                              textAlign: TextAlign.center,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
+                                                      ],
                                                     ),
-                                                  ],
-                                                ),
+                                                  ),
+                                                  // Row(
+                                                  //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                  //   children: [
+                                                  //     RatingBar.builder(
+                                                  //       ignoreGestures: true,
+                                                  //       initialRating: energy,
+                                                  //       minRating: 1,
+                                                  //       direction: Axis.horizontal,
+                                                  //       allowHalfRating: true,
+                                                  //       itemCount: 5,
+                                                  //       itemPadding: const EdgeInsets.symmetric(horizontal: 0.0),
+                                                  //       itemBuilder: (context, _) => Icon(
+                                                  //         // Image.asset(name),
+                                                  //         Icons.rectangle_rounded,
+                                                  //         color: G_energyColor,
+                                                  //       ),
+                                                  //       onRatingUpdate: (rating) {
+                                                  //       },
+                                                  //       itemSize: MediaQuery.of(context).size.height * 0.01
+                                                  //     )
+                                                  //   ],
+                                                  // ),
+                                                ],
                                               ),
-                                              Container(
-                                                decoration: borderForDebug,
-                                                child: Row(
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  children: [
-                                                    Container(
-                                                      decoration: borderForDebug,
-                                                      child: Row(
-                                                        mainAxisAlignment: MainAxisAlignment.center,
-                                                        children: [
-                                                          Container(
-                                                            decoration: borderForDebug,
-                                                            child: Icon(
-                                                              Icons.sunny,
-                                                              color: Colors.yellow,
-                                                              size: 9,
-                                                            ),
-                                                          ),
-                                                          Container(
-                                                            decoration: borderForDebug,
-                                                            child: Text(
-                                                              wakeupTime,
-                                                              style: TextStyle(
-                                                                color: Colors.black,
-                                                                fontSize: 9,
-                                                              ),
-                                                              textAlign: TextAlign.center,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              Container(
-                                                decoration: borderForDebug,
-                                                child: Row(
-                                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                                  children: [
-                                                    Container(
-                                                      decoration: borderForDebug,
-                                                      child: Icon(
-                                                        Icons.circle,
-                                                        size: 7,
-                                                        color: energyToColor(energy),
-                                                      ),
-                                                    ),
-                                                    if (memo.replaceAll(' ', '') != '')
-                                                      Container(
-                                                        decoration: borderForDebug,
-                                                        child: const Icon(
-                                                          Icons.comment_outlined,
-                                                          color: Colors.red,
-                                                          size: 8,
-                                                        ),
-                                                      ),
-                                                  ],
-                                                ),
-                                              ),
-                                              // Row(
-                                              //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                              //   children: [
-                                              //     RatingBar.builder(
-                                              //       ignoreGestures: true,
-                                              //       initialRating: energy,
-                                              //       minRating: 1,
-                                              //       direction: Axis.horizontal,
-                                              //       allowHalfRating: true,
-                                              //       itemCount: 5,
-                                              //       itemPadding: const EdgeInsets.symmetric(horizontal: 0.0),
-                                              //       itemBuilder: (context, _) => Icon(
-                                              //         // Image.asset(name),
-                                              //         Icons.rectangle_rounded,
-                                              //         color: G_energyColor,
-                                              //       ),
-                                              //       onRatingUpdate: (rating) {
-                                              //       },
-                                              //       itemSize: MediaQuery.of(context).size.height * 0.01
-                                              //     )
-                                              //   ],
-                                              // ),
-                                            ],
+                                            ),
                                           ),
-                                        ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            } else {
-                              return const SizedBox();
-                            }
-                          }
-                        );
-                      },
-                      dowBuilder: (context, day) {
-                        return null;
-                      },
-                      defaultBuilder: (context, day, focusedDay) {
-                        return null;
-                      },
-                  ),
-                  onDayLongPressed: (DateTime selectedDay, DateTime focusedDay) async {},
+                                    ),
+                                  );
+                                } else {
+                                  return const SizedBox();
+                                }
+                              }
+                          );
+                        },
+                        dowBuilder: (context, day) {
+                          return null;
+                        },
+                        defaultBuilder: (context, day, focusedDay) {
+                          return null;
+                        },
+                      ),
+                      onDayLongPressed: (DateTime selectedDay, DateTime focusedDay) async {},
+                    );
+                  }
                 ),
               ),
             ),

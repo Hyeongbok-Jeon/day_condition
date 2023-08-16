@@ -485,7 +485,7 @@ class _CanlendarState extends State<Canlendar> {
         solMonth = '0$solMonth';
       }
       const serviceKey = 'vGcOnDW+ywhtts/PnIk6QDB+J7JTcwVdOysxn74uzxJ6/TUtkKU5PHLf4z6yXJinJnU5qKALxEbYIz4WhemGQA==';
-      var url = Uri.http(
+      var url = Uri.https(
           'apis.data.go.kr',
           '/B090041/openapi/service/SpcdeInfoService/getRestDeInfo',
           {

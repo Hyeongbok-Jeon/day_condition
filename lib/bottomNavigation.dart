@@ -13,25 +13,36 @@ class BottomNavigationExample extends StatefulWidget {
 
 class _BottomNavigationExampleState extends State<BottomNavigationExample> {
   int _currentIndex = 0;
+  bool isReTap = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _buildPage(_currentIndex),
+      // body: _buildPage(_currentIndex),
+      body: IndexedStack(
+        index: _currentIndex,
+        children: [
+          Canlendar(isReTap: isReTap,), // 각 탭에 해당하는 페이지 위젯들
+          const Statistics(),
+          const Settings(),
+        ],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         showSelectedLabels: false,
         showUnselectedLabels: false,
-        currentIndex: _currentIndex,
         onTap: (int index) {
-          setState(() {
-            _currentIndex = index;
-          });
+          if (_currentIndex == index) {
+            setState(() {
+              isReTap = true;
+            });
+          } else {
+            setState(() {
+              _currentIndex = index;
+              isReTap = false;
+            });
+          }
         },
         items: const [
-          // BottomNavigationBarItem(
-          //   icon: Icon(Icons.home),
-          //   label: 'Home',
-          // ),
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_month, size: 28),
             label: '',
@@ -47,21 +58,5 @@ class _BottomNavigationExampleState extends State<BottomNavigationExample> {
         ],
       ),
     );
-  }
-
-  Widget _buildPage(int index) {
-    switch (index) {
-      case 0:
-      // 홈 페이지 위젯 반환
-        return const Canlendar();
-      case 1:
-      // 홈 페이지 위젯 반환
-        return const Statistics();
-      case 2:
-      // 검색 페이지 위젯 반환
-        return const Settings();
-      default:
-        return Container();
-    }
   }
 }

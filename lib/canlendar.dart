@@ -12,7 +12,13 @@ import '../utils.dart';
 import 'globalVariables.dart';
 
 class Canlendar extends StatefulWidget {
-  const Canlendar({super.key});
+  late bool isReTap;
+
+  Canlendar({Key? key, required this.isReTap}) : super(key: key);
+
+  void setReTapFalse() {
+    isReTap = false;
+  }
 
   @override
   _CanlendarState createState() => _CanlendarState();
@@ -32,6 +38,8 @@ class _CanlendarState extends State<Canlendar> {
   DateTime? _rangeStart;
   DateTime? _rangeEnd;
   DateTime? currentTime;
+
+  bool _reTap = false;
 
   @override
   void initState() {
@@ -478,6 +486,13 @@ class _CanlendarState extends State<Canlendar> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.isReTap) {
+      setState(() {
+        _focusedDay = DateTime.now();
+        _selectedDay = DateTime.now();
+        widget.setReTapFalse();
+      });
+    }
     Future<Map<String, String>> future() async {
       String solYear = '${_focusedDay.year}';
       String solMonth = '${_focusedDay.month}';
@@ -559,6 +574,11 @@ class _CanlendarState extends State<Canlendar> {
                         selectedDecoration: BoxDecoration(),
                         todayTextStyle: TextStyle(color: Colors.blue),
                         todayDecoration: BoxDecoration(),
+                        // tableBorder: TableBorder(
+                        //   horizontalInside: BorderSide(
+                        //       color: Colors.black12
+                        //   ),
+                        // )
                       ),
                       onDaySelected: _onDaySelected,
                       onRangeSelected: _onRangeSelected,

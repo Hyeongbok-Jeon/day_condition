@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
@@ -464,20 +466,24 @@ class _CanlendarState extends State<Canlendar> {
     }
   }
 
-  bool isHoliday (day) {
-    return false;
+  bool holidayPredicate (DateTime day, asyncSnapshot) {
+    if (asyncSnapshot.hasData) {
+      // 공공데이터포털 특일 API 휴일 + 일요일
+      return asyncSnapshot.data[DateFormat('yyyyMMdd').format(day)] != null || day.weekday == 7;
+    } else {
+      return false;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    Future<Map<int, int>> getHolidayOfMonth() async {
+    Future<Map<String, String>> future() async {
       String solYear = '${_focusedDay.year}';
       String solMonth = '${_focusedDay.month}';
       if (solMonth.length == 1) {
         solMonth = '0$solMonth';
       }
       const serviceKey = 'vGcOnDW+ywhtts/PnIk6QDB+J7JTcwVdOysxn74uzxJ6/TUtkKU5PHLf4z6yXJinJnU5qKALxEbYIz4WhemGQA==';
-
       var url = Uri.http(
           'apis.data.go.kr',
           '/B090041/openapi/service/SpcdeInfoService/getRestDeInfo',
@@ -489,12 +495,26 @@ class _CanlendarState extends State<Canlendar> {
           }
       );
 
+      /// http get 요청
       var response = await http.get(url);
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body.length}');
 
-      return {15: 15};
-      // print(await http.read(Uri.https('example.com', 'foobar.txt')));
+      /// parsing
+      /// 한글 변환을 위해 utf8.decode 사용
+      final decodedData = jsonDecode(utf8.decode(response.bodyBytes));
+      final body = decodedData['response']['body'];
+      final item = body['items']['item'];
+      final totalCount = body['totalCount'];
+
+      Map<String, String> parsedData = {};
+      if (totalCount == 1) {
+        parsedData[item['locdate'].toString()] = item['dateName'];
+      } else if (totalCount > 1) {
+        for (var row in item) {
+          parsedData[row['locdate'].toString()] = row['dateName'];
+        }
+      }
+
+      return parsedData;
     }
     return Scaffold(
       appBar: AppBar(
@@ -507,14 +527,10 @@ class _CanlendarState extends State<Canlendar> {
               child: Container(
                 decoration: borderForDebug,
                 child: FutureBuilder(
-                  future: getHolidayOfMonth(),
-                  builder: (context, snapShot) {
-                    // if (snapShot.hasData) {
-                    //   print(snapShot);
-                    // }
+                  future: future(),
+                  builder: (context, asyncSnapshot) {
                     return TableCalendar<Event>(
-                      // 공휴일 표시
-                      holidayPredicate: (day) => isHoliday(day),
+                      holidayPredicate: (day) => holidayPredicate(day, asyncSnapshot), // 공휴일 표시
                       availableCalendarFormats: const {
                         CalendarFormat.month: '월',
                       },
@@ -592,23 +608,21 @@ class _CanlendarState extends State<Canlendar> {
                         },
                         markerBuilder: (context, day, events) {
                           final key = DateFormat('yyyyMMdd').format(day);
-
-                          Future<Map<dynamic, dynamic>> getMarkersAsync() async {
+                          Future<Map<dynamic, dynamic>> future() async {
                             DataSnapshot snapshot = await ref.child(key).get();
                             return snapshot.value as Map<dynamic, dynamic>;
                           }
-
                           return FutureBuilder(
-                              future: getMarkersAsync(),
-                              builder: (context, snapShot) {
-                                if (snapShot.hasData) {
-                                  String wakeupTime = snapShot.data?["wakeupTime"];
-                                  String bedTime = snapShot.data?["bedTime"];
-                                  double energy = snapShot.data?["energy"].toDouble();
+                              future: future(),
+                              builder: (context, asyncSnapshot) {
+                                if (asyncSnapshot.hasData) {
+                                  String wakeupTime = asyncSnapshot.data?["wakeupTime"];
+                                  String bedTime = asyncSnapshot.data?["bedTime"];
+                                  double energy = asyncSnapshot.data?["energy"].toDouble();
                                   // if (energy is int) {
                                   //   energy = energy.toDouble();
                                   // }
-                                  String memo = snapShot.data?["memo"];
+                                  String memo = asyncSnapshot.data?["memo"];
                                   return Padding(
                                     padding: const EdgeInsets.all(6),
                                     child: Container(

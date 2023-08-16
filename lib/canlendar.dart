@@ -574,11 +574,11 @@ class _CanlendarState extends State<Canlendar> {
                         selectedDecoration: BoxDecoration(),
                         todayTextStyle: TextStyle(color: Colors.blue),
                         todayDecoration: BoxDecoration(),
-                        // tableBorder: TableBorder(
-                        //   horizontalInside: BorderSide(
-                        //       color: Colors.black12
-                        //   ),
-                        // )
+                        tableBorder: TableBorder(
+                          horizontalInside: BorderSide(
+                              color: Colors.black12
+                          ),
+                        )
                       ),
                       onDaySelected: _onDaySelected,
                       onRangeSelected: _onRangeSelected,

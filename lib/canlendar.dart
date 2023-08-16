@@ -467,9 +467,10 @@ class _CanlendarState extends State<Canlendar> {
   }
 
   bool holidayPredicate (DateTime day, asyncSnapshot) {
-    if (asyncSnapshot.hasData) {
-      // 공공데이터포털 특일 API 휴일 + 일요일
-      return asyncSnapshot.data[DateFormat('yyyyMMdd').format(day)] != null || day.weekday == 7;
+    if (day.weekday == 7) {
+      return true;
+    } else if (asyncSnapshot.hasData) {
+      return asyncSnapshot.data[DateFormat('yyyyMMdd').format(day)] != null;
     } else {
       return false;
     }

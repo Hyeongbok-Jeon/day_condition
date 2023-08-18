@@ -18,7 +18,6 @@ class _BottomNavigationExampleState extends State<BottomNavigationExample> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // body: _buildPage(_currentIndex),
       body: IndexedStack(
         index: _currentIndex,
         children: [
@@ -30,6 +29,7 @@ class _BottomNavigationExampleState extends State<BottomNavigationExample> {
       bottomNavigationBar: BottomNavigationBar(
         showSelectedLabels: false,
         showUnselectedLabels: false,
+        currentIndex: _currentIndex,
         onTap: (int index) {
           if (_currentIndex == index) {
             setState(() {

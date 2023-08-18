@@ -182,6 +182,11 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.2"
+  flutter_localizations:
+    dependency: "direct main"
+    description: flutter
+    source: sdk
+    version: "0.0.0"
   flutter_rating_bar:
     dependency: "direct main"
     description:
@@ -220,10 +225,10 @@ packages:
     dependency: "direct main"
     description:
       name: intl
-      sha256: "3bc132a9dbce73a7e4a21a17d06e1878839ffbf975568bc875c60537824b0c4d"
+      sha256: a3715e3bc90294e971cb7dc063fbf3cd9ee0ebf8604ffeafabd9e6f16abbdbe6
       url: "https://pub.dev"
     source: hosted
-    version: "0.18.1"
+    version: "0.18.0"
   js:
     dependency: transitive
     description:
@@ -389,6 +394,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
+  syncfusion_flutter_core:
+    dependency: transitive
+    description:
+      name: syncfusion_flutter_core
+      sha256: d3a978d926919a90065ddd492d1a2eba1e9cd15eec6ac2a127157f1e042c79ef
+      url: "https://pub.dev"
+    source: hosted
+    version: "22.2.9"
+  syncfusion_flutter_datepicker:
+    dependency: "direct main"
+    description:
+      name: syncfusion_flutter_datepicker
+      sha256: fa67b98561c16ca9daf64ba7ac893eaf6794c143a9e0b46f9ba13768edbc55b7
+      url: "https://pub.dev"
+    source: hosted
+    version: "22.2.9"
   table_calendar:
     dependency: "direct main"
     description:

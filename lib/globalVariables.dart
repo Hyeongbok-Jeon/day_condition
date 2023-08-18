@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-bool G_isDebug = false;
+bool G_isDebug = true;
 
 var borderForDebug = G_isDebug ? BoxDecoration(border: Border.all(width: 0.2, color: Colors.black38),) : null;
 

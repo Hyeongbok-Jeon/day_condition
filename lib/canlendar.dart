@@ -1,12 +1,14 @@
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:http/http.dart' as http;
+import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
 import '../utils.dart';
 import 'globalVariables.dart';
@@ -39,7 +41,8 @@ class _CanlendarState extends State<Canlendar> {
   DateTime? _rangeEnd;
   DateTime? currentTime;
 
-  bool _reTap = false;
+  /// sfDateRangePicker 버튼 Key
+  final GlobalKey sfDateRangePickerKey = GlobalKey();
 
   @override
   void initState() {
@@ -251,7 +254,7 @@ class _CanlendarState extends State<Canlendar> {
                                           'memo': memo,
                                         }
                                       })
-                                          .then((value) {
+                                      .then((value) {
                                         setState(() {
                                           Navigator.pop(context);
                                         });
@@ -489,7 +492,6 @@ class _CanlendarState extends State<Canlendar> {
     if (widget.isReTap) {
       setState(() {
         _focusedDay = DateTime.now();
-        _selectedDay = DateTime.now();
         widget.setReTapFalse();
       });
     }
@@ -602,27 +604,64 @@ class _CanlendarState extends State<Canlendar> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Container(
-                                    decoration: borderForDebug,
+                                  decoration: borderForDebug,
+                                  child: TextButton(
+                                    key: sfDateRangePickerKey,
                                     child: Text(
                                       '${day.year}년 ${day.month}월',
-                                      style: const TextStyle(fontSize: 18),
-                                    )
+                                      style: const TextStyle(fontSize: 18, color: Colors.black),
+                                    ),
+                                    onPressed: () {
+                                      /// 버튼의 위치를 구함
+                                      final RenderBox sfDateRangePickerButton = sfDateRangePickerKey.currentContext!.findRenderObject() as RenderBox;
+                                      final RenderBox overlay = Overlay.of(context)!.context.findRenderObject() as RenderBox;
+                                      final buttonPosition = sfDateRangePickerButton.localToGlobal(Offset.zero, ancestor: overlay);
+                                      showDialog<Widget>(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return Transform.translate(
+                                            offset: Offset(buttonPosition.dx, buttonPosition.dy + sfDateRangePickerButton.size.height),
+                                            child: Dialog(
+                                              /// insetPadding 설정으로 padding을 0으로 만들고 align을 topLeft로 설정해서
+                                              /// 왼쪽 상단 모서리에서 dialog가 나타나게 셋팅
+                                              insetPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+                                              alignment: Alignment.topLeft,
+                                              /// dialog의 크기를 제한
+                                              /// width는 일정 크기 이상 작아지면 SfDateRangePicker의 min width의 영향으로
+                                              /// 최소 크기에서 작아지지 않음
+                                              child: SizedBox(
+                                                height: 180,
+                                                width: 0,
+                                                child: SfDateRangePicker(
+                                                  view: DateRangePickerView.year,
+                                                  selectionMode: DateRangePickerSelectionMode.single,
+                                                  onViewChanged: (args) => {
+                                                    if (args.view == DateRangePickerView.month) {
+                                                      Navigator.of(context).pop(),
+                                                      setState(() {
+                                                        ///
+                                                        _focusedDay = DateTime(
+                                                            args.visibleDateRange.endDate!.year,
+                                                            args.visibleDateRange.endDate!.month,
+                                                            _focusedDay.day
+                                                        );
+                                                      })
+                                                    }
+                                                  },
+                                                  /// 오른쪽 상단 좌우 화살표
+                                                  showNavigationArrow: true,
+                                                  /// pick 가능한 최소, 최대 날짜 설정
+                                                  minDate: kFirstDay,
+                                                  maxDate: kLastDay,
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      );
+                                    }
+                                  )
                                 ),
-                                // Container(
-                                //   decoration: borderForDebug,
-                                //   child: TextButton(
-                                //     onPressed: () {
-                                //       setState(() {
-                                //         _selectedDay = DateTime.now();
-                                //         _focusedDay = DateTime.now();
-                                //       });
-                                //     },
-                                //     child: const Text(
-                                //       '오늘',
-                                //       style: TextStyle(fontSize: 18),
-                                //     )
-                                //   ),
-                                // ),
                               ],
                             ),
                           );
@@ -728,7 +767,7 @@ class _CanlendarState extends State<Canlendar> {
                                                             children: [
                                                               Container(
                                                                 decoration: borderForDebug,
-                                                                child: Icon(
+                                                                child: const Icon(
                                                                   Icons.sunny,
                                                                   color: Colors.yellow,
                                                                   size: 9,
@@ -738,7 +777,7 @@ class _CanlendarState extends State<Canlendar> {
                                                                 decoration: borderForDebug,
                                                                 child: Text(
                                                                   wakeupTime,
-                                                                  style: TextStyle(
+                                                                  style: const TextStyle(
                                                                     color: Colors.black,
                                                                     fontSize: 9,
                                                                   ),

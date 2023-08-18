@@ -2,12 +2,11 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:table_calendar/table_calendar.dart';
 import 'bottomNavigation.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'globalVariables.dart';
 
@@ -72,6 +71,16 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: const BottomNavigationExample(),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('ko'),
+        Locale('en'),
+      ],
+      locale: const Locale('ko'),
     );
   }
 }

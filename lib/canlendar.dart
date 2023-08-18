@@ -430,8 +430,14 @@ class _CanlendarState extends State<Canlendar> {
                       maxLines: 5,
                       controller: TextEditingController(text: memo),
                       decoration: const InputDecoration(
-                        labelText: 'memo',
-                        border: OutlineInputBorder(),
+                        // labelText: '',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(20)),
+                          // borderSide: BorderSide(
+                          //   color: Colors.blue,
+                          // ),
+                        ),
+                        hintText: '오늘 하루 어떠셨나요?',
                         // contentPadding: EdgeInsets.symmetric(vertical: 50),
                       ),
                       onChanged: (value) {
@@ -793,25 +799,35 @@ class _CanlendarState extends State<Canlendar> {
                                                   Container(
                                                     decoration: borderForDebug,
                                                     child: Row(
-                                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                                       children: [
-                                                        Container(
-                                                          decoration: borderForDebug,
-                                                          child: Icon(
-                                                            Icons.circle,
-                                                            size: 7,
-                                                            color: energyToColor(energy),
-                                                          ),
-                                                        ),
-                                                        if (memo.replaceAll(' ', '') != '')
-                                                          Container(
+                                                        /// Expanded 2개 배치 시 공간을 정확히 반으로 분배
+                                                        Expanded(
+                                                          child: Container(
                                                             decoration: borderForDebug,
-                                                            child: const Icon(
-                                                              Icons.comment_outlined,
-                                                              color: Colors.red,
+                                                            child: Icon(
+                                                              Icons.circle,
                                                               size: 8,
+                                                              color: energyToColor(energy),
                                                             ),
                                                           ),
+                                                        ),
+                                                        Expanded(
+                                                          child: Container(
+                                                            decoration: borderForDebug,
+                                                            child:
+                                                              /// 공백만으로 이루어진 문자는 메모가 없는 것으로 간주
+                                                              memo.replaceAll(' ', '') != ''
+                                                                ? Container(
+                                                                    decoration: borderForDebug,
+                                                                    child: const Icon(
+                                                                      Icons.comment_outlined,
+                                                                      color: Colors.red,
+                                                                      size: 8,
+                                                                    ),
+                                                                  )
+                                                                : null
+                                                          ),
+                                                        )
                                                       ],
                                                     ),
                                                   ),

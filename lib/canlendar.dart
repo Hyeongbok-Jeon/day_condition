@@ -580,7 +580,7 @@ class _CanlendarState extends State<Canlendar> {
                         holidayDecoration: BoxDecoration(),
                         selectedTextStyle: TextStyle(),
                         selectedDecoration: BoxDecoration(),
-                        todayTextStyle: TextStyle(color: Colors.blue),
+                        todayTextStyle: TextStyle(),
                         todayDecoration: BoxDecoration(),
                         tableBorder: TableBorder(
                           horizontalInside: BorderSide(
@@ -681,51 +681,49 @@ class _CanlendarState extends State<Canlendar> {
                           return FutureBuilder(
                               future: future(),
                               builder: (context, asyncSnapshot) {
+                                String? wakeupTime;
+                                String? bedTime;
+                                double? energy;
+                                String? memo;
                                 if (asyncSnapshot.hasData) {
-                                  String wakeupTime = asyncSnapshot.data?["wakeupTime"];
-                                  String bedTime = asyncSnapshot.data?["bedTime"];
-                                  double energy = asyncSnapshot.data?["energy"].toDouble();
+                                  wakeupTime = asyncSnapshot.data?["wakeupTime"];
+                                  bedTime = asyncSnapshot.data?["bedTime"];
+                                  energy = asyncSnapshot.data?["energy"].toDouble();
                                   // if (energy is int) {
                                   //   energy = energy.toDouble();
                                   // }
-                                  String memo = asyncSnapshot.data?["memo"];
-                                  return Padding(
-                                    padding: const EdgeInsets.all(6),
-                                    child: Container(
-                                      decoration: borderForDebug,
-                                      child: Column(
-                                        children: [
-                                          Container(
+                                  memo = asyncSnapshot.data?["memo"];
+                                }
+                                return Padding(
+                                  padding: const EdgeInsets.all(4),
+                                  child: Container(
+                                    decoration: borderForDebug,
+                                    child: Column(
+                                      children: [
+                                        Container(
+                                          decoration: borderForDebug,
+                                          height: 22,
+                                          child:
+                                            DateFormat('yyyyMMdd').format(day) == DateFormat('yyyyMMdd').format(DateTime.now())
+                                              ? Container(
+                                                  decoration: BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    border: Border.all(width: 1, color: Colors.blue),
+                                                    // color: Colors.blue,
+                                                  ),
+                                                )
+                                              : Container()
+
+                                        ),
+                                        Expanded(
+                                          child: Container(
                                             decoration: borderForDebug,
-                                            height: 16,
-                                            // child: Row(
-                                            //   children: [
-                                            //     Container(
-                                            //       decoration: borderForDebug,
-                                            //       width: 28,
-                                            //     ),
-                                            //     if (memo.replaceAll(' ', '') != '')
-                                            //       Expanded(
-                                            //         child: Container(
-                                            //           decoration: borderForDebug,
-                                            //           child: const Icon(
-                                            //             Icons.comment_outlined,
-                                            //             color: Colors.red,
-                                            //             size: 8,
-                                            //           ),
-                                            //         ),
-                                            //       )
-                                            //   ],
-                                            // ),
-                                          ),
-                                          Expanded(
-                                            child: Container(
-                                              decoration: borderForDebug,
-                                              // width: MediaQuery.of(context).size.width * 0.2,
-                                              // padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.035),
-                                              child: Column(
-                                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                                children: [
+                                            // width: MediaQuery.of(context).size.width * 0.2,
+                                            // padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.035),
+                                            child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                              children: [
+                                                if (bedTime != null)
                                                   Container(
                                                     decoration: borderForDebug,
                                                     child: Row(
@@ -761,6 +759,7 @@ class _CanlendarState extends State<Canlendar> {
                                                       ],
                                                     ),
                                                   ),
+                                                if (wakeupTime != null)
                                                   Container(
                                                     decoration: borderForDebug,
                                                     child: Row(
@@ -796,6 +795,7 @@ class _CanlendarState extends State<Canlendar> {
                                                       ],
                                                     ),
                                                   ),
+                                                if (memo != null)
                                                   Container(
                                                     decoration: borderForDebug,
                                                     child: Row(
@@ -831,39 +831,36 @@ class _CanlendarState extends State<Canlendar> {
                                                       ],
                                                     ),
                                                   ),
-                                                  // Row(
-                                                  //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                                  //   children: [
-                                                  //     RatingBar.builder(
-                                                  //       ignoreGestures: true,
-                                                  //       initialRating: energy,
-                                                  //       minRating: 1,
-                                                  //       direction: Axis.horizontal,
-                                                  //       allowHalfRating: true,
-                                                  //       itemCount: 5,
-                                                  //       itemPadding: const EdgeInsets.symmetric(horizontal: 0.0),
-                                                  //       itemBuilder: (context, _) => Icon(
-                                                  //         // Image.asset(name),
-                                                  //         Icons.rectangle_rounded,
-                                                  //         color: G_energyColor,
-                                                  //       ),
-                                                  //       onRatingUpdate: (rating) {
-                                                  //       },
-                                                  //       itemSize: MediaQuery.of(context).size.height * 0.01
-                                                  //     )
-                                                  //   ],
-                                                  // ),
-                                                ],
-                                              ),
+                                                // Row(
+                                                //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                //   children: [
+                                                //     RatingBar.builder(
+                                                //       ignoreGestures: true,
+                                                //       initialRating: energy,
+                                                //       minRating: 1,
+                                                //       direction: Axis.horizontal,
+                                                //       allowHalfRating: true,
+                                                //       itemCount: 5,
+                                                //       itemPadding: const EdgeInsets.symmetric(horizontal: 0.0),
+                                                //       itemBuilder: (context, _) => Icon(
+                                                //         // Image.asset(name),
+                                                //         Icons.rectangle_rounded,
+                                                //         color: G_energyColor,
+                                                //       ),
+                                                //       onRatingUpdate: (rating) {
+                                                //       },
+                                                //       itemSize: MediaQuery.of(context).size.height * 0.01
+                                                //     )
+                                                //   ],
+                                                // ),
+                                              ],
                                             ),
                                           ),
-                                        ],
-                                      ),
+                                        ),
+                                      ],
                                     ),
-                                  );
-                                } else {
-                                  return const SizedBox();
-                                }
+                                  ),
+                                );
                               }
                           );
                         },

@@ -567,7 +567,6 @@ class _CanlendarState extends State<Canlendar> {
       final totalCount = body['totalCount'];
       final items = body['items'];
 
-
       if (items != '') {
         Map<String, String> parsedData = {};
         var item = items['item'];
@@ -607,47 +606,66 @@ class _CanlendarState extends State<Canlendar> {
                           key: sfDateRangePickerKey,
                           child: Text(
                             '${_focusedDay.year}년 ${_focusedDay.month}월',
-                            style: const TextStyle(fontSize: 22, color: Colors.black),
+                            style: const TextStyle(
+                                fontSize: 22, color: Colors.black),
                           ),
                           onPressed: () {
                             /// 버튼의 위치를 구함
-                            final RenderBox sfDateRangePickerButton = sfDateRangePickerKey.currentContext!.findRenderObject() as RenderBox;
-                            final RenderBox overlay = Overlay.of(context)!.context.findRenderObject() as RenderBox;
-                            final buttonPosition = sfDateRangePickerButton.localToGlobal(Offset.zero, ancestor: overlay);
+                            final RenderBox sfDateRangePickerButton =
+                                sfDateRangePickerKey.currentContext!
+                                    .findRenderObject() as RenderBox;
+                            final RenderBox overlay = Overlay.of(context)!
+                                .context
+                                .findRenderObject() as RenderBox;
+                            final buttonPosition = sfDateRangePickerButton
+                                .localToGlobal(Offset.zero, ancestor: overlay);
                             showDialog<Widget>(
                                 context: context,
                                 builder: (BuildContext context) {
                                   return Transform.translate(
-                                    offset: Offset(buttonPosition.dx, buttonPosition.dy + sfDateRangePickerButton.size.height),
+                                    offset: Offset(
+                                        buttonPosition.dx,
+                                        buttonPosition.dy +
+                                            sfDateRangePickerButton
+                                                .size.height),
                                     child: Dialog(
                                       /// insetPadding 설정으로 padding을 0으로 만들고 align을 topLeft로 설정해서
                                       /// 왼쪽 상단 모서리에서 dialog가 나타나게 셋팅
-                                      insetPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+                                      insetPadding: const EdgeInsets.symmetric(
+                                          horizontal: 0, vertical: 0),
                                       alignment: Alignment.topLeft,
+
                                       /// dialog의 크기를 제한
                                       /// width는 일정 크기 이상 작아지면 SfDateRangePicker의 min width의 영향으로
                                       /// 최소 크기에서 작아지지 않음
                                       child: SizedBox(
                                         height: 180,
+
                                         /// 최소 크기로 설정
                                         width: 0,
                                         child: SfDateRangePicker(
                                           showNavigationArrow: true,
                                           view: DateRangePickerView.year,
-                                          selectionMode: DateRangePickerSelectionMode.single,
+                                          selectionMode:
+                                              DateRangePickerSelectionMode
+                                                  .single,
                                           onViewChanged: (args) => {
-                                            if (args.view == DateRangePickerView.month) {
-                                              Navigator.of(context).pop(),
-                                              setState(() {
-                                                ///
-                                                _focusedDay = DateTime(
-                                                    args.visibleDateRange.endDate!.year,
-                                                    args.visibleDateRange.endDate!.month,
-                                                    _focusedDay.day
-                                                );
-                                              })
-                                            }
+                                            if (args.view ==
+                                                DateRangePickerView.month)
+                                              {
+                                                Navigator.of(context).pop(),
+                                                setState(() {
+                                                  ///
+                                                  _focusedDay = DateTime(
+                                                      args.visibleDateRange
+                                                          .endDate!.year,
+                                                      args.visibleDateRange
+                                                          .endDate!.month,
+                                                      _focusedDay.day);
+                                                })
+                                              }
                                           },
+
                                           /// pick 가능한 최소, 최대 날짜 설정
                                           minDate: kFirstDay,
                                           maxDate: kLastDay,
@@ -655,11 +673,8 @@ class _CanlendarState extends State<Canlendar> {
                                       ),
                                     ),
                                   );
-                                }
-                            );
-                          }
-                      )
-                  ),
+                                });
+                          })),
                   Expanded(
                     child: Container(
                       decoration: borderForDebug,
@@ -697,7 +712,8 @@ class _CanlendarState extends State<Canlendar> {
                                   : StartingDayOfWeek.sunday,
                               calendarStyle: const CalendarStyle(
                                   cellAlignment: Alignment.topCenter,
-                                  holidayTextStyle: TextStyle(color: Colors.red),
+                                  holidayTextStyle:
+                                      TextStyle(color: Colors.red),
                                   holidayDecoration: BoxDecoration(),
                                   selectedTextStyle: TextStyle(),
                                   selectedDecoration: BoxDecoration(),
@@ -755,28 +771,35 @@ class _CanlendarState extends State<Canlendar> {
                                                           as RenderBox;
                                                   final buttonPosition =
                                                       sfDateRangePickerButton
-                                                          .localToGlobal(Offset.zero,
-                                                              ancestor: overlay);
+                                                          .localToGlobal(
+                                                              Offset.zero,
+                                                              ancestor:
+                                                                  overlay);
                                                   showDialog<Widget>(
                                                       context: context,
-                                                      builder:
-                                                          (BuildContext context) {
-                                                        return Transform.translate(
+                                                      builder: (BuildContext
+                                                          context) {
+                                                        return Transform
+                                                            .translate(
                                                           offset: Offset(
                                                               buttonPosition.dx,
-                                                              buttonPosition.dy +
+                                                              buttonPosition
+                                                                      .dy +
                                                                   sfDateRangePickerButton
-                                                                      .size.height),
+                                                                      .size
+                                                                      .height),
                                                           child: Dialog(
                                                             /// insetPadding 설정으로 padding을 0으로 만들고 align을 topLeft로 설정해서
                                                             /// 왼쪽 상단 모서리에서 dialog가 나타나게 셋팅
                                                             insetPadding:
                                                                 const EdgeInsets
                                                                         .symmetric(
-                                                                    horizontal: 0,
-                                                                    vertical: 0),
-                                                            alignment:
-                                                                Alignment.topLeft,
+                                                                    horizontal:
+                                                                        0,
+                                                                    vertical:
+                                                                        0),
+                                                            alignment: Alignment
+                                                                .topLeft,
 
                                                             /// dialog의 크기를 제한
                                                             /// width는 일정 크기 이상 작아지면 SfDateRangePicker의 min width의 영향으로
@@ -801,19 +824,13 @@ class _CanlendarState extends State<Canlendar> {
                                                                       Navigator.of(
                                                                               context)
                                                                           .pop(),
-                                                                      setState(() {
+                                                                      setState(
+                                                                          () {
                                                                         ///
                                                                         _focusedDay = DateTime(
-                                                                            args
-                                                                                .visibleDateRange
-                                                                                .endDate!
-                                                                                .year,
-                                                                            args
-                                                                                .visibleDateRange
-                                                                                .endDate!
-                                                                                .month,
-                                                                            _focusedDay
-                                                                                .day);
+                                                                            args.visibleDateRange.endDate!.year,
+                                                                            args.visibleDateRange.endDate!.month,
+                                                                            _focusedDay.day);
                                                                       })
                                                                     }
                                                                 },
@@ -823,8 +840,10 @@ class _CanlendarState extends State<Canlendar> {
                                                                     true,
 
                                                                 /// pick 가능한 최소, 최대 날짜 설정
-                                                                minDate: kFirstDay,
-                                                                maxDate: kLastDay,
+                                                                minDate:
+                                                                    kFirstDay,
+                                                                maxDate:
+                                                                    kLastDay,
                                                               ),
                                                             ),
                                                           ),
@@ -836,14 +855,17 @@ class _CanlendarState extends State<Canlendar> {
                                   );
                                 },
                                 markerBuilder: (context, day, events) {
-                                  final key = DateFormat('yyyyMMdd').format(day);
+                                  final key =
+                                      DateFormat('yyyyMMdd').format(day);
 
-                                  Future<Map<dynamic, dynamic>?> future() async {
+                                  Future<Map<dynamic, dynamic>?>
+                                      future() async {
                                     DataSnapshot snapshot =
                                         await ref.child(key).get();
 
                                     if (snapshot.exists) {
-                                      return snapshot.value as Map<dynamic, dynamic>;
+                                      return snapshot.value
+                                          as Map<dynamic, dynamic>;
                                     } else {
                                       return null;
                                     }
@@ -856,10 +878,13 @@ class _CanlendarState extends State<Canlendar> {
                                         String? bedTime;
                                         double? energy;
                                         String? memo;
+
+                                        /// DB 데이터 가져옴
                                         if (asyncSnapshot.hasData) {
                                           wakeupTime =
                                               asyncSnapshot.data?["wakeupTime"];
-                                          bedTime = asyncSnapshot.data?["bedTime"];
+                                          bedTime =
+                                              asyncSnapshot.data?["bedTime"];
                                           energy = asyncSnapshot.data?["energy"]
                                               .toDouble();
                                           // if (energy is int) {
@@ -867,6 +892,7 @@ class _CanlendarState extends State<Canlendar> {
                                           // }
                                           memo = asyncSnapshot.data?["memo"];
                                         }
+
                                         return Padding(
                                           padding: const EdgeInsets.all(4),
                                           child: Container(
@@ -875,20 +901,43 @@ class _CanlendarState extends State<Canlendar> {
                                               children: [
                                                 Container(
                                                     decoration: borderForDebug,
-                                                    height: 22,
-                                                    child: DateFormat('yyyyMMdd')
+                                                    height: 23,
+                                                    child: DateFormat(
+                                                                    'yyyyMMdd')
                                                                 .format(day) ==
-                                                            DateFormat('yyyyMMdd')
-                                                                .format(
-                                                                    DateTime.now())
-                                                        ? Container(
-                                                            decoration: BoxDecoration(
-                                                              shape: BoxShape.circle,
-                                                              border: Border.all(
-                                                                  width: 1,
-                                                                  color: Colors.blue),
-                                                              // color: Colors.blue,
-                                                            ),
+                                                            DateFormat(
+                                                                    'yyyyMMdd')
+                                                                .format(DateTime
+                                                                    .now())
+                                                        ? Stack(
+                                                            children: [
+                                                              Container(
+                                                                decoration:
+                                                                    const BoxDecoration(
+                                                                  shape: BoxShape
+                                                                      .circle,
+                                                                  // border: Border.all(
+                                                                  //     width: 1,
+                                                                  //     color: Colors
+                                                                  //         .blue),
+                                                                  color: Colors
+                                                                      .blue,
+                                                                ),
+                                                              ),
+                                                              // const Positioned(
+                                                              //   top: 2,
+                                                              //     left: 12,
+                                                              //     child: Text(
+                                                              //         '21', style: TextStyle(color: Colors
+                                                              //               .white),))
+                                                              const Center(
+                                                                  child: Text(
+                                                                '21',
+                                                                style: TextStyle(
+                                                                    color: Colors
+                                                                        .white),
+                                                              ))
+                                                            ],
                                                           )
                                                         : Container()),
                                                 Expanded(
@@ -925,26 +974,27 @@ class _CanlendarState extends State<Canlendar> {
                                                                             const Icon(
                                                                           Icons
                                                                               .nightlight_round_rounded,
-                                                                          color: Colors
-                                                                              .indigo,
-                                                                          size: 9,
+                                                                          color:
+                                                                              Colors.indigo,
+                                                                          size:
+                                                                              9,
                                                                         ),
                                                                       ),
                                                                       Container(
                                                                         decoration:
                                                                             borderForDebug,
-                                                                        child: Text(
+                                                                        child:
+                                                                            Text(
                                                                           bedTime,
                                                                           style:
                                                                               const TextStyle(
-                                                                            color: Colors
-                                                                                .black,
+                                                                            color:
+                                                                                Colors.black,
                                                                             fontSize:
                                                                                 9,
                                                                           ),
                                                                           textAlign:
-                                                                              TextAlign
-                                                                                  .center,
+                                                                              TextAlign.center,
                                                                         ),
                                                                       ),
                                                                     ],
@@ -975,27 +1025,29 @@ class _CanlendarState extends State<Canlendar> {
                                                                             borderForDebug,
                                                                         child:
                                                                             const Icon(
-                                                                          Icons.sunny,
-                                                                          color: Colors
-                                                                              .yellow,
-                                                                          size: 9,
+                                                                          Icons
+                                                                              .sunny,
+                                                                          color:
+                                                                              Colors.yellow,
+                                                                          size:
+                                                                              9,
                                                                         ),
                                                                       ),
                                                                       Container(
                                                                         decoration:
                                                                             borderForDebug,
-                                                                        child: Text(
+                                                                        child:
+                                                                            Text(
                                                                           wakeupTime,
                                                                           style:
                                                                               const TextStyle(
-                                                                            color: Colors
-                                                                                .black,
+                                                                            color:
+                                                                                Colors.black,
                                                                             fontSize:
                                                                                 9,
                                                                           ),
                                                                           textAlign:
-                                                                              TextAlign
-                                                                                  .center,
+                                                                              TextAlign.center,
                                                                         ),
                                                                       ),
                                                                     ],
@@ -1012,33 +1064,29 @@ class _CanlendarState extends State<Canlendar> {
                                                               children: [
                                                                 /// Expanded 2개 배치 시 공간을 정확히 반으로 분배
                                                                 Expanded(
-                                                                  child: Container(
+                                                                  child:
+                                                                      Container(
                                                                     decoration:
                                                                         borderForDebug,
                                                                     child: Icon(
-                                                                      Icons.circle,
+                                                                      Icons
+                                                                          .circle,
                                                                       size: 8,
-                                                                      color:
-                                                                          energyToColor(
-                                                                              energy),
+                                                                      color: energyToColor(
+                                                                          energy),
                                                                     ),
                                                                   ),
                                                                 ),
                                                                 Expanded(
                                                                   child: Container(
-                                                                      decoration:
-                                                                          borderForDebug,
+                                                                      decoration: borderForDebug,
                                                                       child:
 
                                                                           /// 공백만으로 이루어진 문자는 메모가 없는 것으로 간주
-                                                                          memo.replaceAll(' ',
-                                                                                      '') !=
-                                                                                  ''
+                                                                          memo.replaceAll(' ', '') != ''
                                                                               ? Container(
-                                                                                  decoration:
-                                                                                      borderForDebug,
-                                                                                  child:
-                                                                                      const Icon(
+                                                                                  decoration: borderForDebug,
+                                                                                  child: const Icon(
                                                                                     Icons.comment_outlined,
                                                                                     color: Colors.red,
                                                                                     size: 8,

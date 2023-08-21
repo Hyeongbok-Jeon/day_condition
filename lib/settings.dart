@@ -1,7 +1,6 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:table_calendar/table_calendar.dart';
 
 import 'globalVariables.dart';
 
@@ -23,7 +22,7 @@ class _SettingsState extends State<Settings> {
 
     final query = ref.child('/settings');
     query.onValue.listen((event) {
-      if(mounted) {
+      if (mounted) {
         setState(() {
           for (final child in event.snapshot.children) {
             snapshotValue[child.key] = child.value;
@@ -33,7 +32,7 @@ class _SettingsState extends State<Settings> {
       }
     });
   }
-  
+
   // 색상 변경 다이얼로그 호출
   void _openColorPicker(String type) {
     showDialog(
@@ -175,10 +174,12 @@ class _SettingsState extends State<Settings> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    alignment: AlignmentDirectional.topStart,
-                    decoration: borderForDebug,
-                    child: Text("색상", style: TextStyle(fontSize: 30),)
-                  ),
+                      alignment: AlignmentDirectional.topStart,
+                      decoration: borderForDebug,
+                      child: Text(
+                        "색상",
+                        style: TextStyle(fontSize: 30),
+                      )),
                   widgetSetColor('기상'),
                   widgetSetColor('취침'),
                   widgetSetColor('에너지'),
@@ -189,10 +190,9 @@ class _SettingsState extends State<Settings> {
                         children: [
                           Container(
                               child: const Text(
-                                "시작 요일",
-                                style: TextStyle(fontSize: 20),
-                              )
-                          ),
+                            "시작 요일",
+                            style: TextStyle(fontSize: 20),
+                          )),
                           Row(
                             children: [
                               Container(
@@ -200,9 +200,8 @@ class _SettingsState extends State<Settings> {
                                 child: Row(
                                   children: [
                                     Container(
-                                      decoration: borderForDebug,
-                                      child: Text('월요일')
-                                    ),
+                                        decoration: borderForDebug,
+                                        child: Text('월요일')),
                                     Container(
                                       decoration: borderForDebug,
                                       child: Radio(
@@ -231,8 +230,7 @@ class _SettingsState extends State<Settings> {
                                   children: [
                                     Container(
                                         decoration: borderForDebug,
-                                        child: Text('일요일')
-                                    ),
+                                        child: Text('일요일')),
                                     Container(
                                       decoration: borderForDebug,
                                       child: Radio(
@@ -254,8 +252,7 @@ class _SettingsState extends State<Settings> {
                             ],
                           ),
                         ],
-                      )
-                  ),
+                      )),
                   Container(
                     decoration: borderForDebug,
                     child: TextButton(
@@ -276,11 +273,9 @@ class _SettingsState extends State<Settings> {
                                 ),
                                 TextButton(
                                   onPressed: () async => {
-                                    await ref.remove()
-                                    .then((value) {
-                                      ref.child('settings').update({
-                                        'startingDayOfWeek': 'sunday'
-                                      });
+                                    await ref.remove().then((value) {
+                                      ref.child('settings').update(
+                                          {'startingDayOfWeek': 'sunday'});
                                     }).then((value) {
                                       setState(() {
                                         Navigator.pop(context);
@@ -300,7 +295,6 @@ class _SettingsState extends State<Settings> {
                 ],
               ),
             ),
-
           ],
         ),
       ),

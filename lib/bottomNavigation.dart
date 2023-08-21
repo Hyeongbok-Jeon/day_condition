@@ -8,7 +8,8 @@ class BottomNavigationExample extends StatefulWidget {
   const BottomNavigationExample({super.key});
 
   @override
-  _BottomNavigationExampleState createState() => _BottomNavigationExampleState();
+  _BottomNavigationExampleState createState() =>
+      _BottomNavigationExampleState();
 }
 
 class _BottomNavigationExampleState extends State<BottomNavigationExample> {
@@ -21,7 +22,9 @@ class _BottomNavigationExampleState extends State<BottomNavigationExample> {
       body: IndexedStack(
         index: _currentIndex,
         children: [
-          Canlendar(isReTap: isReTap,), // 각 탭에 해당하는 페이지 위젯들
+          Canlendar(
+            isReTap: isReTap,
+          ),
           const Statistics(),
           const Settings(),
         ],

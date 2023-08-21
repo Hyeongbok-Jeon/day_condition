@@ -1,6 +1,3 @@
-import 'dart:async';
-import 'dart:collection';
-
 import 'package:firebase_database/firebase_database.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
@@ -23,9 +20,10 @@ class _StatisticsState extends State<Statistics> {
   void initState() {
     super.initState();
 
-    final query = FirebaseDatabase.instance.ref("$G_uid").orderByKey().limitToLast(7);
+    final query =
+        FirebaseDatabase.instance.ref("$G_uid").orderByKey().limitToLast(7);
     query.onValue.listen((event) {
-      if(mounted) {
+      if (mounted) {
         setState(() {
           for (final child in event.snapshot.children) {
             snapshotValue[child.key] = child.value;
@@ -41,13 +39,16 @@ class _StatisticsState extends State<Statistics> {
       List<BarChartGroupData> processedData = [];
       for (int i = 0; i < 7; i++) {
         final today = DateTime.now();
-        final dayAgo = DateFormat('yyyyMMdd').format(today.subtract(Duration(days: 6 - i)));
+        final dayAgo = DateFormat('yyyyMMdd')
+            .format(today.subtract(Duration(days: 6 - i)));
         processedData.add(
           BarChartGroupData(
             x: i,
             barRods: [
               BarChartRodData(
-                toY: snapshotValue[dayAgo] != null ? snapshotValue[dayAgo]['timeDiff'].toDouble() / 60 : 0,
+                toY: snapshotValue[dayAgo] != null
+                    ? snapshotValue[dayAgo]['timeDiff'].toDouble() / 60
+                    : 0,
                 gradient: _barsGradient,
               )
             ],
@@ -82,7 +83,8 @@ class _StatisticsState extends State<Statistics> {
         fontSize: 14,
       );
       final today = DateTime.now();
-      String text = DateFormat('MM/dd').format(today.subtract(Duration(days: 6 - value.toInt())));
+      String text = DateFormat('MM/dd')
+          .format(today.subtract(Duration(days: 6 - value.toInt())));
       // String text;
       // switch (value.toInt()) {
       //   case 0: text = '08/04'; break;
@@ -136,10 +138,12 @@ class _StatisticsState extends State<Statistics> {
           child: Column(
             children: [
               Container(
-                alignment: AlignmentDirectional.topStart,
-                decoration: borderForDebug,
-                child: const Text("지난 7일 수면 시간", style: TextStyle(fontSize: 30),)
-              ),
+                  alignment: AlignmentDirectional.topStart,
+                  decoration: borderForDebug,
+                  child: const Text(
+                    "지난 7일 수면 시간",
+                    style: TextStyle(fontSize: 30),
+                  )),
               Container(
                 decoration: borderForDebug,
                 height: 200,
@@ -163,38 +167,38 @@ class _StatisticsState extends State<Statistics> {
   }
 
   BarTouchData get barTouchData => BarTouchData(
-    enabled: false,
-    touchTooltipData: BarTouchTooltipData(
-      tooltipBgColor: Colors.transparent,
-      tooltipPadding: EdgeInsets.zero,
-      tooltipMargin: 8,
-      getTooltipItem: (
-          BarChartGroupData group,
-          int groupIndex,
-          BarChartRodData rod,
-          int rodIndex,
+        enabled: false,
+        touchTooltipData: BarTouchTooltipData(
+          tooltipBgColor: Colors.transparent,
+          tooltipPadding: EdgeInsets.zero,
+          tooltipMargin: 8,
+          getTooltipItem: (
+            BarChartGroupData group,
+            int groupIndex,
+            BarChartRodData rod,
+            int rodIndex,
           ) {
-        return BarTooltipItem(
-          rod.toY.round().toString(),
-          const TextStyle(
-            color: AppColors.contentColorCyan,
-            fontWeight: FontWeight.bold,
-          ),
-        );
-      },
-    ),
-  );
+            return BarTooltipItem(
+              rod.toY.round().toString(),
+              const TextStyle(
+                color: AppColors.contentColorCyan,
+                fontWeight: FontWeight.bold,
+              ),
+            );
+          },
+        ),
+      );
 
   FlBorderData get borderData => FlBorderData(
-    show: false,
-  );
+        show: false,
+      );
 
   LinearGradient get _barsGradient => const LinearGradient(
-    colors: [
-      AppColors.contentColorBlue,
-      AppColors.contentColorCyan,
-    ],
-    begin: Alignment.bottomCenter,
-    end: Alignment.topCenter,
-  );
+        colors: [
+          AppColors.contentColorBlue,
+          AppColors.contentColorCyan,
+        ],
+        begin: Alignment.bottomCenter,
+        end: Alignment.topCenter,
+      );
 }

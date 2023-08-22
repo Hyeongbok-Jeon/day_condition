@@ -9,8 +9,8 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:http/http.dart' as http;
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
-import '../utils.dart';
-import 'globalVariables.dart';
+import '../../utils.dart';
+import '../globalVariables.dart';
 
 class Canlendar extends StatefulWidget {
   late bool isReTap;
@@ -35,7 +35,7 @@ class _CanlendarState extends State<Canlendar> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
   RangeSelectionMode _rangeSelectionMode = RangeSelectionMode
       .toggledOff; // Can be toggled on/off by longpressing a date
-  DateTime _focusedDay = DateTime.now();
+  DateTime _focusedDay = getKoreanTime();
   DateTime? _selectedDay;
   DateTime? _rangeStart;
   DateTime? _rangeEnd;
@@ -100,7 +100,7 @@ class _CanlendarState extends State<Canlendar> {
       _selectedEvents.value = _getEventsForDay(selectedDay);
     }
 
-    setEvent();
+    setEvent(selectedDay);
   }
 
   void _onRangeSelected(DateTime? start, DateTime? end, DateTime focusedDay) {
@@ -165,7 +165,7 @@ class _CanlendarState extends State<Canlendar> {
   }
 
   /// 이벤트 등록 modal bottom sheet
-  Future<void> setEvent() async {
+  Future<void> setEvent(DateTime selectedDay) async {
     int wakeupTimeHH = 6;
     int bedTimeHH = 22;
     int wakeupTimeMM = 0;
@@ -193,11 +193,11 @@ class _CanlendarState extends State<Canlendar> {
 
     ///
 
-    DateTime wakeupTime = DateTime(DateTime.now().year, DateTime.now().month,
-        DateTime.now().day, wakeupTimeHH, wakeupTimeMM);
-    DateTime bedTime = DateTime(DateTime.now().year, DateTime.now().month,
-        DateTime.now().day, bedTimeHH, bedTimeMM);
-    String dayOfWeek = getDayOfWeekInKorean(DateTime.now().weekday);
+    DateTime wakeupTime = DateTime(selectedDay.year, selectedDay.month,
+        selectedDay.day, wakeupTimeHH, wakeupTimeMM);
+    DateTime bedTime = DateTime(selectedDay.year, selectedDay.month,
+        selectedDay.day, bedTimeHH, bedTimeMM);
+    String dayOfWeek = getDayOfWeekInKorean(selectedDay.weekday);
 
     // Don't use 'BuildContext's across async gaps. (Documentation)  Try rewriting the code to not reference the 'BuildContext'.
     // 위 에러 해결 코드
@@ -537,7 +537,7 @@ class _CanlendarState extends State<Canlendar> {
   Widget build(BuildContext context) {
     if (widget.isReTap) {
       setState(() {
-        _focusedDay = DateTime.now();
+        _focusedDay = getKoreanTime();
         widget.setReTapFalse();
       });
     }
@@ -588,7 +588,7 @@ class _CanlendarState extends State<Canlendar> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-            "현재시간: ${DateFormat('yyyy-MM-dd hh:mm').format(DateTime.now())}"),
+            "현재시간: ${DateFormat('yyyy-MM-dd hh:mm').format(getKoreanTime())}"),
       ),
       body: isLoading
           ? const Scaffold()
@@ -614,7 +614,7 @@ class _CanlendarState extends State<Canlendar> {
                             final RenderBox sfDateRangePickerButton =
                                 sfDateRangePickerKey.currentContext!
                                     .findRenderObject() as RenderBox;
-                            final RenderBox overlay = Overlay.of(context)!
+                            final RenderBox overlay = Overlay.of(context)
                                 .context
                                 .findRenderObject() as RenderBox;
                             final buttonPosition = sfDateRangePickerButton
@@ -698,7 +698,7 @@ class _CanlendarState extends State<Canlendar> {
                               focusedDay: _focusedDay,
                               // selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
                               enabledDayPredicate: (day) =>
-                                  DateTime.now().compareTo(day) != -1,
+                                  getKoreanTime().compareTo(day) != -1,
                               // 날짜 비활성화
                               rangeStartDay: _rangeStart,
                               rangeEndDay: _rangeEnd,
@@ -930,10 +930,10 @@ class _CanlendarState extends State<Canlendar> {
                                                               //     child: Text(
                                                               //         '21', style: TextStyle(color: Colors
                                                               //               .white),))
-                                                              const Center(
+                                                              Center(
                                                                   child: Text(
-                                                                '21',
-                                                                style: TextStyle(
+                                                                '${getKoreanTime().day}',
+                                                                style: const TextStyle(
                                                                     color: Colors
                                                                         .white),
                                                               ))

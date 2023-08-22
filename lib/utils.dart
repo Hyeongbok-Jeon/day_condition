@@ -46,3 +46,7 @@ List<DateTime> daysInRange(DateTime first, DateTime last) {
 final kToday = DateTime.now();
 final kFirstDay = DateTime(kToday.year - 5, kToday.month, kToday.day);
 final kLastDay = DateTime(kToday.year + 5, kToday.month, kToday.day);
+
+DateTime getKoreanTime () {
+  return DateTime.now().toUtc().add(const Duration(hours: 9));
+}

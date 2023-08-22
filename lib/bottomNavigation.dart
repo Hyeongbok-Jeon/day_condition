@@ -1,8 +1,8 @@
-import 'package:day_condition/statistics.dart';
+import 'package:day_condition/pages/statistics.dart';
 import 'package:flutter/material.dart';
 
-import 'canlendar.dart';
-import 'settings.dart';
+import 'pages/canlendar.dart';
+import 'pages/settings.dart';
 
 class BottomNavigationExample extends StatefulWidget {
   const BottomNavigationExample({super.key});

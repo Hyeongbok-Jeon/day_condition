@@ -3,8 +3,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import 'app_colors.dart';
-import 'globalVariables.dart';
+import '../app_colors.dart';
+import '../globalVariables.dart';
 
 class Statistics extends StatefulWidget {
   const Statistics({super.key});

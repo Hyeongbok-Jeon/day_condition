@@ -544,9 +544,11 @@ class _CanlendarState extends State<Canlendar> {
     Future<Map<String, String>?> future() async {
       String solYear = '${_focusedDay.year}';
       String solMonth = '${_focusedDay.month}';
+      /// 월을 2자리로
       if (solMonth.length == 1) {
         solMonth = '0$solMonth';
       }
+      /// 공공데이터포털에서 받은 키
       const serviceKey =
           'vGcOnDW+ywhtts/PnIk6QDB+J7JTcwVdOysxn74uzxJ6/TUtkKU5PHLf4z6yXJinJnU5qKALxEbYIz4WhemGQA==';
       var url = Uri.https('apis.data.go.kr',
@@ -557,38 +559,43 @@ class _CanlendarState extends State<Canlendar> {
         '_type': 'json'
       });
 
-      /// http get 요청
-      var response = await http.get(url);
+      try {
+        /// http get 요청
+        var response = await http.get(url);
 
-      /// parsing
-      /// 한글 변환을 위해 utf8.decode 사용
-      final decodedData = jsonDecode(utf8.decode(response.bodyBytes));
-      final body = decodedData['response']['body'];
-      final totalCount = body['totalCount'];
-      final items = body['items'];
+        if (response.statusCode == 200) {
+          /// response.body
+          /// {"response":{"header":{"resultCode":"00","resultMsg":"NORMAL SERVICE."},"body":{"items":{"item":{"dateKind":"01","dateName":"ê´ë³µì ","isHoliday":"Y","locdate":20230815,"seq":1}},"numOfRows":10,"pageNo":1,"totalCount":1}}}
+          final decodedResponseBody = jsonDecode(utf8.decode(response.bodyBytes));
+          final header = decodedResponseBody['response']['header'];
+          final body = decodedResponseBody['response']['body'];
+          final totalCount = body['totalCount'];
+          final items = body['items'];
 
-      if (items != '') {
-        Map<String, String> parsedData = {};
-        var item = items['item'];
-        if (totalCount == 1) {
-          item = items['item'];
-          parsedData[item['locdate'].toString()] = item['dateName'];
-        } else if (totalCount > 1) {
-          final item = items['item'];
-          for (var row in item) {
-            parsedData[row['locdate'].toString()] = row['dateName'];
+          if (items != '') {
+            Map<String, String> map = {};
+            var item = items['item'];
+            if (totalCount == 1) {
+              item = items['item'];
+              map[item['locdate'].toString()] = item['dateName'];
+            } else if (totalCount > 1) {
+              final item = items['item'];
+              for (var row in item) {
+                map[row['locdate'].toString()] = row['dateName'];
+              }
+            }
+            return map;
           }
         }
-        return parsedData;
-      } else {
-        return null;
+      } catch (e) {
+        print('error: $e');
       }
+      return null;
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-            "현재시간: ${DateFormat('yyyy-MM-dd hh:mm').format(getKoreanTime())}"),
+        title: const Text('캘린더'),
       ),
       body: isLoading
           ? const Scaffold()
@@ -691,7 +698,7 @@ class _CanlendarState extends State<Canlendar> {
                                 CalendarFormat.month: '월',
                               },
                               locale: 'ko_KR',
-                              rowHeight: 80,
+                              // rowHeight: 80,
                               daysOfWeekHeight: 30,
                               firstDay: kFirstDay,
                               lastDay: kLastDay,

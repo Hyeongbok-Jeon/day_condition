@@ -535,19 +535,23 @@ class _CanlendarState extends State<Canlendar> {
 
   @override
   Widget build(BuildContext context) {
+    /// bottom navigation 캘린더 아이콘 클릭 시 현재 날짜로 이동
     if (widget.isReTap) {
       setState(() {
         _focusedDay = getKoreanTime();
         widget.setReTapFalse();
       });
     }
+
     Future<Map<String, String>?> future() async {
       String solYear = '${_focusedDay.year}';
       String solMonth = '${_focusedDay.month}';
+
       /// 월을 2자리로
       if (solMonth.length == 1) {
         solMonth = '0$solMonth';
       }
+
       /// 공공데이터포털에서 받은 키
       const serviceKey =
           'vGcOnDW+ywhtts/PnIk6QDB+J7JTcwVdOysxn74uzxJ6/TUtkKU5PHLf4z6yXJinJnU5qKALxEbYIz4WhemGQA==';
@@ -566,7 +570,8 @@ class _CanlendarState extends State<Canlendar> {
         if (response.statusCode == 200) {
           /// response.body
           /// {"response":{"header":{"resultCode":"00","resultMsg":"NORMAL SERVICE."},"body":{"items":{"item":{"dateKind":"01","dateName":"ê´ë³µì ","isHoliday":"Y","locdate":20230815,"seq":1}},"numOfRows":10,"pageNo":1,"totalCount":1}}}
-          final decodedResponseBody = jsonDecode(utf8.decode(response.bodyBytes));
+          final decodedResponseBody =
+              jsonDecode(utf8.decode(response.bodyBytes));
           final header = decodedResponseBody['response']['header'];
           final body = decodedResponseBody['response']['body'];
           final totalCount = body['totalCount'];
@@ -604,17 +609,42 @@ class _CanlendarState extends State<Canlendar> {
               child: Column(
                 children: [
                   Container(
-                      decoration: borderForDebug,
-                      padding: const EdgeInsets.fromLTRB(30, 0, 0, 0),
-                      margin: const EdgeInsets.fromLTRB(0, 0, 0, 10),
-                      height: 50,
-                      alignment: Alignment.centerLeft,
-                      child: TextButton(
-                          key: sfDateRangePickerKey,
-                          child: Text(
-                            '${_focusedDay.year}년 ${_focusedDay.month}월',
-                            style: const TextStyle(
-                                fontSize: 22, color: Colors.black),
+                    decoration: borderForDebug,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        const SizedBox(
+                          width: 20,
+                        ),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white, // 배경색을 하얀색으로 설정
+                            elevation: 0, // 높이를 0으로 설정하여 버튼을 평평하게 만듦
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                decoration: borderForDebug,
+                                height: 50,
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  '${_focusedDay.year}년 ${_focusedDay.month}월',
+                                  style: const TextStyle(
+                                      fontSize: 22, color: Colors.black),
+                                  key: sfDateRangePickerKey,
+                                ),
+                              ),
+                              Container(
+                                decoration: borderForDebug,
+                                child: IconButton(
+                                  color: Colors.black87,
+                                  icon: const Icon(
+                                      Icons.keyboard_arrow_down_sharp),
+                                  onPressed: null,
+                                  alignment: Alignment.centerLeft,
+                                ),
+                              ),
+                            ],
                           ),
                           onPressed: () {
                             /// 버튼의 위치를 구함
@@ -681,7 +711,14 @@ class _CanlendarState extends State<Canlendar> {
                                     ),
                                   );
                                 });
-                          })),
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
                   Expanded(
                     child: Container(
                       decoration: borderForDebug,

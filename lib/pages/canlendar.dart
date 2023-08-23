@@ -26,23 +26,25 @@ class Canlendar extends StatefulWidget {
 }
 
 class _CanlendarState extends State<Canlendar> {
-  final ref = FirebaseDatabase.instance.ref('$G_uid');
-  Map<dynamic, dynamic> snapshotValue = <dynamic, dynamic>{};
-  StartingDayOfWeek startingDayOfWeek = StartingDayOfWeek.monday;
-  bool isLoading = true;
-
+  /// TODO: 변수 정리
   late final ValueNotifier<List<Event>> _selectedEvents;
   CalendarFormat _calendarFormat = CalendarFormat.month;
-  RangeSelectionMode _rangeSelectionMode = RangeSelectionMode
-      .toggledOff; // Can be toggled on/off by longpressing a date
+  RangeSelectionMode _rangeSelectionMode =
+      RangeSelectionMode.toggledOff; // Can be toggled on/off by longpressing a date
   DateTime _focusedDay = getKoreanTime();
   DateTime? _selectedDay;
   DateTime? _rangeStart;
   DateTime? _rangeEnd;
   DateTime? currentTime;
 
+  final ref = FirebaseDatabase.instance.ref('$G_uid');
+  Map<dynamic, dynamic> snapshotValue = {};
+  StartingDayOfWeek startingDayOfWeek = StartingDayOfWeek.monday;
+  bool isLoading = true;
+  bool isSfDateRangePickerDialogOpen = false;
+
   /// sfDateRangePicker 버튼 Key
-  final GlobalKey sfDateRangePickerKey = GlobalKey();
+  final GlobalKey sfDateRangePickerButtonKey = GlobalKey();
 
   @override
   void initState() {
@@ -57,10 +59,9 @@ class _CanlendarState extends State<Canlendar> {
           for (final child in event.snapshot.children) {
             snapshotValue[child.key] = child.value;
           }
-          startingDayOfWeek =
-              snapshotValue['settings']['startingDayOfWeek'] == 'monday'
-                  ? StartingDayOfWeek.monday
-                  : StartingDayOfWeek.sunday;
+          startingDayOfWeek = snapshotValue['settings']['startingDayOfWeek'] == 'monday'
+              ? StartingDayOfWeek.monday
+              : StartingDayOfWeek.sunday;
           isLoading = false;
         });
       }
@@ -177,8 +178,7 @@ class _CanlendarState extends State<Canlendar> {
     final key = DateFormat('yyyyMMdd').format(_selectedDay!);
     DataSnapshot snapshot = await ref.child(key).get();
     if (snapshot.exists) {
-      Map<dynamic, dynamic> snapshotValue =
-          snapshot.value as Map<dynamic, dynamic>;
+      Map<dynamic, dynamic> snapshotValue = snapshot.value as Map<dynamic, dynamic>;
       wakeupTimeHH = int.parse(snapshotValue['wakeupTime'].split(':')[0]);
       wakeupTimeMM = int.parse(snapshotValue['wakeupTime'].split(':')[1]);
       bedTimeHH = int.parse(snapshotValue['bedTime'].split(':')[0]);
@@ -186,17 +186,14 @@ class _CanlendarState extends State<Canlendar> {
       ratingValue = snapshotValue['energy'];
       // db의 값이 flutter 변수로 할당되면서 정수는 int로 소수점은 float으로 됨
       // 때문에 int는 double로 변환
-      ratingValue =
-          ratingValue is int ? snapshotValue['energy'].toDouble() : ratingValue;
+      ratingValue = ratingValue is int ? snapshotValue['energy'].toDouble() : ratingValue;
       memo = snapshotValue['memo'];
     }
 
     ///
 
-    DateTime wakeupTime = DateTime(selectedDay.year, selectedDay.month,
-        selectedDay.day, wakeupTimeHH, wakeupTimeMM);
-    DateTime bedTime = DateTime(selectedDay.year, selectedDay.month,
-        selectedDay.day, bedTimeHH, bedTimeMM);
+    DateTime wakeupTime = DateTime(selectedDay.year, selectedDay.month, selectedDay.day, wakeupTimeHH, wakeupTimeMM);
+    DateTime bedTime = DateTime(selectedDay.year, selectedDay.month, selectedDay.day, bedTimeHH, bedTimeMM);
     String dayOfWeek = getDayOfWeekInKorean(selectedDay.weekday);
 
     // Don't use 'BuildContext's across async gaps. (Documentation)  Try rewriting the code to not reference the 'BuildContext'.
@@ -207,19 +204,16 @@ class _CanlendarState extends State<Canlendar> {
       // modal 높이 조절을 위해서는 true로 설정
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(30.0), topRight: Radius.circular(30.0)),
+        borderRadius: BorderRadius.only(topLeft: Radius.circular(30.0), topRight: Radius.circular(30.0)),
       ),
       context: context,
       builder: (BuildContext context) {
         return SizedBox(
           height: 500 + (MediaQuery.of(context).viewInsets.bottom / 3),
-          child: StatefulBuilder(
-              builder: (BuildContext context, StateSetter modalSetState) {
+          child: StatefulBuilder(builder: (BuildContext context, StateSetter modalSetState) {
             int dateCompareResult = wakeupTime.compareTo(bedTime);
             return Container(
-              padding: EdgeInsets.fromLTRB(
-                  30, 0, 30, MediaQuery.of(context).viewInsets.bottom),
+              padding: EdgeInsets.fromLTRB(30, 0, 30, MediaQuery.of(context).viewInsets.bottom),
               child: Container(
                 decoration: borderForDebug,
                 child: Column(
@@ -233,8 +227,7 @@ class _CanlendarState extends State<Canlendar> {
                           Container(
                             decoration: borderForDebug,
                             child: Text(
-                              DateFormat('M월 d일 $dayOfWeek')
-                                  .format(_selectedDay!),
+                              DateFormat('M월 d일 $dayOfWeek').format(_selectedDay!),
                               style: const TextStyle(fontSize: 22),
                             ),
                           ),
@@ -246,10 +239,7 @@ class _CanlendarState extends State<Canlendar> {
                                   decoration: borderForDebug,
                                   child: TextButton(
                                     onPressed: () async => {
-                                      await ref
-                                          .child(key)
-                                          .remove()
-                                          .then((value) {
+                                      await ref.child(key).remove().then((value) {
                                         setState(() {
                                           Navigator.pop(context);
                                         });
@@ -268,19 +258,12 @@ class _CanlendarState extends State<Canlendar> {
                                     onPressed: () async => {
                                       await ref.update({
                                         key: {
-                                          "wakeupTime": DateFormat('HH:mm')
-                                              .format(wakeupTime),
-                                          "bedTime": DateFormat('HH:mm')
-                                              .format(bedTime),
+                                          "wakeupTime": DateFormat('HH:mm').format(wakeupTime),
+                                          "bedTime": DateFormat('HH:mm').format(bedTime),
                                           "energy": ratingValue,
                                           "timeDiff": dateCompareResult == -1
-                                              ? (24 * 60) -
-                                                  bedTime
-                                                      .difference(wakeupTime)
-                                                      .inMinutes
-                                              : wakeupTime
-                                                  .difference(bedTime)
-                                                  .inMinutes,
+                                              ? (24 * 60) - bedTime.difference(wakeupTime).inMinutes
+                                              : wakeupTime.difference(bedTime).inMinutes,
                                           'memo': memo,
                                         }
                                       }).then((value) {
@@ -356,10 +339,8 @@ class _CanlendarState extends State<Canlendar> {
                                           mode: CupertinoDatePickerMode.time,
                                           use24hFormat: true,
                                           // This is called when the user changes the dateTime.
-                                          onDateTimeChanged:
-                                              (DateTime newDateTime) {
-                                            modalSetState(
-                                                () => bedTime = newDateTime);
+                                          onDateTimeChanged: (DateTime newDateTime) {
+                                            modalSetState(() => bedTime = newDateTime);
                                           },
                                         ),
                                       ),
@@ -417,10 +398,8 @@ class _CanlendarState extends State<Canlendar> {
                                           mode: CupertinoDatePickerMode.time,
                                           use24hFormat: true,
                                           // This is called when the user changes the dateTime.
-                                          onDateTimeChanged:
-                                              (DateTime newDateTime) {
-                                            modalSetState(
-                                                () => wakeupTime = newDateTime);
+                                          onDateTimeChanged: (DateTime newDateTime) {
+                                            modalSetState(() => wakeupTime = newDateTime);
                                           },
                                         ),
                                       ),
@@ -533,6 +512,67 @@ class _CanlendarState extends State<Canlendar> {
     }
   }
 
+  void showSfDateRangePickerDialog() async {
+    /// 버튼의 위치를 구함
+    final RenderBox sfDateRangePickerButton =
+        sfDateRangePickerButtonKey.currentContext!.findRenderObject() as RenderBox;
+    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+    final buttonPosition = sfDateRangePickerButton.localToGlobal(Offset.zero, ancestor: overlay);
+
+    setState(() {
+      isSfDateRangePickerDialogOpen = true;
+    });
+
+    /// await로 dialog가 닫힐 때 까지 코드
+    await showDialog<Widget>(
+        context: context,
+        builder: (BuildContext context) {
+          return Transform.translate(
+            offset: Offset(buttonPosition.dx, buttonPosition.dy + sfDateRangePickerButton.size.height),
+            child: Dialog(
+              /// insetPadding 설정으로 padding을 0으로 만들고 align을 topLeft로 설정해서
+              /// 왼쪽 상단 모서리에서 dialog가 나타나게 셋팅
+              insetPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+              alignment: Alignment.topLeft,
+
+              /// dialog의 크기를 제한
+              /// width는 일정 크기 이상 작아지면 SfDateRangePicker의 min width의 영향으로
+              /// 최소 크기에서 작아지지 않음
+              child: SizedBox(
+                height: 180,
+
+                /// 최소 크기로 설정
+                width: 0,
+                child: SfDateRangePicker(
+                  showNavigationArrow: true,
+                  view: DateRangePickerView.year,
+                  selectionMode: DateRangePickerSelectionMode.single,
+                  onViewChanged: (args) => {
+                    if (args.view == DateRangePickerView.month)
+                      {
+                        Navigator.of(context).pop(),
+                        setState(() {
+                          _focusedDay = DateTime(args.visibleDateRange.endDate!.year,
+                              args.visibleDateRange.endDate!.month, _focusedDay.day);
+                          isSfDateRangePickerDialogOpen = false;
+                        })
+                      }
+                  },
+
+                  /// pick 가능한 최소, 최대 날짜 설정
+                  minDate: kFirstDay,
+                  maxDate: kLastDay,
+                ),
+              ),
+            ),
+          );
+        });
+
+    setState(() {
+      isSfDateRangePickerDialogOpen = false; // 다이얼로그가 열릴 때 변수를 true로 설정
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     /// bottom navigation 캘린더 아이콘 클릭 시 현재 날짜로 이동
@@ -553,15 +593,9 @@ class _CanlendarState extends State<Canlendar> {
       }
 
       /// 공공데이터포털에서 받은 키
-      const serviceKey =
-          'vGcOnDW+ywhtts/PnIk6QDB+J7JTcwVdOysxn74uzxJ6/TUtkKU5PHLf4z6yXJinJnU5qKALxEbYIz4WhemGQA==';
-      var url = Uri.https('apis.data.go.kr',
-          '/B090041/openapi/service/SpcdeInfoService/getRestDeInfo', {
-        'solYear': solYear,
-        'solMonth': solMonth,
-        'ServiceKey': serviceKey,
-        '_type': 'json'
-      });
+      const serviceKey = 'vGcOnDW+ywhtts/PnIk6QDB+J7JTcwVdOysxn74uzxJ6/TUtkKU5PHLf4z6yXJinJnU5qKALxEbYIz4WhemGQA==';
+      var url = Uri.https('apis.data.go.kr', '/B090041/openapi/service/SpcdeInfoService/getRestDeInfo',
+          {'solYear': solYear, 'solMonth': solMonth, 'ServiceKey': serviceKey, '_type': 'json'});
 
       try {
         /// http get 요청
@@ -570,9 +604,7 @@ class _CanlendarState extends State<Canlendar> {
         if (response.statusCode == 200) {
           /// response.body
           /// {"response":{"header":{"resultCode":"00","resultMsg":"NORMAL SERVICE."},"body":{"items":{"item":{"dateKind":"01","dateName":"ê´ë³µì ","isHoliday":"Y","locdate":20230815,"seq":1}},"numOfRows":10,"pageNo":1,"totalCount":1}}}
-          final decodedResponseBody =
-              jsonDecode(utf8.decode(response.bodyBytes));
-          final header = decodedResponseBody['response']['header'];
+          final decodedResponseBody = jsonDecode(utf8.decode(response.bodyBytes));
           final body = decodedResponseBody['response']['body'];
           final totalCount = body['totalCount'];
           final items = body['items'];
@@ -599,9 +631,9 @@ class _CanlendarState extends State<Canlendar> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('캘린더'),
-      ),
+      // appBar: AppBar(
+      //   title: const Text('캘린더'),
+      // ),
       body: isLoading
           ? const Scaffold()
           : Container(
@@ -610,113 +642,48 @@ class _CanlendarState extends State<Canlendar> {
                 children: [
                   Container(
                     decoration: borderForDebug,
+                    height: 50,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       children: [
-                        const SizedBox(
-                          width: 20,
-                        ),
                         ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white, // 배경색을 하얀색으로 설정
-                            elevation: 0, // 높이를 0으로 설정하여 버튼을 평평하게 만듦
+                          style: ButtonStyle(
+                            elevation: MaterialStateProperty.all(0),
+                            backgroundColor: MaterialStateProperty.all(Colors.transparent),
                           ),
+                          onPressed: showSfDateRangePickerDialog,
                           child: Row(
                             children: [
-                              Container(
-                                decoration: borderForDebug,
-                                height: 50,
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  '${_focusedDay.year}년 ${_focusedDay.month}월',
-                                  style: const TextStyle(
-                                      fontSize: 22, color: Colors.black),
-                                  key: sfDateRangePickerKey,
+                              Center(
+                                child: Container(
+                                  decoration: borderForDebug,
+                                  child: Text(
+                                    '${_focusedDay.year}.${_focusedDay.month}',
+                                    style:
+                                        const TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.w900),
+                                    key: sfDateRangePickerButtonKey,
+                                  ),
                                 ),
                               ),
-                              Container(
-                                decoration: borderForDebug,
-                                child: IconButton(
-                                  color: Colors.black87,
-                                  icon: const Icon(
-                                      Icons.keyboard_arrow_down_sharp),
-                                  onPressed: null,
-                                  alignment: Alignment.centerLeft,
+                              Center(
+                                child: Container(
+                                  decoration: borderForDebug,
+                                  child: Icon(
+                                    isSfDateRangePickerDialogOpen
+                                        ? Icons.keyboard_arrow_down
+                                        : Icons.keyboard_arrow_right,
+                                    color: Colors.black,
+                                    size: 25,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                          onPressed: () {
-                            /// 버튼의 위치를 구함
-                            final RenderBox sfDateRangePickerButton =
-                                sfDateRangePickerKey.currentContext!
-                                    .findRenderObject() as RenderBox;
-                            final RenderBox overlay = Overlay.of(context)
-                                .context
-                                .findRenderObject() as RenderBox;
-                            final buttonPosition = sfDateRangePickerButton
-                                .localToGlobal(Offset.zero, ancestor: overlay);
-                            showDialog<Widget>(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return Transform.translate(
-                                    offset: Offset(
-                                        buttonPosition.dx,
-                                        buttonPosition.dy +
-                                            sfDateRangePickerButton
-                                                .size.height),
-                                    child: Dialog(
-                                      /// insetPadding 설정으로 padding을 0으로 만들고 align을 topLeft로 설정해서
-                                      /// 왼쪽 상단 모서리에서 dialog가 나타나게 셋팅
-                                      insetPadding: const EdgeInsets.symmetric(
-                                          horizontal: 0, vertical: 0),
-                                      alignment: Alignment.topLeft,
-
-                                      /// dialog의 크기를 제한
-                                      /// width는 일정 크기 이상 작아지면 SfDateRangePicker의 min width의 영향으로
-                                      /// 최소 크기에서 작아지지 않음
-                                      child: SizedBox(
-                                        height: 180,
-
-                                        /// 최소 크기로 설정
-                                        width: 0,
-                                        child: SfDateRangePicker(
-                                          showNavigationArrow: true,
-                                          view: DateRangePickerView.year,
-                                          selectionMode:
-                                              DateRangePickerSelectionMode
-                                                  .single,
-                                          onViewChanged: (args) => {
-                                            if (args.view ==
-                                                DateRangePickerView.month)
-                                              {
-                                                Navigator.of(context).pop(),
-                                                setState(() {
-                                                  ///
-                                                  _focusedDay = DateTime(
-                                                      args.visibleDateRange
-                                                          .endDate!.year,
-                                                      args.visibleDateRange
-                                                          .endDate!.month,
-                                                      _focusedDay.day);
-                                                })
-                                              }
-                                          },
-
-                                          /// pick 가능한 최소, 최대 날짜 설정
-                                          minDate: kFirstDay,
-                                          maxDate: kLastDay,
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                });
-                          },
                         ),
                       ],
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 10,
                   ),
                   Expanded(
@@ -728,8 +695,7 @@ class _CanlendarState extends State<Canlendar> {
                             return TableCalendar<Event>(
                               headerVisible: false,
                               shouldFillViewport: true,
-                              holidayPredicate: (day) =>
-                                  holidayPredicate(day, asyncSnapshot),
+                              holidayPredicate: (day) => holidayPredicate(day, asyncSnapshot),
                               // 공휴일 표시
                               availableCalendarFormats: const {
                                 CalendarFormat.month: '월',
@@ -741,32 +707,28 @@ class _CanlendarState extends State<Canlendar> {
                               lastDay: kLastDay,
                               focusedDay: _focusedDay,
                               // selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-                              enabledDayPredicate: (day) =>
-                                  getKoreanTime().compareTo(day) != -1,
+                              enabledDayPredicate: (day) => getKoreanTime().compareTo(day) != -1,
                               // 날짜 비활성화
                               rangeStartDay: _rangeStart,
                               rangeEndDay: _rangeEnd,
                               calendarFormat: _calendarFormat,
                               rangeSelectionMode: _rangeSelectionMode,
                               eventLoader: _getEventsForDay,
-                              startingDayOfWeek: snapshotValue['settings']
-                                          ['startingDayOfWeek'] ==
-                                      'monday'
+                              startingDayOfWeek: snapshotValue['settings']['startingDayOfWeek'] == 'monday'
                                   ? StartingDayOfWeek.monday
                                   : StartingDayOfWeek.sunday,
                               calendarStyle: const CalendarStyle(
                                   cellAlignment: Alignment.topCenter,
-                                  holidayTextStyle:
-                                      TextStyle(color: Colors.red),
+                                  holidayTextStyle: TextStyle(color: Colors.red),
                                   holidayDecoration: BoxDecoration(),
                                   selectedTextStyle: TextStyle(),
                                   selectedDecoration: BoxDecoration(),
                                   todayTextStyle: TextStyle(),
                                   todayDecoration: BoxDecoration(),
                                   tableBorder: TableBorder(
-                                    horizontalInside:
-                                        BorderSide(color: Colors.black12),
-                                  )),
+                                    horizontalInside: BorderSide(color: Colors.black12),
+                                  ),
+                              ),
                               onDaySelected: _onDaySelected,
                               onRangeSelected: _onRangeSelected,
                               onFormatChanged: (format) {
@@ -782,94 +744,55 @@ class _CanlendarState extends State<Canlendar> {
                                 });
                               },
                               calendarBuilders: CalendarBuilders(
-                                headerTitleBuilder:
-                                    (BuildContext context, DateTime day) {
+                                headerTitleBuilder: (BuildContext context, DateTime day) {
                                   return Container(
                                     decoration: borderForDebug,
                                     child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         Container(
                                             decoration: borderForDebug,
                                             child: TextButton(
-                                                key: sfDateRangePickerKey,
+                                                key: sfDateRangePickerButtonKey,
                                                 child: Text(
                                                   '${day.year}년 ${day.month}월',
-                                                  style: const TextStyle(
-                                                      fontSize: 18,
-                                                      color: Colors.black),
+                                                  style: const TextStyle(fontSize: 18, color: Colors.black),
                                                 ),
                                                 onPressed: () {
                                                   /// 버튼의 위치를 구함
-                                                  final RenderBox
-                                                      sfDateRangePickerButton =
-                                                      sfDateRangePickerKey
-                                                              .currentContext!
-                                                              .findRenderObject()
+                                                  final RenderBox sfDateRangePickerButton =
+                                                      sfDateRangePickerButtonKey.currentContext!.findRenderObject()
                                                           as RenderBox;
                                                   final RenderBox overlay =
-                                                      Overlay.of(context)
-                                                              .context
-                                                              .findRenderObject()
-                                                          as RenderBox;
-                                                  final buttonPosition =
-                                                      sfDateRangePickerButton
-                                                          .localToGlobal(
-                                                              Offset.zero,
-                                                              ancestor:
-                                                                  overlay);
-                                                  showDialog<Widget>(
+                                                      Overlay.of(context).context.findRenderObject() as RenderBox;
+                                                  final buttonPosition = sfDateRangePickerButton
+                                                      .localToGlobal(Offset.zero, ancestor: overlay);
+                                                  showDialog(
                                                       context: context,
-                                                      builder: (BuildContext
-                                                          context) {
-                                                        return Transform
-                                                            .translate(
-                                                          offset: Offset(
-                                                              buttonPosition.dx,
-                                                              buttonPosition
-                                                                      .dy +
-                                                                  sfDateRangePickerButton
-                                                                      .size
-                                                                      .height),
+                                                      builder: (BuildContext context) {
+                                                        return Transform.translate(
+                                                          offset: Offset(buttonPosition.dx,
+                                                              buttonPosition.dy + sfDateRangePickerButton.size.height),
                                                           child: Dialog(
                                                             /// insetPadding 설정으로 padding을 0으로 만들고 align을 topLeft로 설정해서
                                                             /// 왼쪽 상단 모서리에서 dialog가 나타나게 셋팅
                                                             insetPadding:
-                                                                const EdgeInsets
-                                                                        .symmetric(
-                                                                    horizontal:
-                                                                        0,
-                                                                    vertical:
-                                                                        0),
-                                                            alignment: Alignment
-                                                                .topLeft,
-
+                                                                const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+                                                            alignment: Alignment.topLeft,
                                                             /// dialog의 크기를 제한
                                                             /// width는 일정 크기 이상 작아지면 SfDateRangePicker의 min width의 영향으로
                                                             /// 최소 크기에서 작아지지 않음
                                                             child: SizedBox(
                                                               height: 180,
                                                               width: 0,
-                                                              child:
-                                                                  SfDateRangePicker(
-                                                                view:
-                                                                    DateRangePickerView
-                                                                        .year,
-                                                                selectionMode:
-                                                                    DateRangePickerSelectionMode
-                                                                        .single,
-                                                                onViewChanged:
-                                                                    (args) => {
-                                                                  if (args.view ==
-                                                                      DateRangePickerView
-                                                                          .month)
+                                                              child: SfDateRangePicker(
+                                                                view: DateRangePickerView.year,
+                                                                selectionMode: DateRangePickerSelectionMode.single,
+                                                                onViewChanged: (args) => {
+                                                                  if (args.view == DateRangePickerView.month)
                                                                     {
-                                                                      Navigator.of(
-                                                                              context)
-                                                                          .pop(),
-                                                                      setState(
-                                                                          () {
+                                                                      Navigator.of(context).pop(),
+                                                                      setState(() {
                                                                         ///
                                                                         _focusedDay = DateTime(
                                                                             args.visibleDateRange.endDate!.year,
@@ -880,14 +803,11 @@ class _CanlendarState extends State<Canlendar> {
                                                                 },
 
                                                                 /// 오른쪽 상단 좌우 화살표
-                                                                showNavigationArrow:
-                                                                    true,
+                                                                showNavigationArrow: true,
 
                                                                 /// pick 가능한 최소, 최대 날짜 설정
-                                                                minDate:
-                                                                    kFirstDay,
-                                                                maxDate:
-                                                                    kLastDay,
+                                                                minDate: kFirstDay,
+                                                                maxDate: kLastDay,
                                                               ),
                                                             ),
                                                           ),
@@ -899,17 +819,13 @@ class _CanlendarState extends State<Canlendar> {
                                   );
                                 },
                                 markerBuilder: (context, day, events) {
-                                  final key =
-                                      DateFormat('yyyyMMdd').format(day);
+                                  final key = DateFormat('yyyyMMdd').format(day);
 
-                                  Future<Map<dynamic, dynamic>?>
-                                      future() async {
-                                    DataSnapshot snapshot =
-                                        await ref.child(key).get();
+                                  Future<Map<dynamic, dynamic>?> future() async {
+                                    DataSnapshot snapshot = await ref.child(key).get();
 
                                     if (snapshot.exists) {
-                                      return snapshot.value
-                                          as Map<dynamic, dynamic>;
+                                      return snapshot.value as Map<dynamic, dynamic>;
                                     } else {
                                       return null;
                                     }
@@ -925,12 +841,9 @@ class _CanlendarState extends State<Canlendar> {
 
                                         /// DB 데이터 가져옴
                                         if (asyncSnapshot.hasData) {
-                                          wakeupTime =
-                                              asyncSnapshot.data?["wakeupTime"];
-                                          bedTime =
-                                              asyncSnapshot.data?["bedTime"];
-                                          energy = asyncSnapshot.data?["energy"]
-                                              .toDouble();
+                                          wakeupTime = asyncSnapshot.data?["wakeupTime"];
+                                          bedTime = asyncSnapshot.data?["bedTime"];
+                                          energy = asyncSnapshot.data?["energy"].toDouble();
                                           // if (energy is int) {
                                           //   energy = energy.toDouble();
                                           // }
@@ -946,26 +859,18 @@ class _CanlendarState extends State<Canlendar> {
                                                 Container(
                                                     decoration: borderForDebug,
                                                     height: 23,
-                                                    child: DateFormat(
-                                                                    'yyyyMMdd')
-                                                                .format(day) ==
-                                                            DateFormat(
-                                                                    'yyyyMMdd')
-                                                                .format(DateTime
-                                                                    .now())
+                                                    child: DateFormat('yyyyMMdd').format(day) ==
+                                                            DateFormat('yyyyMMdd').format(DateTime.now())
                                                         ? Stack(
                                                             children: [
                                                               Container(
-                                                                decoration:
-                                                                    const BoxDecoration(
-                                                                  shape: BoxShape
-                                                                      .circle,
+                                                                decoration: const BoxDecoration(
+                                                                  shape: BoxShape.circle,
                                                                   // border: Border.all(
                                                                   //     width: 1,
                                                                   //     color: Colors
                                                                   //         .blue),
-                                                                  color: Colors
-                                                                      .blue,
+                                                                  color: Colors.blue,
                                                                 ),
                                                               ),
                                                               // const Positioned(
@@ -977,9 +882,7 @@ class _CanlendarState extends State<Canlendar> {
                                                               Center(
                                                                   child: Text(
                                                                 '${getKoreanTime().day}',
-                                                                style: const TextStyle(
-                                                                    color: Colors
-                                                                        .white),
+                                                                style: const TextStyle(color: Colors.white),
                                                               ))
                                                             ],
                                                           )
@@ -990,55 +893,36 @@ class _CanlendarState extends State<Canlendar> {
                                                     // width: MediaQuery.of(context).size.width * 0.2,
                                                     // padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.035),
                                                     child: Column(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .spaceEvenly,
+                                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                                       children: [
                                                         if (bedTime != null)
                                                           Container(
-                                                            decoration:
-                                                                borderForDebug,
+                                                            decoration: borderForDebug,
                                                             child: Row(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .center,
+                                                              mainAxisAlignment: MainAxisAlignment.center,
                                                               children: [
                                                                 Container(
-                                                                  decoration:
-                                                                      borderForDebug,
+                                                                  decoration: borderForDebug,
                                                                   child: Row(
-                                                                    mainAxisAlignment:
-                                                                        MainAxisAlignment
-                                                                            .center,
+                                                                    mainAxisAlignment: MainAxisAlignment.center,
                                                                     children: [
                                                                       Container(
-                                                                        decoration:
-                                                                            borderForDebug,
-                                                                        child:
-                                                                            const Icon(
-                                                                          Icons
-                                                                              .nightlight_round_rounded,
-                                                                          color:
-                                                                              Colors.indigo,
-                                                                          size:
-                                                                              9,
+                                                                        decoration: borderForDebug,
+                                                                        child: const Icon(
+                                                                          Icons.nightlight_round_rounded,
+                                                                          color: Colors.indigo,
+                                                                          size: 9,
                                                                         ),
                                                                       ),
                                                                       Container(
-                                                                        decoration:
-                                                                            borderForDebug,
-                                                                        child:
-                                                                            Text(
+                                                                        decoration: borderForDebug,
+                                                                        child: Text(
                                                                           bedTime,
-                                                                          style:
-                                                                              const TextStyle(
-                                                                            color:
-                                                                                Colors.black,
-                                                                            fontSize:
-                                                                                9,
+                                                                          style: const TextStyle(
+                                                                            color: Colors.black,
+                                                                            fontSize: 9,
                                                                           ),
-                                                                          textAlign:
-                                                                              TextAlign.center,
+                                                                          textAlign: TextAlign.center,
                                                                         ),
                                                                       ),
                                                                     ],
@@ -1049,49 +933,32 @@ class _CanlendarState extends State<Canlendar> {
                                                           ),
                                                         if (wakeupTime != null)
                                                           Container(
-                                                            decoration:
-                                                                borderForDebug,
+                                                            decoration: borderForDebug,
                                                             child: Row(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .center,
+                                                              mainAxisAlignment: MainAxisAlignment.center,
                                                               children: [
                                                                 Container(
-                                                                  decoration:
-                                                                      borderForDebug,
+                                                                  decoration: borderForDebug,
                                                                   child: Row(
-                                                                    mainAxisAlignment:
-                                                                        MainAxisAlignment
-                                                                            .center,
+                                                                    mainAxisAlignment: MainAxisAlignment.center,
                                                                     children: [
                                                                       Container(
-                                                                        decoration:
-                                                                            borderForDebug,
-                                                                        child:
-                                                                            const Icon(
-                                                                          Icons
-                                                                              .sunny,
-                                                                          color:
-                                                                              Colors.yellow,
-                                                                          size:
-                                                                              9,
+                                                                        decoration: borderForDebug,
+                                                                        child: const Icon(
+                                                                          Icons.sunny,
+                                                                          color: Colors.yellow,
+                                                                          size: 9,
                                                                         ),
                                                                       ),
                                                                       Container(
-                                                                        decoration:
-                                                                            borderForDebug,
-                                                                        child:
-                                                                            Text(
+                                                                        decoration: borderForDebug,
+                                                                        child: Text(
                                                                           wakeupTime,
-                                                                          style:
-                                                                              const TextStyle(
-                                                                            color:
-                                                                                Colors.black,
-                                                                            fontSize:
-                                                                                9,
+                                                                          style: const TextStyle(
+                                                                            color: Colors.black,
+                                                                            fontSize: 9,
                                                                           ),
-                                                                          textAlign:
-                                                                              TextAlign.center,
+                                                                          textAlign: TextAlign.center,
                                                                         ),
                                                                       ),
                                                                     ],
@@ -1102,22 +969,17 @@ class _CanlendarState extends State<Canlendar> {
                                                           ),
                                                         if (memo != null)
                                                           Container(
-                                                            decoration:
-                                                                borderForDebug,
+                                                            decoration: borderForDebug,
                                                             child: Row(
                                                               children: [
                                                                 /// Expanded 2개 배치 시 공간을 정확히 반으로 분배
                                                                 Expanded(
-                                                                  child:
-                                                                      Container(
-                                                                    decoration:
-                                                                        borderForDebug,
+                                                                  child: Container(
+                                                                    decoration: borderForDebug,
                                                                     child: Icon(
-                                                                      Icons
-                                                                          .circle,
+                                                                      Icons.circle,
                                                                       size: 8,
-                                                                      color: energyToColor(
-                                                                          energy),
+                                                                      color: energyToColor(energy),
                                                                     ),
                                                                   ),
                                                                 ),
@@ -1180,8 +1042,7 @@ class _CanlendarState extends State<Canlendar> {
                                   return null;
                                 },
                               ),
-                              onDayLongPressed: (DateTime selectedDay,
-                                  DateTime focusedDay) async {},
+                              onDayLongPressed: (DateTime selectedDay, DateTime focusedDay) async {},
                             );
                           }),
                     ),

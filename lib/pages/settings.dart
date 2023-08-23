@@ -162,7 +162,7 @@ class _SettingsState extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("설정")),
+      // appBar: AppBar(title: const Text("설정")),
       body: Container(
         padding: const EdgeInsets.all(10),
         child: Column(
@@ -171,18 +171,18 @@ class _SettingsState extends State<Settings> {
               decoration: borderForDebug,
               height: 500,
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                      alignment: AlignmentDirectional.topStart,
-                      decoration: borderForDebug,
-                      child: Text(
-                        "색상",
-                        style: TextStyle(fontSize: 30),
-                      )),
-                  widgetSetColor('기상'),
-                  widgetSetColor('취침'),
-                  widgetSetColor('에너지'),
+                  // Container(
+                  //     alignment: AlignmentDirectional.topStart,
+                  //     decoration: borderForDebug,
+                  //     child: Text(
+                  //       "색상",
+                  //       style: TextStyle(fontSize: 30),
+                  //     )),
+                  // widgetSetColor('기상'),
+                  // widgetSetColor('취침'),
+                  // widgetSetColor('에너지'),
                   Container(
                       decoration: borderForDebug,
                       child: Row(
@@ -199,9 +199,7 @@ class _SettingsState extends State<Settings> {
                                 decoration: borderForDebug,
                                 child: Row(
                                   children: [
-                                    Container(
-                                        decoration: borderForDebug,
-                                        child: Text('월요일')),
+                                    Container(decoration: borderForDebug, child: Text('월요일')),
                                     Container(
                                       decoration: borderForDebug,
                                       child: Radio(
@@ -228,9 +226,7 @@ class _SettingsState extends State<Settings> {
                                 decoration: borderForDebug,
                                 child: Row(
                                   children: [
-                                    Container(
-                                        decoration: borderForDebug,
-                                        child: Text('일요일')),
+                                    Container(decoration: borderForDebug, child: Text('일요일')),
                                     Container(
                                       decoration: borderForDebug,
                                       child: Radio(
@@ -274,8 +270,7 @@ class _SettingsState extends State<Settings> {
                                 TextButton(
                                   onPressed: () async => {
                                     await ref.remove().then((value) {
-                                      ref.child('settings').update(
-                                          {'startingDayOfWeek': 'sunday'});
+                                      ref.child('settings').update({'startingDayOfWeek': 'sunday'});
                                     }).then((value) {
                                       setState(() {
                                         Navigator.pop(context);

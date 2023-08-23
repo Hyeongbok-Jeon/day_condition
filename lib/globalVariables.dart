@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// bool G_isDebug = true;
 bool G_isDebug = false;
 
 var borderForDebug = G_isDebug

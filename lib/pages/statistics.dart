@@ -130,12 +130,13 @@ class _StatisticsState extends State<Statistics> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text("차트")),
+      // appBar: AppBar(title: const Text("차트")),
       body: Container(
         padding: const EdgeInsets.all(10),
         child: Container(
           decoration: borderForDebug,
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
                   alignment: AlignmentDirectional.topStart,

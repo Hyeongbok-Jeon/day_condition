@@ -718,16 +718,22 @@ class _CanlendarState extends State<Canlendar> {
                                   ? StartingDayOfWeek.monday
                                   : StartingDayOfWeek.sunday,
                               calendarStyle: const CalendarStyle(
-                                  cellAlignment: Alignment.topCenter,
-                                  holidayTextStyle: TextStyle(color: Colors.red),
-                                  holidayDecoration: BoxDecoration(),
-                                  selectedTextStyle: TextStyle(),
-                                  selectedDecoration: BoxDecoration(),
-                                  todayTextStyle: TextStyle(),
-                                  todayDecoration: BoxDecoration(),
-                                  tableBorder: TableBorder(
-                                    horizontalInside: BorderSide(color: Colors.black12),
-                                  ),
+                                cellAlignment: Alignment.topCenter,
+                                holidayTextStyle: TextStyle(color: Colors.red, fontSize: 14),
+                                holidayDecoration: BoxDecoration(),
+                                selectedTextStyle: TextStyle(),
+                                selectedDecoration: BoxDecoration(),
+                                todayTextStyle: TextStyle(),
+                                todayDecoration: BoxDecoration(),
+                                tableBorder: TableBorder(
+                                  horizontalInside: BorderSide(color: Colors.black12),
+                                ),
+                                defaultTextStyle: TextStyle(fontSize: 14),
+                                weekendTextStyle: TextStyle(fontSize: 14),
+                                outsideTextStyle: TextStyle(fontSize: 14),
+                                // outsideDaysVisible: true,
+                                disabledTextStyle: TextStyle(color: Color(0xFFBFBFBF), fontSize: 14),
+                                // disabledDecoration: const BoxDecoration(),
                               ),
                               onDaySelected: _onDaySelected,
                               onRangeSelected: _onRangeSelected,
@@ -743,305 +749,296 @@ class _CanlendarState extends State<Canlendar> {
                                   _focusedDay = focusedDay;
                                 });
                               },
-                              calendarBuilders: CalendarBuilders(
-                                headerTitleBuilder: (BuildContext context, DateTime day) {
-                                  return Container(
-                                    decoration: borderForDebug,
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Container(
-                                            decoration: borderForDebug,
-                                            child: TextButton(
-                                                key: sfDateRangePickerButtonKey,
-                                                child: Text(
-                                                  '${day.year}년 ${day.month}월',
-                                                  style: const TextStyle(fontSize: 18, color: Colors.black),
-                                                ),
-                                                onPressed: () {
-                                                  /// 버튼의 위치를 구함
-                                                  final RenderBox sfDateRangePickerButton =
-                                                      sfDateRangePickerButtonKey.currentContext!.findRenderObject()
-                                                          as RenderBox;
-                                                  final RenderBox overlay =
-                                                      Overlay.of(context).context.findRenderObject() as RenderBox;
-                                                  final buttonPosition = sfDateRangePickerButton
-                                                      .localToGlobal(Offset.zero, ancestor: overlay);
-                                                  showDialog(
-                                                      context: context,
-                                                      builder: (BuildContext context) {
-                                                        return Transform.translate(
-                                                          offset: Offset(buttonPosition.dx,
-                                                              buttonPosition.dy + sfDateRangePickerButton.size.height),
-                                                          child: Dialog(
-                                                            /// insetPadding 설정으로 padding을 0으로 만들고 align을 topLeft로 설정해서
-                                                            /// 왼쪽 상단 모서리에서 dialog가 나타나게 셋팅
-                                                            insetPadding:
-                                                                const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-                                                            alignment: Alignment.topLeft,
-                                                            /// dialog의 크기를 제한
-                                                            /// width는 일정 크기 이상 작아지면 SfDateRangePicker의 min width의 영향으로
-                                                            /// 최소 크기에서 작아지지 않음
-                                                            child: SizedBox(
-                                                              height: 180,
-                                                              width: 0,
-                                                              child: SfDateRangePicker(
-                                                                view: DateRangePickerView.year,
-                                                                selectionMode: DateRangePickerSelectionMode.single,
-                                                                onViewChanged: (args) => {
-                                                                  if (args.view == DateRangePickerView.month)
-                                                                    {
-                                                                      Navigator.of(context).pop(),
-                                                                      setState(() {
-                                                                        ///
-                                                                        _focusedDay = DateTime(
-                                                                            args.visibleDateRange.endDate!.year,
-                                                                            args.visibleDateRange.endDate!.month,
-                                                                            _focusedDay.day);
-                                                                      })
-                                                                    }
-                                                                },
+                              calendarBuilders:
+                                  CalendarBuilders(headerTitleBuilder: (BuildContext context, DateTime day) {
+                                return Container(
+                                  decoration: borderForDebug,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Container(
+                                          decoration: borderForDebug,
+                                          child: TextButton(
+                                              key: sfDateRangePickerButtonKey,
+                                              child: Text(
+                                                '${day.year}년 ${day.month}월',
+                                                style: const TextStyle(fontSize: 18, color: Colors.black),
+                                              ),
+                                              onPressed: () {
+                                                /// 버튼의 위치를 구함
+                                                final RenderBox sfDateRangePickerButton =
+                                                    sfDateRangePickerButtonKey.currentContext!.findRenderObject()
+                                                        as RenderBox;
+                                                final RenderBox overlay =
+                                                    Overlay.of(context).context.findRenderObject() as RenderBox;
+                                                final buttonPosition = sfDateRangePickerButton
+                                                    .localToGlobal(Offset.zero, ancestor: overlay);
+                                                showDialog(
+                                                    context: context,
+                                                    builder: (BuildContext context) {
+                                                      return Transform.translate(
+                                                        offset: Offset(buttonPosition.dx,
+                                                            buttonPosition.dy + sfDateRangePickerButton.size.height),
+                                                        child: Dialog(
+                                                          /// insetPadding 설정으로 padding을 0으로 만들고 align을 topLeft로 설정해서
+                                                          /// 왼쪽 상단 모서리에서 dialog가 나타나게 셋팅
+                                                          insetPadding:
+                                                              const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+                                                          alignment: Alignment.topLeft,
 
-                                                                /// 오른쪽 상단 좌우 화살표
-                                                                showNavigationArrow: true,
+                                                          /// dialog의 크기를 제한
+                                                          /// width는 일정 크기 이상 작아지면 SfDateRangePicker의 min width의 영향으로
+                                                          /// 최소 크기에서 작아지지 않음
+                                                          child: SizedBox(
+                                                            height: 180,
+                                                            width: 0,
+                                                            child: SfDateRangePicker(
+                                                              view: DateRangePickerView.year,
+                                                              selectionMode: DateRangePickerSelectionMode.single,
+                                                              onViewChanged: (args) => {
+                                                                if (args.view == DateRangePickerView.month)
+                                                                  {
+                                                                    Navigator.of(context).pop(),
+                                                                    setState(() {
+                                                                      ///
+                                                                      _focusedDay = DateTime(
+                                                                          args.visibleDateRange.endDate!.year,
+                                                                          args.visibleDateRange.endDate!.month,
+                                                                          _focusedDay.day);
+                                                                    })
+                                                                  }
+                                                              },
 
-                                                                /// pick 가능한 최소, 최대 날짜 설정
-                                                                minDate: kFirstDay,
-                                                                maxDate: kLastDay,
-                                                              ),
+                                                              /// 오른쪽 상단 좌우 화살표
+                                                              showNavigationArrow: true,
+
+                                                              /// pick 가능한 최소, 최대 날짜 설정
+                                                              minDate: kFirstDay,
+                                                              maxDate: kLastDay,
                                                             ),
                                                           ),
-                                                        );
-                                                      });
-                                                })),
-                                      ],
-                                    ),
-                                  );
-                                },
-                                markerBuilder: (context, day, events) {
-                                  final key = DateFormat('yyyyMMdd').format(day);
+                                                        ),
+                                                      );
+                                                    });
+                                              })),
+                                    ],
+                                  ),
+                                );
+                              }, markerBuilder: (context, day, events) {
+                                final key = DateFormat('yyyyMMdd').format(day);
 
-                                  Future<Map<dynamic, dynamic>?> future() async {
-                                    DataSnapshot snapshot = await ref.child(key).get();
+                                Future<Map<dynamic, dynamic>?> future() async {
+                                  DataSnapshot snapshot = await ref.child(key).get();
 
-                                    if (snapshot.exists) {
-                                      return snapshot.value as Map<dynamic, dynamic>;
-                                    } else {
-                                      return null;
-                                    }
+                                  if (snapshot.exists) {
+                                    return snapshot.value as Map<dynamic, dynamic>;
+                                  } else {
+                                    return null;
                                   }
+                                }
 
-                                  return FutureBuilder(
-                                      future: future(),
-                                      builder: (context, asyncSnapshot) {
-                                        String? wakeupTime;
-                                        String? bedTime;
-                                        double? energy;
-                                        String? memo;
+                                return FutureBuilder(
+                                    future: future(),
+                                    builder: (context, asyncSnapshot) {
+                                      String? wakeupTime;
+                                      String? bedTime;
+                                      double? energy;
+                                      String? memo;
 
-                                        /// DB 데이터 가져옴
-                                        if (asyncSnapshot.hasData) {
-                                          wakeupTime = asyncSnapshot.data?["wakeupTime"];
-                                          bedTime = asyncSnapshot.data?["bedTime"];
-                                          energy = asyncSnapshot.data?["energy"].toDouble();
-                                          // if (energy is int) {
-                                          //   energy = energy.toDouble();
-                                          // }
-                                          memo = asyncSnapshot.data?["memo"];
-                                        }
+                                      /// DB 데이터 가져옴
+                                      if (asyncSnapshot.hasData) {
+                                        wakeupTime = asyncSnapshot.data?["wakeupTime"];
+                                        bedTime = asyncSnapshot.data?["bedTime"];
+                                        energy = asyncSnapshot.data?["energy"].toDouble();
+                                        // if (energy is int) {
+                                        //   energy = energy.toDouble();
+                                        // }
+                                        memo = asyncSnapshot.data?["memo"];
+                                      }
 
-                                        return Padding(
-                                          padding: const EdgeInsets.all(4),
-                                          child: Container(
-                                            decoration: borderForDebug,
-                                            child: Column(
-                                              children: [
-                                                Container(
-                                                    decoration: borderForDebug,
-                                                    height: 23,
-                                                    child: DateFormat('yyyyMMdd').format(day) ==
-                                                            DateFormat('yyyyMMdd').format(DateTime.now())
-                                                        ? Stack(
-                                                            children: [
-                                                              Container(
-                                                                decoration: const BoxDecoration(
-                                                                  shape: BoxShape.circle,
-                                                                  // border: Border.all(
-                                                                  //     width: 1,
-                                                                  //     color: Colors
-                                                                  //         .blue),
-                                                                  color: Colors.blue,
-                                                                ),
-                                                              ),
-                                                              // const Positioned(
-                                                              //   top: 2,
-                                                              //     left: 12,
-                                                              //     child: Text(
-                                                              //         '21', style: TextStyle(color: Colors
-                                                              //               .white),))
-                                                              Center(
-                                                                  child: Text(
-                                                                '${getKoreanTime().day}',
-                                                                style: const TextStyle(color: Colors.white),
-                                                              ))
-                                                            ],
-                                                          )
-                                                        : Container()),
-                                                Expanded(
-                                                  child: Container(
-                                                    decoration: borderForDebug,
-                                                    // width: MediaQuery.of(context).size.width * 0.2,
-                                                    // padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.035),
-                                                    child: Column(
-                                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                                      children: [
-                                                        if (bedTime != null)
-                                                          Container(
-                                                            decoration: borderForDebug,
-                                                            child: Row(
-                                                              mainAxisAlignment: MainAxisAlignment.center,
-                                                              children: [
-                                                                Container(
-                                                                  decoration: borderForDebug,
-                                                                  child: Row(
-                                                                    mainAxisAlignment: MainAxisAlignment.center,
-                                                                    children: [
-                                                                      Container(
-                                                                        decoration: borderForDebug,
-                                                                        child: const Icon(
-                                                                          Icons.nightlight_round_rounded,
-                                                                          color: Colors.indigo,
-                                                                          size: 9,
-                                                                        ),
-                                                                      ),
-                                                                      Container(
-                                                                        decoration: borderForDebug,
-                                                                        child: Text(
-                                                                          bedTime,
-                                                                          style: const TextStyle(
-                                                                            color: Colors.black,
-                                                                            fontSize: 9,
-                                                                          ),
-                                                                          textAlign: TextAlign.center,
-                                                                        ),
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          ),
-                                                        if (wakeupTime != null)
-                                                          Container(
-                                                            decoration: borderForDebug,
-                                                            child: Row(
-                                                              mainAxisAlignment: MainAxisAlignment.center,
-                                                              children: [
-                                                                Container(
-                                                                  decoration: borderForDebug,
-                                                                  child: Row(
-                                                                    mainAxisAlignment: MainAxisAlignment.center,
-                                                                    children: [
-                                                                      Container(
-                                                                        decoration: borderForDebug,
-                                                                        child: const Icon(
-                                                                          Icons.sunny,
-                                                                          color: Colors.yellow,
-                                                                          size: 9,
-                                                                        ),
-                                                                      ),
-                                                                      Container(
-                                                                        decoration: borderForDebug,
-                                                                        child: Text(
-                                                                          wakeupTime,
-                                                                          style: const TextStyle(
-                                                                            color: Colors.black,
-                                                                            fontSize: 9,
-                                                                          ),
-                                                                          textAlign: TextAlign.center,
-                                                                        ),
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          ),
-                                                        if (memo != null)
-                                                          Container(
-                                                            decoration: borderForDebug,
-                                                            child: Row(
-                                                              children: [
-                                                                /// Expanded 2개 배치 시 공간을 정확히 반으로 분배
-                                                                Expanded(
-                                                                  child: Container(
+                                      return Padding(
+                                        padding: const EdgeInsets.all(4),
+                                        child: Container(
+                                          decoration: borderForDebug,
+                                          child: Stack(
+                                            children: [
+                                              day.day == getKoreanTime().day
+                                                  ? Container(
+                                                      height: 21,
+                                                      decoration: const BoxDecoration(
+                                                        shape: BoxShape.circle,
+                                                        color: Colors.blue,
+                                                      ),
+                                                    )
+                                                  : Container(),
+                                              Column(
+                                                children: [
+                                                  Container(
+                                                      decoration: borderForDebug,
+                                                      height: 20,
+                                                      child: day.day == getKoreanTime().day
+                                                          ? Center(
+                                                              child: Text(
+                                                              '${getKoreanTime().day}',
+                                                              style: const TextStyle(color: Colors.white, fontSize: 14),
+                                                            ))
+                                                          : Container()),
+                                                  Expanded(
+                                                    child: Container(
+                                                      decoration: borderForDebug,
+                                                      // width: MediaQuery.of(context).size.width * 0.2,
+                                                      // padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.035),
+                                                      child: Column(
+                                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                        children: [
+                                                          if (bedTime != null)
+                                                            Container(
+                                                              decoration: borderForDebug,
+                                                              child: Row(
+                                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                                children: [
+                                                                  Container(
                                                                     decoration: borderForDebug,
-                                                                    child: Icon(
-                                                                      Icons.circle,
-                                                                      size: 8,
-                                                                      color: energyToColor(energy),
+                                                                    child: Row(
+                                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                                      children: [
+                                                                        Container(
+                                                                          decoration: borderForDebug,
+                                                                          child: const Icon(
+                                                                            Icons.nightlight_round_rounded,
+                                                                            color: Colors.indigo,
+                                                                            size: 9,
+                                                                          ),
+                                                                        ),
+                                                                        Container(
+                                                                          decoration: borderForDebug,
+                                                                          child: Text(
+                                                                            bedTime,
+                                                                            style: const TextStyle(
+                                                                              color: Colors.black,
+                                                                              fontSize: 9,
+                                                                            ),
+                                                                            textAlign: TextAlign.center,
+                                                                          ),
+                                                                        ),
+                                                                      ],
                                                                     ),
                                                                   ),
-                                                                ),
-                                                                Expanded(
-                                                                  child: Container(
-                                                                      decoration: borderForDebug,
-                                                                      child:
-
-                                                                          /// 공백만으로 이루어진 문자는 메모가 없는 것으로 간주
-                                                                          memo.replaceAll(' ', '') != ''
-                                                                              ? Container(
-                                                                                  decoration: borderForDebug,
-                                                                                  child: const Icon(
-                                                                                    Icons.comment_outlined,
-                                                                                    color: Colors.red,
-                                                                                    size: 8,
-                                                                                  ),
-                                                                                )
-                                                                              : null),
-                                                                )
-                                                              ],
+                                                                ],
+                                                              ),
                                                             ),
-                                                          ),
-                                                        // Row(
-                                                        //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                                        //   children: [
-                                                        //     RatingBar.builder(
-                                                        //       ignoreGestures: true,
-                                                        //       initialRating: energy,
-                                                        //       minRating: 1,
-                                                        //       direction: Axis.horizontal,
-                                                        //       allowHalfRating: true,
-                                                        //       itemCount: 5,
-                                                        //       itemPadding: const EdgeInsets.symmetric(horizontal: 0.0),
-                                                        //       itemBuilder: (context, _) => Icon(
-                                                        //         // Image.asset(name),
-                                                        //         Icons.rectangle_rounded,
-                                                        //         color: G_energyColor,
-                                                        //       ),
-                                                        //       onRatingUpdate: (rating) {
-                                                        //       },
-                                                        //       itemSize: MediaQuery.of(context).size.height * 0.01
-                                                        //     )
-                                                        //   ],
-                                                        // ),
-                                                      ],
+                                                          if (wakeupTime != null)
+                                                            Container(
+                                                              decoration: borderForDebug,
+                                                              child: Row(
+                                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                                children: [
+                                                                  Container(
+                                                                    decoration: borderForDebug,
+                                                                    child: Row(
+                                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                                      children: [
+                                                                        Container(
+                                                                          decoration: borderForDebug,
+                                                                          child: const Icon(
+                                                                            Icons.sunny,
+                                                                            color: Colors.yellow,
+                                                                            size: 9,
+                                                                          ),
+                                                                        ),
+                                                                        Container(
+                                                                          decoration: borderForDebug,
+                                                                          child: Text(
+                                                                            wakeupTime,
+                                                                            style: const TextStyle(
+                                                                              color: Colors.black,
+                                                                              fontSize: 9,
+                                                                            ),
+                                                                            textAlign: TextAlign.center,
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          if (memo != null)
+                                                            Container(
+                                                              decoration: borderForDebug,
+                                                              child: Row(
+                                                                children: [
+                                                                  /// Expanded 2개 배치 시 공간을 정확히 반으로 분배
+                                                                  Expanded(
+                                                                    child: Container(
+                                                                      decoration: borderForDebug,
+                                                                      child: Icon(
+                                                                        Icons.circle,
+                                                                        size: 8,
+                                                                        color: energyToColor(energy),
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  Expanded(
+                                                                    child: Container(
+                                                                        decoration: borderForDebug,
+                                                                        child:
+
+                                                                            /// 공백만으로 이루어진 문자는 메모가 없는 것으로 간주
+                                                                            memo.replaceAll(' ', '') != ''
+                                                                                ? Container(
+                                                                                    decoration: borderForDebug,
+                                                                                    child: const Icon(
+                                                                                      Icons.comment_outlined,
+                                                                                      color: Colors.red,
+                                                                                      size: 8,
+                                                                                    ),
+                                                                                  )
+                                                                                : null),
+                                                                  )
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          // Row(
+                                                          //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                          //   children: [
+                                                          //     RatingBar.builder(
+                                                          //       ignoreGestures: true,
+                                                          //       initialRating: energy,
+                                                          //       minRating: 1,
+                                                          //       direction: Axis.horizontal,
+                                                          //       allowHalfRating: true,
+                                                          //       itemCount: 5,
+                                                          //       itemPadding: const EdgeInsets.symmetric(horizontal: 0.0),
+                                                          //       itemBuilder: (context, _) => Icon(
+                                                          //         // Image.asset(name),
+                                                          //         Icons.rectangle_rounded,
+                                                          //         color: G_energyColor,
+                                                          //       ),
+                                                          //       onRatingUpdate: (rating) {
+                                                          //       },
+                                                          //       itemSize: MediaQuery.of(context).size.height * 0.01
+                                                          //     )
+                                                          //   ],
+                                                          // ),
+                                                        ],
+                                                      ),
                                                     ),
                                                   ),
-                                                ),
-                                              ],
-                                            ),
+                                                ],
+                                              ),
+                                            ],
                                           ),
-                                        );
-                                      });
-                                },
-                                dowBuilder: (context, day) {
-                                  return null;
-                                },
-                                defaultBuilder: (context, day, focusedDay) {
-                                  return null;
-                                },
-                              ),
+                                        ),
+                                      );
+                                    });
+                              }, dowBuilder: (context, day) {
+                                return null;
+                              }, defaultBuilder: (context, day, focusedDay) {
+                                return null;
+                              }, outsideBuilder: (context, day, focusedDay) {
+                                return null;
+                              }),
                               onDayLongPressed: (DateTime selectedDay, DateTime focusedDay) async {},
                             );
                           }),

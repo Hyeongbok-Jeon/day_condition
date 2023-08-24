@@ -8,8 +8,7 @@ class BottomNavigationExample extends StatefulWidget {
   const BottomNavigationExample({super.key});
 
   @override
-  _BottomNavigationExampleState createState() =>
-      _BottomNavigationExampleState();
+  _BottomNavigationExampleState createState() => _BottomNavigationExampleState();
 }
 
 class _BottomNavigationExampleState extends State<BottomNavigationExample> {

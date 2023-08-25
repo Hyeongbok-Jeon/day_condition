@@ -175,7 +175,7 @@ class _CanlendarState extends State<Canlendar> {
     String memo = '';
 
     /// DB에 데이터가 존재 시 가져옴
-    final key = DateFormat('yyyyMMdd').format(_selectedDay!);
+    final key = DateFormat('yyyyMMdd').format(selectedDay);
     DataSnapshot snapshot = await ref.child(key).get();
     if (snapshot.exists) {
       Map<dynamic, dynamic> snapshotValue = snapshot.value as Map<dynamic, dynamic>;
@@ -190,18 +190,16 @@ class _CanlendarState extends State<Canlendar> {
       memo = snapshotValue['memo'];
     }
 
-    ///
-
     DateTime wakeupTime = DateTime(selectedDay.year, selectedDay.month, selectedDay.day, wakeupTimeHH, wakeupTimeMM);
     DateTime bedTime = DateTime(selectedDay.year, selectedDay.month, selectedDay.day, bedTimeHH, bedTimeMM);
     String dayOfWeek = getDayOfWeekInKorean(selectedDay.weekday);
 
-    // Don't use 'BuildContext's across async gaps. (Documentation)  Try rewriting the code to not reference the 'BuildContext'.
-    // 위 에러 해결 코드
+    /// Don't use 'BuildContext's across async gaps. (Documentation)  Try rewriting the code to not reference the 'BuildContext'.
+    /// 위 에러 해결 코드
     if (!mounted) return;
 
     showModalBottomSheet<void>(
-      // modal 높이 조절을 위해서는 true로 설정
+      /// modal 높이 조절을 위해서는 true로 설정
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(topLeft: Radius.circular(30.0), topRight: Radius.circular(30.0)),
@@ -209,77 +207,81 @@ class _CanlendarState extends State<Canlendar> {
       context: context,
       builder: (BuildContext context) {
         return SizedBox(
-          height: 500 + (MediaQuery.of(context).viewInsets.bottom / 3),
+          height: 400 + (MediaQuery.of(context).viewInsets.bottom),
           child: StatefulBuilder(builder: (BuildContext context, StateSetter modalSetState) {
             int dateCompareResult = wakeupTime.compareTo(bedTime);
             return Container(
-              padding: EdgeInsets.fromLTRB(30, 0, 30, MediaQuery.of(context).viewInsets.bottom),
+              padding: EdgeInsets.fromLTRB(30, 30, 30, 30 + MediaQuery.of(context).viewInsets.bottom),
               child: Container(
                 decoration: borderForDebug,
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
                       decoration: borderForDebug,
+                      height: 60,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Container(
                             decoration: borderForDebug,
+                            width: 190,
                             child: Text(
-                              DateFormat('M월 d일 $dayOfWeek').format(_selectedDay!),
-                              style: const TextStyle(fontSize: 22),
+                              DateFormat('M월 d일 $dayOfWeek').format(selectedDay),
+                              style: const TextStyle(fontSize: 24),
                             ),
                           ),
-                          Container(
-                            decoration: borderForDebug,
-                            child: Row(
-                              children: [
-                                Container(
-                                  decoration: borderForDebug,
-                                  child: TextButton(
-                                    onPressed: () async => {
-                                      await ref.child(key).remove().then((value) {
-                                        setState(() {
-                                          Navigator.pop(context);
-                                        });
-                                      })
-                                    },
-                                    child: const Icon(
-                                      Icons.delete,
-                                      size: 30,
+                          Expanded(
+                            child: Container(
+                              decoration: borderForDebug,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Container(
+                                    decoration: borderForDebug,
+                                    child: IconButton(
+                                      onPressed: () async => {
+                                        await ref.child(key).remove().then((value) {
+                                          setState(() {
+                                            Navigator.pop(context);
+                                          });
+                                        })
+                                      },
+                                      icon: const Icon(
+                                        Icons.delete,
+                                        color: Colors.blue,
+                                      ),
                                     ),
-                                    // child: const Text('완료', style: TextStyle(fontSize: 30),),
                                   ),
-                                ),
-                                Container(
-                                  decoration: borderForDebug,
-                                  child: TextButton(
-                                    onPressed: () async => {
-                                      await ref.update({
-                                        key: {
-                                          "wakeupTime": DateFormat('HH:mm').format(wakeupTime),
-                                          "bedTime": DateFormat('HH:mm').format(bedTime),
-                                          "energy": ratingValue,
-                                          "timeDiff": dateCompareResult == -1
-                                              ? (24 * 60) - bedTime.difference(wakeupTime).inMinutes
-                                              : wakeupTime.difference(bedTime).inMinutes,
-                                          'memo': memo,
-                                        }
-                                      }).then((value) {
-                                        setState(() {
-                                          Navigator.pop(context);
-                                        });
-                                      })
-                                    },
-                                    child: const Icon(
-                                      Icons.check,
-                                      size: 30,
+                                  Container(
+                                    decoration: borderForDebug,
+                                    child: IconButton(
+                                      onPressed: () async => {
+                                        await ref.update({
+                                          key: {
+                                            "wakeupTime": DateFormat('HH:mm').format(wakeupTime),
+                                            "bedTime": DateFormat('HH:mm').format(bedTime),
+                                            "energy": ratingValue,
+                                            "timeDiff": dateCompareResult == -1
+                                                ? (24 * 60) - bedTime.difference(wakeupTime).inMinutes
+                                                : wakeupTime.difference(bedTime).inMinutes,
+                                            'memo': memo,
+                                          }
+                                        }).then((value) {
+                                          setState(() {
+                                            Navigator.pop(context);
+                                          });
+                                        })
+                                      },
+                                      icon: const Icon(
+                                        Icons.check,
+                                        color: Colors.blue,
+                                      ),
+                                      // child: const Text('완료', style: TextStyle(fontSize: 30),),
                                     ),
-                                    // child: const Text('완료', style: TextStyle(fontSize: 30),),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ],
@@ -287,8 +289,9 @@ class _CanlendarState extends State<Canlendar> {
                     ),
                     Container(
                       decoration: borderForDebug,
+                      height: 50,
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           Container(
                             decoration: borderForDebug,
@@ -297,39 +300,12 @@ class _CanlendarState extends State<Canlendar> {
                               children: [
                                 Container(
                                   decoration: borderForDebug,
-                                  child: const Icon(
+                                  child: Icon(
                                     Icons.nightlight_round_rounded,
-                                    color: Colors.indigo,
-                                    size: 40,
+                                    color: Colors.indigo.shade400,
+                                    size: 30,
                                   ),
                                 ),
-                                // Container(
-                                //   decoration: borderForDebug,
-                                //   child: CupertinoButton(
-                                //     // Display a CupertinoDatePicker in dateTime picker mode.
-                                //     onPressed: () => _showDialog(
-                                //       CupertinoDatePicker(
-                                //         initialDateTime: bedTime,
-                                //         mode: CupertinoDatePickerMode.time,
-                                //         use24hFormat: false,
-                                //         // This is called when the user changes the dateTime.
-                                //         onDateTimeChanged: (DateTime newDateTime) {
-                                //           modalSetState(() => bedTime = newDateTime);
-                                //         },
-                                //       ),
-                                //     ),
-                                //     // In this example, the time value is formatted manually. You
-                                //     // can use the intl package to format the value based on the
-                                //     // user's locale settings.
-                                //     child: Text(
-                                //       DateFormat('HH:mm').format(bedTime),
-                                //       // '${bedTime.hour}:${bedTime.minute}',
-                                //       style: const TextStyle(
-                                //         fontSize: 20,
-                                //       ),
-                                //     ),
-                                //   ),
-                                // ),
                                 Container(
                                     decoration: borderForDebug,
                                     child: TextButton(
@@ -338,7 +314,6 @@ class _CanlendarState extends State<Canlendar> {
                                           initialDateTime: bedTime,
                                           mode: CupertinoDatePickerMode.time,
                                           use24hFormat: true,
-                                          // This is called when the user changes the dateTime.
                                           onDateTimeChanged: (DateTime newDateTime) {
                                             modalSetState(() => bedTime = newDateTime);
                                           },
@@ -359,53 +334,31 @@ class _CanlendarState extends State<Canlendar> {
                               children: [
                                 Container(
                                   decoration: borderForDebug,
-                                  child: const Icon(
+                                  child: Icon(
                                     Icons.sunny,
-                                    color: Colors.yellow,
-                                    size: 40,
+                                    color: Colors.yellow.shade400,
+                                    size: 30,
                                   ),
                                 ),
-                                // CupertinoButton(
-                                //   padding: const EdgeInsets.only(top: 0, bottom: 0),
-                                //   // Display a CupertinoDatePicker in dateTime picker mode.
-                                //   onPressed: () => _showDialog(
-                                //     CupertinoDatePicker(
-                                //       initialDateTime: wakeupTime,
-                                //       mode: CupertinoDatePickerMode.time,
-                                //       use24hFormat: false,
-                                //       // This is called when the user changes the dateTime.
-                                //       onDateTimeChanged: (DateTime newDateTime) {
-                                //         modalSetState(() => wakeupTime = newDateTime);
-                                //       },
-                                //     ),
-                                //   ),
-                                //   // In this example, the time value is formatted manually. You
-                                //   // can use the intl package to format the value based on the
-                                //   // user's locale settings.
-                                //   child: Text(
-                                //     DateFormat('HH:mm').format(wakeupTime),
-                                //     style: const TextStyle(
-                                //       fontSize: 40,
-                                //     ),
-                                //   ),
-                                // ),
                                 Container(
                                     decoration: borderForDebug,
-                                    child: TextButton(
-                                      onPressed: () => _showDialog(
-                                        CupertinoDatePicker(
-                                          initialDateTime: wakeupTime,
-                                          mode: CupertinoDatePickerMode.time,
-                                          use24hFormat: true,
-                                          // This is called when the user changes the dateTime.
-                                          onDateTimeChanged: (DateTime newDateTime) {
-                                            modalSetState(() => wakeupTime = newDateTime);
-                                          },
+                                    child: Center(
+                                      child: TextButton(
+                                        onPressed: () => _showDialog(
+                                          CupertinoDatePicker(
+                                            initialDateTime: wakeupTime,
+                                            mode: CupertinoDatePickerMode.time,
+                                            use24hFormat: true,
+                                            // This is called when the user changes the dateTime.
+                                            onDateTimeChanged: (DateTime newDateTime) {
+                                              modalSetState(() => wakeupTime = newDateTime);
+                                            },
+                                          ),
                                         ),
-                                      ),
-                                      child: Text(
-                                        DateFormat('HH:mm').format(wakeupTime),
-                                        style: const TextStyle(fontSize: 30),
+                                        child: Text(
+                                          DateFormat('HH:mm').format(wakeupTime),
+                                          style: const TextStyle(fontSize: 30),
+                                        ),
                                       ),
                                     )),
                               ],
@@ -416,47 +369,47 @@ class _CanlendarState extends State<Canlendar> {
                     ),
                     Container(
                       decoration: borderForDebug,
-                      // padding: const EdgeInsets.only(top: 10, bottom: 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          RatingBar.builder(
-                            initialRating: ratingValue,
-                            minRating: 1,
-                            direction: Axis.horizontal,
-                            // allowHalfRating: true,
-                            itemCount: 5,
-                            itemBuilder: (context, _) => const Icon(
-                              // Image.asset(name),
-                              Icons.rectangle_rounded,
-                              color: Colors.green,
-                            ),
-                            onRatingUpdate: (rating) {
-                              ratingValue = rating;
-                            },
-                            itemSize: 50,
-                          )
-                        ],
+                      height: 50,
+                      child: Center(
+                        child: RatingBar.builder(
+                          initialRating: ratingValue,
+                          minRating: 1,
+                          direction: Axis.horizontal,
+                          // allowHalfRating: true,
+                          itemCount: 5,
+                          itemBuilder: (context, _) => const Icon(
+                            // Image.asset(name),
+                            Icons.rectangle_rounded,
+                            color: Colors.green,
+                          ),
+                          onRatingUpdate: (rating) {
+                            ratingValue = rating;
+                          },
+                          // itemSize: 40,
+                        ),
                       ),
                     ),
-                    TextField(
-                      maxLines: 5,
-                      controller: TextEditingController(text: memo),
-                      decoration: const InputDecoration(
-                        // labelText: '',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(20)),
-                          // borderSide: BorderSide(
-                          //   color: Colors.blue,
-                          // ),
+                    Container(
+                      decoration: borderForDebug,
+                      child: TextField(
+                        maxLines: 3,
+                        controller: TextEditingController(text: memo),
+                        decoration: const InputDecoration(
+                          // labelText: '',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(20)),
+                            // borderSide: BorderSide(
+                            //   color: Colors.blue,
+                            // ),
+                          ),
+                          hintText: '오늘 하루 어떠셨나요?',
+                          // contentPadding: EdgeInsets.symmetric(vertical: 50),
                         ),
-                        hintText: '오늘 하루 어떠셨나요?',
-                        // contentPadding: EdgeInsets.symmetric(vertical: 50),
+                        onChanged: (value) {
+                          memo = value;
+                        },
+                        keyboardType: TextInputType.multiline,
                       ),
-                      onChanged: (value) {
-                        memo = value;
-                      },
-                      keyboardType: TextInputType.multiline,
                     )
                   ],
                 ),
@@ -534,13 +487,11 @@ class _CanlendarState extends State<Canlendar> {
               /// 왼쪽 상단 모서리에서 dialog가 나타나게 셋팅
               insetPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
               alignment: Alignment.topLeft,
-
               /// dialog의 크기를 제한
               /// width는 일정 크기 이상 작아지면 SfDateRangePicker의 min width의 영향으로
               /// 최소 크기에서 작아지지 않음
               child: SizedBox(
                 height: 180,
-
                 /// 최소 크기로 설정
                 width: 0,
                 child: SfDateRangePicker(
@@ -558,7 +509,6 @@ class _CanlendarState extends State<Canlendar> {
                         })
                       }
                   },
-
                   /// pick 가능한 최소, 최대 날짜 설정
                   minDate: kFirstDay,
                   maxDate: kLastDay,
@@ -654,27 +604,23 @@ class _CanlendarState extends State<Canlendar> {
                           onPressed: showSfDateRangePickerDialog,
                           child: Row(
                             children: [
-                              Center(
-                                child: Container(
-                                  decoration: borderForDebug,
-                                  child: Text(
-                                    '${_focusedDay.year}.${_focusedDay.month}',
-                                    style:
-                                        const TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.w900),
-                                    key: sfDateRangePickerButtonKey,
-                                  ),
+                              Container(
+                                decoration: borderForDebug,
+                                child: Text(
+                                  '${_focusedDay.year}.${_focusedDay.month}',
+                                  style:
+                                      const TextStyle(fontSize: 24, color: Colors.black, fontWeight: FontWeight.w900),
+                                  key: sfDateRangePickerButtonKey,
                                 ),
                               ),
-                              Center(
-                                child: Container(
-                                  decoration: borderForDebug,
-                                  child: Icon(
-                                    isSfDateRangePickerDialogOpen
-                                        ? Icons.keyboard_arrow_down
-                                        : Icons.keyboard_arrow_right,
-                                    color: Colors.black,
-                                    size: 25,
-                                  ),
+                              Container(
+                                decoration: borderForDebug,
+                                child: Icon(
+                                  isSfDateRangePickerDialogOpen
+                                      ? Icons.keyboard_arrow_down
+                                      : Icons.keyboard_arrow_right,
+                                  color: Colors.black,
+                                  size: 15,
                                 ),
                               ),
                             ],
@@ -730,7 +676,7 @@ class _CanlendarState extends State<Canlendar> {
                                 ),
                                 defaultTextStyle: TextStyle(fontSize: 14),
                                 weekendTextStyle: TextStyle(fontSize: 14),
-                                outsideTextStyle: TextStyle(fontSize: 14),
+                                outsideTextStyle: TextStyle(fontSize: 14, color: Color(0xFFAEAEAE)),
                                 // outsideDaysVisible: true,
                                 disabledTextStyle: TextStyle(color: Color(0xFFBFBFBF), fontSize: 14),
                                 // disabledDecoration: const BoxDecoration(),
@@ -808,10 +754,8 @@ class _CanlendarState extends State<Canlendar> {
                                                                     })
                                                                   }
                                                               },
-
                                                               /// 오른쪽 상단 좌우 화살표
                                                               showNavigationArrow: true,
-
                                                               /// pick 가능한 최소, 최대 날짜 설정
                                                               minDate: kFirstDay,
                                                               maxDate: kLastDay,
@@ -884,106 +828,83 @@ class _CanlendarState extends State<Canlendar> {
                                                             ))
                                                           : Container()),
                                                   Expanded(
-                                                    child: Container(
-                                                      decoration: borderForDebug,
-                                                      // width: MediaQuery.of(context).size.width * 0.2,
-                                                      // padding: EdgeInsets.only(top: MediaQuery.of(context).size.height * 0.035),
-                                                      child: Column(
-                                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                                        children: [
-                                                          if (bedTime != null)
-                                                            Container(
-                                                              decoration: borderForDebug,
-                                                              child: Row(
-                                                                mainAxisAlignment: MainAxisAlignment.center,
-                                                                children: [
-                                                                  Container(
-                                                                    decoration: borderForDebug,
-                                                                    child: Row(
-                                                                      mainAxisAlignment: MainAxisAlignment.center,
-                                                                      children: [
-                                                                        Container(
-                                                                          decoration: borderForDebug,
-                                                                          child: const Icon(
-                                                                            Icons.nightlight_round_rounded,
-                                                                            color: Colors.indigo,
-                                                                            size: 9,
-                                                                          ),
-                                                                        ),
-                                                                        Container(
-                                                                          decoration: borderForDebug,
-                                                                          child: Text(
-                                                                            bedTime,
-                                                                            style: const TextStyle(
-                                                                              color: Colors.black,
-                                                                              fontSize: 9,
-                                                                            ),
-                                                                            textAlign: TextAlign.center,
-                                                                          ),
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ),
-                                                                ],
+                                                    child: Column(
+                                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                      children: [
+                                                        if (bedTime != null)
+                                                          Container(
+                                                            height: 15,
+                                                            // padding: const EdgeInsets.fromLTRB(3, 0, 3, 0),
+                                                            child: Stack(alignment: Alignment.center, children: [
+                                                              Container(
+                                                                // color: Colors.indigo.shade400,
+                                                                decoration: const BoxDecoration(
+                                                                  shape: BoxShape.rectangle,
+                                                                  color: Colors.cyan,
+                                                                  borderRadius: BorderRadius.all(Radius.circular(2.0)),
+                                                                ),
                                                               ),
-                                                            ),
-                                                          if (wakeupTime != null)
-                                                            Container(
-                                                              decoration: borderForDebug,
-                                                              child: Row(
-                                                                mainAxisAlignment: MainAxisAlignment.center,
-                                                                children: [
-                                                                  Container(
-                                                                    decoration: borderForDebug,
-                                                                    child: Row(
-                                                                      mainAxisAlignment: MainAxisAlignment.center,
-                                                                      children: [
-                                                                        Container(
-                                                                          decoration: borderForDebug,
-                                                                          child: const Icon(
-                                                                            Icons.sunny,
-                                                                            color: Colors.yellow,
-                                                                            size: 9,
-                                                                          ),
-                                                                        ),
-                                                                        Container(
-                                                                          decoration: borderForDebug,
-                                                                          child: Text(
-                                                                            wakeupTime,
-                                                                            style: const TextStyle(
-                                                                              color: Colors.black,
-                                                                              fontSize: 9,
-                                                                            ),
-                                                                            textAlign: TextAlign.center,
-                                                                          ),
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                  ),
-                                                                ],
+                                                              Text(
+                                                                bedTime,
+                                                                style: const TextStyle(
+                                                                  color: Colors.white,
+                                                                  fontSize: 10,
+                                                                ),
+                                                                textAlign: TextAlign.center,
                                                               ),
-                                                            ),
-                                                          if (memo != null)
-                                                            Container(
-                                                              decoration: borderForDebug,
-                                                              child: Row(
-                                                                children: [
-                                                                  /// Expanded 2개 배치 시 공간을 정확히 반으로 분배
-                                                                  Expanded(
-                                                                    child: Container(
-                                                                      decoration: borderForDebug,
-                                                                      child: Icon(
-                                                                        Icons.circle,
-                                                                        size: 8,
-                                                                        color: energyToColor(energy),
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                  Expanded(
-                                                                    child: Container(
+                                                            ]),
+                                                          ),
+                                                        if (wakeupTime != null)
+                                                          Container(
+                                                            height: 15,
+                                                            // padding: const EdgeInsets.fromLTRB(3, 0, 3, 0),
+                                                            child: Stack(alignment: Alignment.center, children: [
+                                                              Container(
+                                                                // color: Colors.yellow.shade400,
+                                                                decoration: BoxDecoration(
+                                                                  shape: BoxShape.rectangle,
+                                                                  color: Colors.yellow.shade300,
+                                                                  borderRadius: const BorderRadius.all(Radius.circular(2.0)),
+                                                                ),
+                                                              ),
+                                                              Text(
+                                                                wakeupTime,
+                                                                style: const TextStyle(
+                                                                  color: Colors.black,
+                                                                  fontSize: 10,
+                                                                ),
+                                                                textAlign: TextAlign.center,
+                                                              ),
+                                                            ]),
+                                                          ),
+                                                        Container(
+                                                          decoration: borderForDebug,
+                                                          height: 15,
+                                                          child: Row(
+                                                            children: [
+                                                              /// Expanded 2개 배치 시 공간을 정확히 반으로 분배
+                                                              Expanded(
+                                                                child: energy != null
+                                                                    ? Container(
+                                                                        decoration: borderForDebug,
+                                                                        child: const Icon(
+                                                                          // CupertinoIcons.circle,
+                                                                          // color: energyToColor(energy),
+                                                                          // size: 10
+                                                                          IconData(
+                                                                            0xe911,
+                                                                            fontFamily: 'icomoon',
+                                                                          ),
+
+                                                                        ),
+                                                                      )
+                                                                    : Container(),
+                                                              ),
+                                                              Expanded(
+                                                                child: memo != null
+                                                                    ? Container(
                                                                         decoration: borderForDebug,
                                                                         child:
-
                                                                             /// 공백만으로 이루어진 문자는 메모가 없는 것으로 간주
                                                                             memo.replaceAll(' ', '') != ''
                                                                                 ? Container(
@@ -991,38 +912,38 @@ class _CanlendarState extends State<Canlendar> {
                                                                                     child: const Icon(
                                                                                       Icons.comment_outlined,
                                                                                       color: Colors.red,
-                                                                                      size: 8,
+                                                                                      size: 10,
                                                                                     ),
                                                                                   )
-                                                                                : null),
-                                                                  )
-                                                                ],
-                                                              ),
-                                                            ),
-                                                          // Row(
-                                                          //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                                          //   children: [
-                                                          //     RatingBar.builder(
-                                                          //       ignoreGestures: true,
-                                                          //       initialRating: energy,
-                                                          //       minRating: 1,
-                                                          //       direction: Axis.horizontal,
-                                                          //       allowHalfRating: true,
-                                                          //       itemCount: 5,
-                                                          //       itemPadding: const EdgeInsets.symmetric(horizontal: 0.0),
-                                                          //       itemBuilder: (context, _) => Icon(
-                                                          //         // Image.asset(name),
-                                                          //         Icons.rectangle_rounded,
-                                                          //         color: G_energyColor,
-                                                          //       ),
-                                                          //       onRatingUpdate: (rating) {
-                                                          //       },
-                                                          //       itemSize: MediaQuery.of(context).size.height * 0.01
-                                                          //     )
-                                                          //   ],
-                                                          // ),
-                                                        ],
-                                                      ),
+                                                                                : null)
+                                                                    : Container(),
+                                                              )
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        // Row(
+                                                        //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                        //   children: [
+                                                        //     RatingBar.builder(
+                                                        //       ignoreGestures: true,
+                                                        //       initialRating: energy,
+                                                        //       minRating: 1,
+                                                        //       direction: Axis.horizontal,
+                                                        //       allowHalfRating: true,
+                                                        //       itemCount: 5,
+                                                        //       itemPadding: const EdgeInsets.symmetric(horizontal: 0.0),
+                                                        //       itemBuilder: (context, _) => Icon(
+                                                        //         // Image.asset(name),
+                                                        //         Icons.rectangle_rounded,
+                                                        //         color: G_energyColor,
+                                                        //       ),
+                                                        //       onRatingUpdate: (rating) {
+                                                        //       },
+                                                        //       itemSize: MediaQuery.of(context).size.height * 0.01
+                                                        //     )
+                                                        //   ],
+                                                        // ),
+                                                      ],
                                                     ),
                                                   ),
                                                 ],

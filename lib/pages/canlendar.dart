@@ -300,9 +300,9 @@ class _CanlendarState extends State<Canlendar> {
                               children: [
                                 Container(
                                   decoration: borderForDebug,
-                                  child: Icon(
+                                  child: const Icon(
                                     Icons.nightlight_round_rounded,
-                                    color: Colors.indigo.shade400,
+                                    color: Color(0xFF28A0FF),
                                     size: 30,
                                   ),
                                 ),
@@ -334,9 +334,9 @@ class _CanlendarState extends State<Canlendar> {
                               children: [
                                 Container(
                                   decoration: borderForDebug,
-                                  child: Icon(
+                                  child: const Icon(
                                     Icons.sunny,
-                                    color: Colors.yellow.shade400,
+                                    color: Color(0xFFFFF064),
                                     size: 30,
                                   ),
                                 ),
@@ -456,7 +456,7 @@ class _CanlendarState extends State<Canlendar> {
   }
 
   bool holidayPredicate(DateTime day, asyncSnapshot) {
-    if (day.weekday == 7) {
+    if (day.weekday == 7 && day.month == _focusedDay.month) {
       return true;
     } else if (asyncSnapshot.hasData) {
       return asyncSnapshot.data[DateFormat('yyyyMMdd').format(day)] != null;
@@ -487,11 +487,13 @@ class _CanlendarState extends State<Canlendar> {
               /// 왼쪽 상단 모서리에서 dialog가 나타나게 셋팅
               insetPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
               alignment: Alignment.topLeft,
+
               /// dialog의 크기를 제한
               /// width는 일정 크기 이상 작아지면 SfDateRangePicker의 min width의 영향으로
               /// 최소 크기에서 작아지지 않음
               child: SizedBox(
                 height: 180,
+
                 /// 최소 크기로 설정
                 width: 0,
                 child: SfDateRangePicker(
@@ -509,6 +511,7 @@ class _CanlendarState extends State<Canlendar> {
                         })
                       }
                   },
+
                   /// pick 가능한 최소, 최대 날짜 설정
                   minDate: kFirstDay,
                   maxDate: kLastDay,
@@ -754,8 +757,10 @@ class _CanlendarState extends State<Canlendar> {
                                                                     })
                                                                   }
                                                               },
+
                                                               /// 오른쪽 상단 좌우 화살표
                                                               showNavigationArrow: true,
+
                                                               /// pick 가능한 최소, 최대 날짜 설정
                                                               minDate: kFirstDay,
                                                               maxDate: kLastDay,
@@ -806,7 +811,8 @@ class _CanlendarState extends State<Canlendar> {
                                           decoration: borderForDebug,
                                           child: Stack(
                                             children: [
-                                              day.day == getKoreanTime().day
+                                              DateFormat('yyyyMMdd').format(day) ==
+                                                      DateFormat('yyyyMMdd').format(getKoreanTime())
                                                   ? Container(
                                                       height: 21,
                                                       decoration: const BoxDecoration(
@@ -820,7 +826,8 @@ class _CanlendarState extends State<Canlendar> {
                                                   Container(
                                                       decoration: borderForDebug,
                                                       height: 20,
-                                                      child: day.day == getKoreanTime().day
+                                                      child: DateFormat('yyyyMMdd').format(day) ==
+                                                              DateFormat('yyyyMMdd').format(getKoreanTime())
                                                           ? Center(
                                                               child: Text(
                                                               '${getKoreanTime().day}',
@@ -832,7 +839,7 @@ class _CanlendarState extends State<Canlendar> {
                                                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                                       children: [
                                                         if (bedTime != null)
-                                                          Container(
+                                                          SizedBox(
                                                             height: 15,
                                                             // padding: const EdgeInsets.fromLTRB(3, 0, 3, 0),
                                                             child: Stack(alignment: Alignment.center, children: [
@@ -840,7 +847,7 @@ class _CanlendarState extends State<Canlendar> {
                                                                 // color: Colors.indigo.shade400,
                                                                 decoration: const BoxDecoration(
                                                                   shape: BoxShape.rectangle,
-                                                                  color: Colors.cyan,
+                                                                  color: Color(0xFF28A0FF),
                                                                   borderRadius: BorderRadius.all(Radius.circular(2.0)),
                                                                 ),
                                                               ),
@@ -855,16 +862,15 @@ class _CanlendarState extends State<Canlendar> {
                                                             ]),
                                                           ),
                                                         if (wakeupTime != null)
-                                                          Container(
+                                                          SizedBox(
                                                             height: 15,
                                                             // padding: const EdgeInsets.fromLTRB(3, 0, 3, 0),
                                                             child: Stack(alignment: Alignment.center, children: [
                                                               Container(
-                                                                // color: Colors.yellow.shade400,
-                                                                decoration: BoxDecoration(
+                                                                decoration: const BoxDecoration(
                                                                   shape: BoxShape.rectangle,
-                                                                  color: Colors.yellow.shade300,
-                                                                  borderRadius: const BorderRadius.all(Radius.circular(2.0)),
+                                                                  color: Color(0xFFFFF064),
+                                                                  borderRadius: BorderRadius.all(Radius.circular(2.0)),
                                                                 ),
                                                               ),
                                                               Text(
@@ -887,16 +893,8 @@ class _CanlendarState extends State<Canlendar> {
                                                                 child: energy != null
                                                                     ? Container(
                                                                         decoration: borderForDebug,
-                                                                        child: const Icon(
-                                                                          // CupertinoIcons.circle,
-                                                                          // color: energyToColor(energy),
-                                                                          // size: 10
-                                                                          IconData(
-                                                                            0xe911,
-                                                                            fontFamily: 'icomoon',
-                                                                          ),
-
-                                                                        ),
+                                                                        child: Icon(Icons.circle,
+                                                                            color: energyToColor(energy), size: 10),
                                                                       )
                                                                     : Container(),
                                                               ),
@@ -905,6 +903,7 @@ class _CanlendarState extends State<Canlendar> {
                                                                     ? Container(
                                                                         decoration: borderForDebug,
                                                                         child:
+
                                                                             /// 공백만으로 이루어진 문자는 메모가 없는 것으로 간주
                                                                             memo.replaceAll(' ', '') != ''
                                                                                 ? Container(

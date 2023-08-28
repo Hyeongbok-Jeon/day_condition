@@ -1,4 +1,5 @@
 import 'package:day_condition/pages/statistics.dart';
+import 'package:day_condition/pages/statistics_.dart';
 import 'package:flutter/material.dart';
 
 import 'pages/canlendar.dart';
@@ -24,7 +25,7 @@ class _BottomNavigationExampleState extends State<BottomNavigationExample> {
           Canlendar(
             isReTap: isReTap,
           ),
-          const Statistics(),
+          Statistics_(isReTap: true,),
           const Settings(),
         ],
       ),

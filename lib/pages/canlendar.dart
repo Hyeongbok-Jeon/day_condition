@@ -171,22 +171,22 @@ class _CanlendarState extends State<Canlendar> {
     int bedTimeHH = 22;
     int wakeupTimeMM = 0;
     int bedTimeMM = 0;
-    dynamic ratingValue = 2.5;
+    double ratingValue = 3.0;
     String memo = '';
 
     /// DB에 데이터가 존재 시 가져옴
     final key = DateFormat('yyyyMMdd').format(selectedDay);
-    DataSnapshot snapshot = await ref.child(key).get();
+    DataSnapshot snapshot = await ref.child('data/$key').get();
     if (snapshot.exists) {
       Map<dynamic, dynamic> snapshotValue = snapshot.value as Map<dynamic, dynamic>;
       wakeupTimeHH = int.parse(snapshotValue['wakeupTime'].split(':')[0]);
       wakeupTimeMM = int.parse(snapshotValue['wakeupTime'].split(':')[1]);
       bedTimeHH = int.parse(snapshotValue['bedTime'].split(':')[0]);
       bedTimeMM = int.parse(snapshotValue['bedTime'].split(':')[1]);
-      ratingValue = snapshotValue['energy'];
+      ratingValue = snapshotValue['energy'] is int ? snapshotValue['energy'].toDouble() : snapshotValue['energy'];
       // db의 값이 flutter 변수로 할당되면서 정수는 int로 소수점은 float으로 됨
       // 때문에 int는 double로 변환
-      ratingValue = ratingValue is int ? snapshotValue['energy'].toDouble() : ratingValue;
+      ratingValue = ratingValue is int ? ratingValue.toDouble() : ratingValue;
       memo = snapshotValue['memo'];
     }
 
@@ -241,7 +241,7 @@ class _CanlendarState extends State<Canlendar> {
                                     decoration: borderForDebug,
                                     child: IconButton(
                                       onPressed: () async => {
-                                        await ref.child(key).remove().then((value) {
+                                        await ref.child('data/$key').remove().then((value) {
                                           setState(() {
                                             Navigator.pop(context);
                                           });
@@ -257,8 +257,9 @@ class _CanlendarState extends State<Canlendar> {
                                     decoration: borderForDebug,
                                     child: IconButton(
                                       onPressed: () async => {
-                                        await ref.update({
+                                        await ref.child('data').update({
                                           key: {
+                                            'date': selectedDay.toString(),
                                             "wakeupTime": DateFormat('HH:mm').format(wakeupTime),
                                             "bedTime": DateFormat('HH:mm').format(bedTime),
                                             "energy": ratingValue,
@@ -336,7 +337,7 @@ class _CanlendarState extends State<Canlendar> {
                                   decoration: borderForDebug,
                                   child: const Icon(
                                     Icons.sunny,
-                                    color: Color(0xFFFFF064),
+                                    color: Color(0xFFFFDFB0),
                                     size: 30,
                                   ),
                                 ),
@@ -777,7 +778,7 @@ class _CanlendarState extends State<Canlendar> {
                                 final key = DateFormat('yyyyMMdd').format(day);
 
                                 Future<Map<dynamic, dynamic>?> future() async {
-                                  DataSnapshot snapshot = await ref.child(key).get();
+                                  DataSnapshot snapshot = await ref.child('data/$key').get();
 
                                   if (snapshot.exists) {
                                     return snapshot.value as Map<dynamic, dynamic>;
@@ -869,7 +870,7 @@ class _CanlendarState extends State<Canlendar> {
                                                               Container(
                                                                 decoration: const BoxDecoration(
                                                                   shape: BoxShape.rectangle,
-                                                                  color: Color(0xFFFFF064),
+                                                                  color: Color(0xFFFFDFB0),
                                                                   borderRadius: BorderRadius.all(Radius.circular(2.0)),
                                                                 ),
                                                               ),

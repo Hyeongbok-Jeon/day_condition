@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 import '../globalVariables.dart';
-import '../userData.dart';
+import '../models/userData.dart';
 
 class Statistics extends StatefulWidget {
   late bool isReTap;

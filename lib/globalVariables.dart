@@ -5,7 +5,7 @@ bool G_isDebug = false;
 
 var borderForDebug = G_isDebug
     ? BoxDecoration(
-        border: Border.all(width: 0.2, color: Colors.black38),
+        border: Border.all(width: 0.2, color: Colors.white38),
       )
     : null;
 

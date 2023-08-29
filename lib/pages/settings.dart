@@ -2,7 +2,9 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
+import '../SingleChoice.dart';
 import '../globalVariables.dart';
+import '../models/userSetting.dart';
 
 class Settings extends StatefulWidget {
   const Settings({super.key});
@@ -31,6 +33,10 @@ class _SettingsState extends State<Settings> {
         });
       }
     });
+  }
+
+  Future<UserSetting> fetchSettings() async {
+    return UserSetting.fromDataSnapshot(await ref.child('settings').get());
   }
 
   // 색상 변경 다이얼로그 호출
@@ -193,62 +199,70 @@ class _SettingsState extends State<Settings> {
                             "시작 요일",
                             style: TextStyle(fontSize: 20),
                           )),
-                          Row(
-                            children: [
-                              Container(
-                                decoration: borderForDebug,
-                                child: Row(
-                                  children: [
-                                    Container(decoration: borderForDebug, child: Text('월요일')),
-                                    Container(
-                                      decoration: borderForDebug,
-                                      child: Radio(
-                                        value: 'monday',
-                                        groupValue: startingDayOfWeek,
-                                        onChanged: (value) {
-                                          setState(() {
-                                            startingDayOfWeek = value;
-                                            ref.child('settings').update({
-                                              'startingDayOfWeek': value,
-                                            });
-                                          });
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Container(
-                                decoration: borderForDebug,
-                                child: Row(
-                                  children: [
-                                    Container(decoration: borderForDebug, child: Text('일요일')),
-                                    Container(
-                                      decoration: borderForDebug,
-                                      child: Radio(
-                                        value: 'sunday',
-                                        groupValue: startingDayOfWeek,
-                                        onChanged: (value) {
-                                          setState(() {
-                                            startingDayOfWeek = value;
-                                            ref.child('settings').update({
-                                              'startingDayOfWeek': value,
-                                            });
-                                          });
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
+                          FutureBuilder(
+                              future: fetchSettings(),
+                              builder: (context, settingsAsyncSnapshot) {
+                                return SingleChoice(settingsAsyncSnapshot: settingsAsyncSnapshot);
+                              }),
+                          // Row(
+                          //   children: [
+                          //     Container(
+                          //       decoration: borderForDebug,
+                          //       child: Row(
+                          //         children: [
+                          //           Container(decoration: borderForDebug, child: Text('월요일')),
+                          //           Container(
+                          //             decoration: borderForDebug,
+                          //             child: Radio(
+                          //               value: 'monday',
+                          //               groupValue: startingDayOfWeek,
+                          //               onChanged: (value) {
+                          //                 setState(() {
+                          //                   startingDayOfWeek = value;
+                          //                   ref.child('settings').update({
+                          //                     'startingDayOfWeek': value,
+                          //                   });
+                          //                 });
+                          //               },
+                          //             ),
+                          //           ),
+                          //         ],
+                          //       ),
+                          //     ),
+                          //   ],
+                          // ),
+                          // Row(
+                          //   children: [
+                          //     Container(
+                          //       decoration: borderForDebug,
+                          //       child: Row(
+                          //         children: [
+                          //           Container(decoration: borderForDebug, child: Text('일요일')),
+                          //           Container(
+                          //             decoration: borderForDebug,
+                          //             child: Radio(
+                          //               value: 'sunday',
+                          //               groupValue: startingDayOfWeek,
+                          //               onChanged: (value) {
+                          //                 setState(() {
+                          //                   startingDayOfWeek = value;
+                          //                   ref.child('settings').update({
+                          //                     'startingDayOfWeek': value,
+                          //                   });
+                          //                 });
+                          //               },
+                          //             ),
+                          //           ),
+                          //         ],
+                          //       ),
+                          //     ),
+                          //   ],
+                          // ),
                         ],
                       )),
+                  const SizedBox(
+                    height: 30,
+                  ),
                   Container(
                     decoration: borderForDebug,
                     child: TextButton(

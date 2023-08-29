@@ -42,24 +42,49 @@ Future<void> main() async {
   for (final child in snapshot.children) {
     snapshotValue[child.key] = child.value;
   }
-  ref.update(
-      {'startingDayOfWeek': snapshotValue['startingDayOfWeek'] ?? 'sunday'});
+  ref.update({'startingDayOfWeek': snapshotValue['startingDayOfWeek'] ?? 'sunday'});
 
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool useMaterial3 = true;
+  ThemeMode themeMode = ThemeMode.system;
+
+  bool get useLightMode {
+    switch (themeMode) {
+      case ThemeMode.system:
+        return View.of(context).platformDispatcher.platformBrightness ==
+            Brightness.light;
+      case ThemeMode.light:
+        return true;
+      case ThemeMode.dark:
+        return false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
+      title: 'Day Condition',
+      themeMode: themeMode,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        useMaterial3: useMaterial3,
+        brightness: Brightness.light,
       ),
-      home: const BottomNavigationExample(),
+      darkTheme: ThemeData(
+        useMaterial3: useMaterial3,
+        brightness: Brightness.dark,
+      ),
+      home: BottomNavigationExample(useLightMode: useLightMode),
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,

@@ -44,6 +44,8 @@ class _StatisticsState extends State<Statistics> {
 
   @override
   Widget build(BuildContext context) {
+    DateTime sevenDaysAgo = getKoreanTime().subtract(const Duration(days: 7));
+    DateTime tomorrow = getKoreanTime().add(const Duration(days: 1));
     return Container(
       padding: const EdgeInsets.all(10),
       child: Container(
@@ -93,16 +95,16 @@ class _StatisticsState extends State<Statistics> {
                       )
                     ],
                     primaryXAxis: DateTimeCategoryAxis(
-                      visibleMinimum: getKoreanTime().subtract(const Duration(days: 7)),
-                      // visibleMaximum: getKoreanTime(),
+                      visibleMinimum: DateTime(sevenDaysAgo.year,sevenDaysAgo.month,sevenDaysAgo.day),
+                      visibleMaximum: DateTime(tomorrow.year, tomorrow.month,tomorrow.day),
                       dateFormat: DateFormat.d(),
-                      maximumLabels: 50,
+                      maximumLabels: 30,
                       majorGridLines: const MajorGridLines(width: 0),
                     ),
                     primaryYAxis: NumericAxis(
                       interval: 1,
                       majorGridLines: const MajorGridLines(width: 0),
-                      visibleMaximum: 12
+                      // visibleMaximum: 12
                     ),
                     zoomPanBehavior: _zoomPanBehavior,
                     enableAxisAnimation: true,

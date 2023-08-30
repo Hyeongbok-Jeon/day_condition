@@ -36,8 +36,6 @@ class _CanlendarState extends State<Canlendar> {
   late Future<List<Holiday>> futureHoliday;
   Map<String, dynamic> snapshot = {};
 
-  get colorScheme => null;
-
   @override
   void initState() {
     super.initState();
@@ -496,8 +494,8 @@ class _CanlendarState extends State<Canlendar> {
                         child: Text(
                           '${_focusedDay.year}.${_focusedDay.month}',
                           style: TextStyle(
-                              fontSize: 24,
-                              color: widget.useLightMode ? Colors.black : Colors.white,
+                              fontSize: Theme.of(context).textTheme.headlineSmall?.fontSize,
+                              color: Theme.of(context).colorScheme.onBackground,
                               fontWeight: FontWeight.w900),
                           key: sfDateRangePickerButtonKey,
                         ),
@@ -506,7 +504,7 @@ class _CanlendarState extends State<Canlendar> {
                         decoration: borderForDebug,
                         child: Icon(
                           isSfDateRangePickerDialogOpen ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_right,
-                          color: widget.useLightMode ? Colors.black : Colors.white,
+                          color: Theme.of(context).colorScheme.onBackground,
                           size: 15,
                         ),
                       ),
@@ -552,20 +550,22 @@ class _CanlendarState extends State<Canlendar> {
                                 : StartingDayOfWeek.monday,
                             calendarStyle: CalendarStyle(
                               cellAlignment: Alignment.topCenter,
-                              holidayTextStyle: const TextStyle(color: Colors.red, fontSize: 14),
+                              holidayTextStyle: TextStyle(color: Colors.red, fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize),
                               holidayDecoration: const BoxDecoration(),
                               selectedTextStyle: const TextStyle(),
                               selectedDecoration: const BoxDecoration(),
                               todayTextStyle: const TextStyle(),
                               todayDecoration: const BoxDecoration(),
-                              tableBorder: const TableBorder(
-                                horizontalInside: BorderSide(color: Colors.black12),
+                              tableBorder: TableBorder(
+                                horizontalInside: BorderSide(color: Theme.of(context).colorScheme.surfaceVariant),
                               ),
-                              defaultTextStyle: const TextStyle(fontSize: 14),
-                              weekendTextStyle: const TextStyle(fontSize: 14),
-                              outsideTextStyle: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.surfaceVariant),
+                              defaultTextStyle: TextStyle(fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize),
+                              weekendTextStyle: TextStyle(fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize),
+                              outsideTextStyle:
+                                  TextStyle(fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize, color: Theme.of(context).colorScheme.surfaceVariant),
                               // outsideDaysVisible: true,
-                              disabledTextStyle: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.surfaceVariant),
+                              disabledTextStyle:
+                                  TextStyle(fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize, color: Theme.of(context).colorScheme.surfaceVariant),
                               // disabledDecoration: const BoxDecoration(),
                             ),
                             onDaySelected: _onDaySelected,
@@ -594,7 +594,7 @@ class _CanlendarState extends State<Canlendar> {
                                               key: sfDateRangePickerButtonKey,
                                               child: Text(
                                                 '${day.year}년 ${day.month}월',
-                                                style: const TextStyle(fontSize: 18, color: Colors.black),
+                                                style: TextStyle(fontSize: Theme.of(context).textTheme.bodySmall?.fontSize, color: Colors.black),
                                               ),
                                               onPressed: () {
                                                 /// 버튼의 위치를 구함
@@ -687,7 +687,7 @@ class _CanlendarState extends State<Canlendar> {
                                         DateFormat('yyyyMMdd').format(day) ==
                                                 DateFormat('yyyyMMdd').format(getKoreanTime())
                                             ? Container(
-                                                height: 21,
+                                                height: 23,
                                                 decoration: const BoxDecoration(
                                                   shape: BoxShape.circle,
                                                   color: Colors.blue,
@@ -698,99 +698,108 @@ class _CanlendarState extends State<Canlendar> {
                                           children: [
                                             Container(
                                                 decoration: borderForDebug,
-                                                height: 20,
+                                                height: 23,
                                                 child: DateFormat('yyyyMMdd').format(day) ==
                                                         DateFormat('yyyyMMdd').format(getKoreanTime())
                                                     ? Center(
                                                         child: Text(
                                                         '${getKoreanTime().day}',
-                                                        style: const TextStyle(color: Colors.white, fontSize: 14),
+                                                        style: TextStyle(color: Colors.white, fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize),
                                                       ))
                                                     : Container()),
                                             Expanded(
                                               child: Column(
-                                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                mainAxisAlignment: MainAxisAlignment.start,
                                                 children: [
                                                   if (bedTime != null)
-                                                    SizedBox(
-                                                      height: 15,
-                                                      // padding: const EdgeInsets.fromLTRB(3, 0, 3, 0),
-                                                      child: Stack(alignment: Alignment.center, children: [
-                                                        Container(
-                                                          // color: Colors.indigo.shade400,
-                                                          decoration: const BoxDecoration(
-                                                            shape: BoxShape.rectangle,
-                                                            color: Color(0xFF28A0FF),
-                                                            borderRadius: BorderRadius.all(Radius.circular(2.0)),
+                                                    Padding(
+                                                      padding: const EdgeInsets.only(top: 5),
+                                                      child: SizedBox(
+                                                        height: 15,
+                                                        // padding: const EdgeInsets.fromLTRB(3, 0, 3, 0),
+                                                        child: Stack(alignment: Alignment.center, children: [
+                                                          Container(
+                                                            // color: Colors.indigo.shade400,
+                                                            decoration: const BoxDecoration(
+                                                              shape: BoxShape.rectangle,
+                                                              color: Color(0xFF28A0FF),
+                                                              borderRadius: BorderRadius.all(Radius.circular(2.0)),
+                                                            ),
                                                           ),
-                                                        ),
-                                                        Text(
-                                                          bedTime,
-                                                          style: const TextStyle(
-                                                            color: Colors.white,
-                                                            fontSize: 10,
+                                                          Text(
+                                                            bedTime,
+                                                            style: const TextStyle(
+                                                              color: Colors.white,
+                                                              fontSize: 10,
+                                                            ),
+                                                            textAlign: TextAlign.center,
                                                           ),
-                                                          textAlign: TextAlign.center,
-                                                        ),
-                                                      ]),
+                                                        ]),
+                                                      ),
                                                     ),
                                                   if (wakeupTime != null)
-                                                    SizedBox(
-                                                      height: 15,
-                                                      // padding: const EdgeInsets.fromLTRB(3, 0, 3, 0),
-                                                      child: Stack(alignment: Alignment.center, children: [
-                                                        Container(
-                                                          decoration: const BoxDecoration(
-                                                            shape: BoxShape.rectangle,
-                                                            color: Color(0xFFFFDFB0),
-                                                            borderRadius: BorderRadius.all(Radius.circular(2.0)),
+                                                    Padding(
+                                                      padding: const EdgeInsets.only(top: 5),
+                                                      child: SizedBox(
+                                                        height: 15,
+                                                        // padding: const EdgeInsets.fromLTRB(3, 0, 3, 0),
+                                                        child: Stack(alignment: Alignment.center, children: [
+                                                          Container(
+                                                            decoration: const BoxDecoration(
+                                                              shape: BoxShape.rectangle,
+                                                              color: Color(0xFFFFDFB0),
+                                                              borderRadius: BorderRadius.all(Radius.circular(2.0)),
+                                                            ),
                                                           ),
-                                                        ),
-                                                        Text(
-                                                          wakeupTime,
-                                                          style: const TextStyle(
-                                                            color: Colors.black,
-                                                            fontSize: 10,
+                                                          Text(
+                                                            wakeupTime,
+                                                            style: const TextStyle(
+                                                              color: Colors.black,
+                                                              fontSize: 10,
+                                                            ),
+                                                            textAlign: TextAlign.center,
                                                           ),
-                                                          textAlign: TextAlign.center,
-                                                        ),
-                                                      ]),
+                                                        ]),
+                                                      ),
                                                     ),
-                                                  Container(
-                                                    decoration: borderForDebug,
-                                                    height: 15,
-                                                    child: Row(
-                                                      children: [
-                                                        /// Expanded 2개 배치 시 공간을 정확히 반으로 분배
-                                                        Expanded(
-                                                          child: energy != null
-                                                              ? Container(
-                                                                  decoration: borderForDebug,
-                                                                  child: Icon(Icons.circle,
-                                                                      color: energyToColor(energy), size: 10),
-                                                                )
-                                                              : Container(),
-                                                        ),
-                                                        Expanded(
-                                                          child: memo != null
-                                                              ? Container(
-                                                                  decoration: borderForDebug,
-                                                                  child:
+                                                  Padding(
+                                                    padding: const EdgeInsets.only(top: 5),
+                                                    child: Container(
+                                                      decoration: borderForDebug,
+                                                      height: 15,
+                                                      child: Row(
+                                                        children: [
+                                                          /// Expanded 2개 배치 시 공간을 정확히 반으로 분배
+                                                          Expanded(
+                                                            child: energy != null
+                                                                ? Container(
+                                                                    decoration: borderForDebug,
+                                                                    child: Icon(Icons.circle,
+                                                                        color: energyToColor(energy), size: 10),
+                                                                  )
+                                                                : Container(),
+                                                          ),
+                                                          Expanded(
+                                                            child: memo != null
+                                                                ? Container(
+                                                                    decoration: borderForDebug,
+                                                                    child:
 
-                                                                      /// 공백만으로 이루어진 문자는 메모가 없는 것으로 간주
-                                                                      memo.replaceAll(' ', '') != ''
-                                                                          ? Container(
-                                                                              decoration: borderForDebug,
-                                                                              child: const Icon(
-                                                                                Icons.comment_outlined,
-                                                                                color: Colors.red,
-                                                                                size: 10,
-                                                                              ),
-                                                                            )
-                                                                          : null)
-                                                              : Container(),
-                                                        )
-                                                      ],
+                                                                        /// 공백만으로 이루어진 문자는 메모가 없는 것으로 간주
+                                                                        memo.replaceAll(' ', '') != ''
+                                                                            ? Container(
+                                                                                decoration: borderForDebug,
+                                                                                child: const Icon(
+                                                                                  Icons.comment_outlined,
+                                                                                  color: Colors.red,
+                                                                                  size: 10,
+                                                                                ),
+                                                                              )
+                                                                            : null)
+                                                                : Container(),
+                                                          )
+                                                        ],
+                                                      ),
                                                     ),
                                                   ),
                                                 ],

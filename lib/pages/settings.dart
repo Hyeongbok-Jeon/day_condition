@@ -114,7 +114,13 @@ class _SettingsState extends State<Settings> {
                         },
                       );
                     },
-                    child: const Text('데이터 초기화'),
+                    child: Text(
+                      '데이터 초기화',
+                      style: Theme.of(context)
+                          .textTheme
+                          .apply(bodyColor: Theme.of(context).colorScheme.primary)
+                          .titleMedium,
+                    ),
                   ),
                 ),
               ],

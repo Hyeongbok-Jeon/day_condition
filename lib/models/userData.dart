@@ -14,7 +14,7 @@ class UserData {
         wakeupTime = json['wakeupTime'],
         energy = json['energy'],
         memo = json['memo'],
-        timeDiff = json['timeDiff'].toDouble() / 60;
+        timeDiff = json['timeDiff'].toDouble();
 
   @override
   toString() {

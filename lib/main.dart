@@ -1,4 +1,5 @@
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'bottomNavigation.dart';
@@ -24,14 +25,20 @@ Future<void> main() async {
   try {
     final userCredential = await FirebaseAuth.instance.signInAnonymously();
     G_uid = userCredential.user?.uid.toString();
-    print("uid: $G_uid");
+    if (kDebugMode) {
+      print("uid: $G_uid");
+    }
   } on FirebaseAuthException catch (e) {
     switch (e.code) {
       case "operation-not-allowed":
-        print("Anonymous auth hasn't been enabled for this project.");
+        if (kDebugMode) {
+          print("Anonymous auth hasn't been enabled for this project.");
+        }
         break;
       default:
-        print("Unknown error.");
+        if (kDebugMode) {
+          print("Unknown error.");
+        }
     }
   }
 
@@ -61,8 +68,7 @@ class _MyAppState extends State<MyApp> {
   bool get useLightMode {
     switch (themeMode) {
       case ThemeMode.system:
-        return View.of(context).platformDispatcher.platformBrightness ==
-            Brightness.light;
+        return View.of(context).platformDispatcher.platformBrightness == Brightness.light;
       case ThemeMode.light:
         return true;
       case ThemeMode.dark:

@@ -65,7 +65,7 @@ class _StatisticsState extends State<Statistics> {
     }
 
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(30),
       child: Container(
           decoration: borderForDebug,
           child: Column(
@@ -77,9 +77,9 @@ class _StatisticsState extends State<Statistics> {
               Container(
                   alignment: AlignmentDirectional.topStart,
                   decoration: borderForDebug,
-                  child: const Text(
+                  child: Text(
                     "수면 시간",
-                    style: TextStyle(fontSize: 25),
+                    style: Theme.of(context).textTheme.titleLarge,
                   )),
               const SizedBox(
                 height: 10,
@@ -87,36 +87,53 @@ class _StatisticsState extends State<Statistics> {
               snapshot.isEmpty
                   ? Container(
                       decoration: BoxDecoration(border: Border.all(color: Colors.white)),
-                      height: 200,
+                      height: 250,
                       child: const Center(
                         child: Text('No Data'),
                       ),
                     )
-                  : SfCartesianChart(
-                      series: <ChartSeries>[
-                        // Renders line chart
-                        ColumnSeries<UserData, DateTime>(
-                          dataSource: chartData,
-                          xValueMapper: (UserData data, _) => data.date,
-                          yValueMapper: (UserData data, _) => data.timeDiff,
-                          width: 0.5,
-                        )
-                      ],
-                      primaryXAxis: DateTimeCategoryAxis(
-                        visibleMinimum: DateTime(sevenDaysAgo.year, sevenDaysAgo.month, sevenDaysAgo.day),
-                        dateFormat: DateFormat.d(),
-                        maximumLabels: 30,
-                        majorGridLines: const MajorGridLines(width: 0),
+                  : SizedBox(
+                      height: 250,
+                      child: SfCartesianChart(
+                        series: <ChartSeries>[
+                          // Renders line chart
+                          ColumnSeries<UserData, DateTime>(
+                            dataSource: chartData,
+                            xValueMapper: (UserData data, _) => data.date,
+                            yValueMapper: (UserData data, _) => data.timeDiff,
+                            dataLabelSettings: DataLabelSettings(
+                              isVisible: true,
+                              builder: (dynamic data, dynamic point, dynamic series, int pointIndex, int seriesIndex) {
+                                double timeDiff = data.timeDiff;
+                                String HH = (timeDiff ~/ 60).toString();
+                                int MM = (timeDiff % 60).truncate();
+                                String label = '$HH시간';
+                                if (MM > 0) {
+                                  label += ' ${MM.toString()}분';
+                                }
+                                return Text(timeDiff != 0 ? label : '0');
+                              },
+                            ),
+                            width: 0.5,
+                          )
+                        ],
+                        primaryXAxis: DateTimeCategoryAxis(
+                          visibleMinimum: DateTime(sevenDaysAgo.year, sevenDaysAgo.month, sevenDaysAgo.day),
+                          dateFormat: DateFormat.d(),
+                          maximumLabels: 30,
+                          majorGridLines: const MajorGridLines(width: 0),
+                        ),
+                        primaryYAxis: NumericAxis(
+                          interval: 1,
+                          majorGridLines: const MajorGridLines(width: 0),
+                          isVisible: false,
+                          // visibleMaximum: 12
+                        ),
+                        zoomPanBehavior: ZoomPanBehavior(
+                          enablePanning: true,
+                        ),
+                        enableAxisAnimation: false,
                       ),
-                      primaryYAxis: NumericAxis(
-                        interval: 1,
-                        majorGridLines: const MajorGridLines(width: 0),
-                        // visibleMaximum: 12
-                      ),
-                      zoomPanBehavior: ZoomPanBehavior(
-                        enablePanning: true,
-                      ),
-                      enableAxisAnimation: true,
                     )
             ],
           )),

@@ -2,10 +2,18 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
 import '../SingleChoice.dart';
+import '../SwitchRow.dart';
 import '../globalVariables.dart';
 
 class Settings extends StatefulWidget {
-  const Settings({super.key});
+  const Settings({
+    super.key,
+    required this.useLightMode,
+    required this.handleBrightnessChange,
+  });
+
+  final bool useLightMode;
+  final Function(bool useLightMode) handleBrightnessChange;
 
   @override
   State<Settings> createState() => _SettingsState();
@@ -31,35 +39,50 @@ class _SettingsState extends State<Settings> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(10),
+    return Padding(
+      padding: const EdgeInsets.all(30),
       child: Column(
         children: [
           Expanded(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Container(
                     decoration: borderForDebug,
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                        Text(
+                          "다크모드",
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        Switch(
+                          value: !widget.useLightMode,
+                          onChanged: (value) {
+                            setState(() {
+                              widget.handleBrightnessChange(!value);
+                            });
+                          },
+                        ),
+                      ],
+                    )),
+                Container(
+                    decoration: borderForDebug,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
                           "시작 요일",
-                          style: TextStyle(fontSize: 20),
+                          style: Theme.of(context).textTheme.titleMedium,
                         ),
                         snapshot['startingDayOfWeek'] == null
                             ? const Center(
-                              child: CircularProgressIndicator(),
-                            )
+                                child: CircularProgressIndicator(),
+                              )
                             : SingleChoice(snapshot: snapshot),
                       ],
                     )),
-                const SizedBox(
-                  height: 30,
-                ),
-                Container(
-                  decoration: borderForDebug,
+                Center(
                   child: TextButton(
                     onPressed: () {
                       showDialog(

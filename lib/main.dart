@@ -70,6 +70,12 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  void handleBrightnessChange(bool useLightMode) {
+    setState(() {
+      themeMode = useLightMode ? ThemeMode.light : ThemeMode.dark;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -84,7 +90,7 @@ class _MyAppState extends State<MyApp> {
         useMaterial3: useMaterial3,
         brightness: Brightness.dark,
       ),
-      home: BottomNavigationExample(useLightMode: useLightMode),
+      home: BottomNavigationExample(useLightMode: useLightMode, handleBrightnessChange: handleBrightnessChange),
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,

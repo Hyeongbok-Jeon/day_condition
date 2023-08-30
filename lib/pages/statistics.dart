@@ -38,9 +38,18 @@ class _StatisticsState extends State<Statistics> {
   @override
   Widget build(BuildContext context) {
     chartData = List<UserData>.generate(
-        30, (int index) => UserData(getKoreanTime().subtract(Duration(days: index)), '', '', 0, '', 0));
+        30,
+        (int index) => UserData(
+            DateTime(
+                getKoreanTime().subtract(Duration(days: index)).year,
+                getKoreanTime().subtract(Duration(days: index)).month,
+                getKoreanTime().subtract(Duration(days: index)).day),
+            '',
+            '',
+            0,
+            '',
+            0));
     DateTime sevenDaysAgo = getKoreanTime().subtract(const Duration(days: 7));
-    DateTime tomorrow = getKoreanTime().add(const Duration(days: 1));
 
     if (snapshot.isNotEmpty) {
       for (UserData element in chartData) {
@@ -95,7 +104,6 @@ class _StatisticsState extends State<Statistics> {
                       ],
                       primaryXAxis: DateTimeCategoryAxis(
                         visibleMinimum: DateTime(sevenDaysAgo.year, sevenDaysAgo.month, sevenDaysAgo.day),
-                        visibleMaximum: DateTime(getKoreanTime().year, getKoreanTime().month, getKoreanTime().day),
                         dateFormat: DateFormat.d(),
                         maximumLabels: 30,
                         majorGridLines: const MajorGridLines(width: 0),

@@ -8,9 +8,11 @@ class BottomNavigationExample extends StatefulWidget {
   const BottomNavigationExample({
     super.key,
     required this.useLightMode,
+    required this.handleBrightnessChange,
   });
 
   final bool useLightMode;
+  final Function(bool useLightMode) handleBrightnessChange;
 
   @override
   State<BottomNavigationExample> createState() => _BottomNavigationExampleState();
@@ -90,7 +92,7 @@ class _BottomNavigationExampleState extends State<BottomNavigationExample> {
           Statistics(
             isReTap: true,
           ),
-          const Settings(),
+          Settings(useLightMode: widget.useLightMode, handleBrightnessChange: widget.handleBrightnessChange),
         ],
       ),
       bottomNavigationBar: navigationBar,

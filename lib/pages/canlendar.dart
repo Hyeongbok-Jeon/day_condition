@@ -36,6 +36,8 @@ class _CanlendarState extends State<Canlendar> {
   late Future<List<Holiday>> futureHoliday;
   Map<String, dynamic> snapshot = {};
 
+  get colorScheme => null;
+
   @override
   void initState() {
     super.initState();
@@ -548,22 +550,22 @@ class _CanlendarState extends State<Canlendar> {
                             startingDayOfWeek: snapshot['settings']['startingDayOfWeek'] == 'sunday'
                                 ? StartingDayOfWeek.sunday
                                 : StartingDayOfWeek.monday,
-                            calendarStyle: const CalendarStyle(
+                            calendarStyle: CalendarStyle(
                               cellAlignment: Alignment.topCenter,
-                              holidayTextStyle: TextStyle(color: Colors.red, fontSize: 14),
-                              holidayDecoration: BoxDecoration(),
-                              selectedTextStyle: TextStyle(),
-                              selectedDecoration: BoxDecoration(),
-                              todayTextStyle: TextStyle(),
-                              todayDecoration: BoxDecoration(),
-                              tableBorder: TableBorder(
+                              holidayTextStyle: const TextStyle(color: Colors.red, fontSize: 14),
+                              holidayDecoration: const BoxDecoration(),
+                              selectedTextStyle: const TextStyle(),
+                              selectedDecoration: const BoxDecoration(),
+                              todayTextStyle: const TextStyle(),
+                              todayDecoration: const BoxDecoration(),
+                              tableBorder: const TableBorder(
                                 horizontalInside: BorderSide(color: Colors.black12),
                               ),
-                              defaultTextStyle: TextStyle(fontSize: 14),
-                              weekendTextStyle: TextStyle(fontSize: 14),
-                              outsideTextStyle: TextStyle(fontSize: 14, color: Color(0xFFAEAEAE)),
+                              defaultTextStyle: const TextStyle(fontSize: 14),
+                              weekendTextStyle: const TextStyle(fontSize: 14),
+                              outsideTextStyle: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.surfaceVariant),
                               // outsideDaysVisible: true,
-                              disabledTextStyle: TextStyle(color: Color(0xFFBFBFBF), fontSize: 14),
+                              disabledTextStyle: TextStyle(fontSize: 14, color: Theme.of(context).colorScheme.surfaceVariant),
                               // disabledDecoration: const BoxDecoration(),
                             ),
                             onDaySelected: _onDaySelected,

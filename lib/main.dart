@@ -11,10 +11,10 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'globalVariables.dart';
 
 Future<void> main() async {
-  // 없으면 에러
+  /// 없으면 에러
   WidgetsFlutterBinding.ensureInitialized();
 
-  // firebase 초기화
+  /// firebase 초기화
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -50,6 +50,9 @@ Future<void> main() async {
     snapshotValue[child.key] = child.value;
   }
   ref.update({'startingDayOfWeek': snapshotValue['startingDayOfWeek'] ?? 'sunday'});
+
+  /// 지속성 동작
+  // FirebaseDatabase.instance.setPersistenceEnabled(true);
 
   runApp(const MyApp());
 }

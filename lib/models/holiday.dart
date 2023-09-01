@@ -1,13 +1,16 @@
+import 'package:firebase_database/firebase_database.dart';
+
 class Holiday {
   String locdate;
   String dateName;
 
   Holiday(this.locdate, this.dateName);
 
-  static List<Holiday> holidayListfromJson(dynamic json) {
+  static List<Holiday> holidayListfromDataSnapshot(DataSnapshot dataSnapshot) {
     /// response.body
     /// {"response":{"header":{"resultCode":"00","resultMsg":"NORMAL SERVICE."},"body":{"items":{"item":{"dateKind":"01","dateName":"ê´ë³µì ","isHoliday":"Y","locdate":20230815,"seq":1}},"numOfRows":10,"pageNo":1,"totalCount":1}}}
-    final body = json['response']['body'];
+    Map<dynamic, dynamic> map = dataSnapshot.value as Map<dynamic, dynamic>;
+    final body = map['response']['body'];
     final totalCount = body['totalCount'];
     final items = body['items'];
 

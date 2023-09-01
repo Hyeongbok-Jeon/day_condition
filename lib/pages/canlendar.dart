@@ -1,12 +1,10 @@
-import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:firebase_database/firebase_database.dart';
-import 'package:http/http.dart' as http;
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
 import '../../utils.dart';
@@ -28,21 +26,21 @@ class Canlendar extends StatefulWidget {
 }
 
 class _CanlendarState extends State<Canlendar> {
-  final ref = FirebaseDatabase.instance.ref('$G_uid');
+  final gUidRef = FirebaseDatabase.instance.ref('$G_uid');
+  final holidayInfoRef = FirebaseDatabase.instance.ref('holidayInfo');
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = getKoreanTime();
   bool isSfDateRangePickerDialogOpen = false;
   final GlobalKey sfDateRangePickerButtonKey = GlobalKey();
-  late Future<List<Holiday>> futureHoliday;
   Map<String, dynamic> snapshot = {};
+  Map<String, dynamic> holidaySnapshot = {};
+  late Future<List<Holiday>> futureHoliday;
 
   @override
   void initState() {
     super.initState();
 
-    futureHoliday = fetchHoliday();
-
-    ref.onValue.listen((DatabaseEvent event) {
+    gUidRef.onValue.listen((DatabaseEvent event) {
       setState(() {
         snapshot.clear();
         for (DataSnapshot child in event.snapshot.children) {
@@ -50,6 +48,8 @@ class _CanlendarState extends State<Canlendar> {
         }
       });
     });
+
+    futureHoliday = fetchHoliday();
   }
 
   @override
@@ -60,23 +60,15 @@ class _CanlendarState extends State<Canlendar> {
   Future<List<Holiday>> fetchHoliday() async {
     List<Holiday> holidayList = [];
 
-    int firstYear = kFirstDay.year;
-    int lastYear = kLastDay.year;
-
-    for (int i = firstYear; i <= lastYear; i++) {
-      /// 공공 데이터 포털 인증키
-      /// https://www.data.go.kr/iim/main/mypageMain.do
-      const serviceKey = 'vGcOnDW+ywhtts/PnIk6QDB+J7JTcwVdOysxn74uzxJ6/TUtkKU5PHLf4z6yXJinJnU5qKALxEbYIz4WhemGQA==';
-      String solYear = '$i';
-
-      var url = Uri.https('apis.data.go.kr', '/B090041/openapi/service/SpcdeInfoService/getRestDeInfo',
-          {'solYear': solYear, 'ServiceKey': serviceKey, '_type': 'json', 'numOfRows': '100'});
-      final response = await http.get(url);
-
-      if (response.statusCode == 200) {
-        holidayList.addAll(Holiday.holidayListfromJson(jsonDecode(utf8.decode(response.bodyBytes))));
-      } else {
-        throw Exception('Failed to fetch $i holiday');
+    final holidayRef = FirebaseDatabase.instance.ref('holidayInfo');
+    final snapshot = await holidayRef.get();
+    if (snapshot.exists) {
+      for (DataSnapshot child in snapshot.children) {
+        holidayList.addAll(Holiday.holidayListfromDataSnapshot(child));
+      }
+    } else {
+      if (kDebugMode) {
+        print('No data available.');
       }
     }
 
@@ -163,205 +155,215 @@ class _CanlendarState extends State<Canlendar> {
     if (!mounted) return;
 
     showModalBottomSheet<void>(
+      showDragHandle: true,
+
       /// modal 높이 조절을 위해서는 true로 설정
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(topLeft: Radius.circular(30.0), topRight: Radius.circular(30.0)),
-      ),
       context: context,
       builder: (BuildContext context) {
-        return SizedBox(
-          height: 400 + (MediaQuery.of(context).viewInsets.bottom),
-          child: StatefulBuilder(builder: (BuildContext context, StateSetter modalSetState) {
-            int dateCompareResult = wakeupTime.compareTo(bedTime);
-            return Container(
-              padding: EdgeInsets.fromLTRB(30, 30, 30, 30 + MediaQuery.of(context).viewInsets.bottom),
-              child: Container(
-                decoration: borderForDebug,
-                child: Column(
+        int dateCompareResult = wakeupTime.compareTo(bedTime);
+        return Container(
+          constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.9),
+          // height: MediaQuery.of(context).size.height * 0.6 + (MediaQuery.of(context).viewInsets.bottom),
+          // padding: EdgeInsets.fromLTRB(30, 0, 30, 40 + MediaQuery.of(context).viewInsets.bottom),
+          padding: EdgeInsets.fromLTRB(30, 0, 30, 40 + MediaQuery.of(context).viewInsets.bottom),
+          child: Container(
+            decoration: borderForDebug,
+            height: MediaQuery.of(context).size.height * 0.6,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          decoration: borderForDebug,
-                          width: 190,
-                          child: Text(
-                            DateFormat('M월 d일 $dayOfWeek').format(selectedDay),
-                            style: const TextStyle(fontSize: 24),
-                          ),
+                    Container(
+                      decoration: borderForDebug,
+                      width: 190,
+                      child: Text(
+                        DateFormat('M월 d일 $dayOfWeek').format(selectedDay),
+                        style: const TextStyle(fontSize: 24),
+                      ),
+                    ),
+                    Expanded(
+                      child: Container(
+                        decoration: borderForDebug,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Container(
+                              decoration: borderForDebug,
+                              child: IconButton(
+                                onPressed: () async => {
+                                  await gUidRef.child('data/$key').remove().then((value) {
+                                    Navigator.pop(context);
+                                  })
+                                },
+                                icon: const Icon(
+                                  Icons.delete,
+                                  color: Colors.blue,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              decoration: borderForDebug,
+                              child: IconButton(
+                                onPressed: () async => {
+                                  await gUidRef.child('data').update({
+                                    key: {
+                                      'date': selectedDay.toString(),
+                                      "wakeupTime": DateFormat('HH:mm').format(wakeupTime),
+                                      "bedTime": DateFormat('HH:mm').format(bedTime),
+                                      "energy": energy,
+                                      "timeDiff": dateCompareResult == -1
+                                          ? (24 * 60) - bedTime.difference(wakeupTime).inMinutes
+                                          : wakeupTime.difference(bedTime).inMinutes,
+                                      'memo': textEditingController.text,
+                                    }
+                                  }).then((value) {
+                                    setState(() {
+                                      Navigator.pop(context);
+                                    });
+                                  })
+                                },
+                                icon: const Icon(
+                                  Icons.check,
+                                  color: Colors.blue,
+                                ),
+                                // child: const Text('완료', style: TextStyle(fontSize: 30),),
+                              ),
+                            ),
+                          ],
                         ),
-                        Expanded(
-                          child: Container(
+                      ),
+                    ),
+                  ],
+                ),
+                Divider(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+                StatefulBuilder(builder: (BuildContext context, StateSetter modalSetState) {
+                  return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                    Container(
+                      decoration: borderForDebug,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
                             decoration: borderForDebug,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Container(
-                                  decoration: borderForDebug,
-                                  child: IconButton(
-                                    onPressed: () async => {
-                                      await ref.child('data/$key').remove().then((value) {
-                                        Navigator.pop(context);
-                                      })
-                                    },
-                                    icon: const Icon(
-                                      Icons.delete,
-                                      color: Colors.blue,
-                                    ),
-                                  ),
-                                ),
-                                Container(
-                                  decoration: borderForDebug,
-                                  child: IconButton(
-                                    onPressed: () async => {
-                                      await ref.child('data').update({
-                                        key: {
-                                          'date': selectedDay.toString(),
-                                          "wakeupTime": DateFormat('HH:mm').format(wakeupTime),
-                                          "bedTime": DateFormat('HH:mm').format(bedTime),
-                                          "energy": energy,
-                                          "timeDiff": dateCompareResult == -1
-                                              ? (24 * 60) - bedTime.difference(wakeupTime).inMinutes
-                                              : wakeupTime.difference(bedTime).inMinutes,
-                                          'memo': textEditingController.text,
-                                        }
-                                      }).then((value) {
-                                        setState(() {
-                                          Navigator.pop(context);
-                                        });
-                                      })
-                                    },
-                                    icon: const Icon(
-                                      Icons.check,
-                                      color: Colors.blue,
-                                    ),
-                                    // child: const Text('완료', style: TextStyle(fontSize: 30),),
-                                  ),
-                                ),
-                              ],
+                            child: Icon(
+                              Icons.nightlight_round_rounded,
+                              color: const Color(0xFF28A0FF),
+                              size: Theme.of(context).textTheme.headlineMedium?.fontSize,
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Container(
-                          decoration: borderForDebug,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                decoration: borderForDebug,
-                                child: const Icon(
-                                  Icons.nightlight_round_rounded,
-                                  color: Color(0xFF28A0FF),
-                                  size: 30,
+                          Container(
+                              decoration: borderForDebug,
+                              child: TextButton(
+                                onPressed: () => _showDialog(
+                                  CupertinoDatePicker(
+                                    initialDateTime: bedTime,
+                                    mode: CupertinoDatePickerMode.time,
+                                    use24hFormat: true,
+                                    onDateTimeChanged: (DateTime newDateTime) {
+                                      modalSetState(() => bedTime = newDateTime);
+                                    },
+                                  ),
                                 ),
-                              ),
-                              Container(
-                                  decoration: borderForDebug,
-                                  child: TextButton(
-                                    onPressed: () => _showDialog(
-                                      CupertinoDatePicker(
-                                        initialDateTime: bedTime,
-                                        mode: CupertinoDatePickerMode.time,
-                                        use24hFormat: true,
-                                        onDateTimeChanged: (DateTime newDateTime) {
-                                          modalSetState(() => bedTime = newDateTime);
-                                        },
-                                      ),
-                                    ),
-                                    child: Text(
-                                      DateFormat('HH:mm').format(bedTime),
-                                      style: const TextStyle(fontSize: 20),
-                                    ),
-                                  )),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          decoration: borderForDebug,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                decoration: borderForDebug,
-                                child: const Icon(
-                                  Icons.sunny,
-                                  color: Color(0xFFFFDFB0),
-                                  size: 30,
+                                child: Text(
+                                  DateFormat('HH:mm').format(bedTime),
+                                  style: TextStyle(fontSize: Theme.of(context).textTheme.headlineMedium?.fontSize),
                                 ),
-                              ),
-                              Container(
-                                  decoration: borderForDebug,
-                                  child: TextButton(
-                                    onPressed: () => _showDialog(
-                                      CupertinoDatePicker(
-                                        initialDateTime: wakeupTime,
-                                        mode: CupertinoDatePickerMode.time,
-                                        use24hFormat: true,
-                                        // This is called when the user changes the dateTime.
-                                        onDateTimeChanged: (DateTime newDateTime) {
-                                          modalSetState(() => wakeupTime = newDateTime);
-                                        },
-                                      ),
-                                    ),
-                                    child: Text(
-                                      DateFormat('HH:mm').format(wakeupTime),
-                                      style: const TextStyle(fontSize: 20),
-                                    ),
-                                  )),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    RatingBar.builder(
-                      initialRating: energy,
-                      minRating: 1,
-                      direction: Axis.horizontal,
-                      // allowHalfRating: true,
-                      itemCount: 5,
-                      itemBuilder: (context, _) => const Icon(
-                        // Image.asset(name),
-                        Icons.rectangle_rounded,
-                        color: Colors.green,
+                              )),
+                        ],
                       ),
-                      onRatingUpdate: (rating) {
-                        energy = rating;
-                      },
-                      itemSize: 50,
                     ),
                     Container(
                       decoration: borderForDebug,
-                      child: TextField(
-                        maxLines: 3,
-                        controller: textEditingController,
-                        decoration: const InputDecoration(
-                          // prefixIcon: const Icon(Icons.comment_outlined),
-                          // suffixIcon: IconButton(
-                          //   icon: const Icon(Icons.clear),
-                          //   onPressed: () => textEditingController.clear(),
-                          // ),
-                          filled: true,
-                          border: OutlineInputBorder(),
-                          hintText: '오늘 하루 어떠셨나요?',
-                        ),
-                        onChanged: (value) {
-                          textEditingController.text = value;
-                        },
-                        keyboardType: TextInputType.multiline,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            decoration: borderForDebug,
+                            child: Icon(
+                              Icons.sunny,
+                              color: const Color(0xFFFFDFB0),
+                              size: Theme.of(context).textTheme.headlineMedium?.fontSize,
+                            ),
+                          ),
+                          Container(
+                              decoration: borderForDebug,
+                              child: TextButton(
+                                onPressed: () => _showDialog(
+                                  CupertinoDatePicker(
+                                    initialDateTime: wakeupTime,
+                                    mode: CupertinoDatePickerMode.time,
+                                    use24hFormat: true,
+                                    // This is called when the user changes the dateTime.
+                                    onDateTimeChanged: (DateTime newDateTime) {
+                                      modalSetState(() => wakeupTime = newDateTime);
+                                    },
+                                  ),
+                                ),
+                                child: Text(
+                                  DateFormat('HH:mm').format(wakeupTime),
+                                  style: TextStyle(fontSize: Theme.of(context).textTheme.headlineMedium?.fontSize),
+                                ),
+                              )),
+                        ],
                       ),
-                    )
-                  ],
+                    ),
+                  ]);
+                }),
+                Divider(
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
-              ),
-            );
-          }),
+                // IconSelectorWidget(),
+                RatingBar.builder(
+                  initialRating: energy,
+                  minRating: 1,
+                  direction: Axis.horizontal,
+                  // allowHalfRating: true,
+                  itemCount: 5,
+                  itemBuilder: (context, _) => const Icon(
+                    // Image.asset(name),
+                    Icons.rectangle_rounded,
+                    color: Colors.green,
+                  ),
+                  onRatingUpdate: (rating) {
+                    energy = rating;
+                  },
+                  itemSize: 60,
+                ),
+                Divider(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 20),
+                  child: Container(
+                    decoration: borderForDebug,
+                    child: TextField(
+                      maxLines: 3,
+                      controller: textEditingController,
+                      decoration: const InputDecoration(
+                        // prefixIcon: const Icon(Icons.comment_outlined),
+                        // suffixIcon: IconButton(
+                        //   icon: const Icon(Icons.clear),
+                        //   onPressed: () => textEditingController.clear(),
+                        // ),
+                        filled: true,
+                        border: OutlineInputBorder(),
+                        hintText: '오늘 하루 어떠셨나요?',
+                      ),
+                      onChanged: (value) {
+                        textEditingController.text = value;
+                      },
+                      keyboardType: TextInputType.multiline,
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
         );
       },
     );
@@ -384,12 +386,12 @@ class _CanlendarState extends State<Canlendar> {
     }
   }
 
-  bool holidayPredicate(DateTime day, asyncSnapshot) {
+  bool holidayPredicate(DateTime day, AsyncSnapshot holidayAsyncSnapshot) {
     if (day.weekday == 7 && day.month == _focusedDay.month) {
       return true;
-    } else if (asyncSnapshot.hasData) {
+    } else if (holidayAsyncSnapshot.hasData) {
       bool isHoliday = false;
-      List<Holiday> holidayList = asyncSnapshot.data;
+      List<Holiday> holidayList = holidayAsyncSnapshot.data;
       for (Holiday holiday in holidayList) {
         if (DateFormat('yyyyMMdd').format(day) == holiday.locdate) {
           isHoliday = true;
@@ -462,14 +464,18 @@ class _CanlendarState extends State<Canlendar> {
     });
   }
 
+  List<Holiday> getHolidayList() {
+    List<Holiday> holidayList = [];
+    // holidayList.addAll(Holiday.holidayListfromJson(holidaySnapshot));
+    return holidayList;
+  }
+
   @override
   Widget build(BuildContext context) {
     /// bottom navigation 캘린더 아이콘 클릭 시 현재 날짜로 이동
     if (widget.isReTap) {
-      setState(() {
-        _focusedDay = getKoreanTime();
-        widget.setReTapFalse();
-      });
+      _focusedDay = getKoreanTime();
+      widget.setReTapFalse();
     }
     return Container(
       padding: const EdgeInsets.all(10),
@@ -519,15 +525,13 @@ class _CanlendarState extends State<Canlendar> {
           ),
           Expanded(
             child: Container(
-              decoration: borderForDebug,
-              child: FutureBuilder(
-                  future: futureHoliday,
-                  builder: (context, holidayAsyncSnapshot) {
-                    return snapshot['settings'] == null || !holidayAsyncSnapshot.hasData
-                        ? const Center(
-                            child: CircularProgressIndicator(),
-                          )
-                        : TableCalendar<Event>(
+                decoration: borderForDebug,
+                child: snapshot['settings'] == null
+                    ? const Center()
+                    : FutureBuilder(
+                        future: futureHoliday,
+                        builder: (context, holidayAsyncSnapshot) {
+                          return TableCalendar<Event>(
                             headerVisible: false,
                             shouldFillViewport: true,
                             holidayPredicate: (day) => holidayPredicate(day, holidayAsyncSnapshot),
@@ -542,7 +546,7 @@ class _CanlendarState extends State<Canlendar> {
                             lastDay: kLastDay,
                             focusedDay: _focusedDay,
                             // selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-                            enabledDayPredicate: (day) => getKoreanTime().compareTo(day) != -1,
+                            // enabledDayPredicate: (day) => getKoreanTime().compareTo(day) != -1,
                             // 날짜 비활성화
                             calendarFormat: _calendarFormat,
                             startingDayOfWeek: snapshot['settings']['startingDayOfWeek'] == 'sunday'
@@ -550,7 +554,8 @@ class _CanlendarState extends State<Canlendar> {
                                 : StartingDayOfWeek.monday,
                             calendarStyle: CalendarStyle(
                               cellAlignment: Alignment.topCenter,
-                              holidayTextStyle: TextStyle(color: Colors.red, fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize),
+                              holidayTextStyle: TextStyle(
+                                  color: Colors.red, fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize),
                               holidayDecoration: const BoxDecoration(),
                               selectedTextStyle: const TextStyle(),
                               selectedDecoration: const BoxDecoration(),
@@ -561,11 +566,13 @@ class _CanlendarState extends State<Canlendar> {
                               ),
                               defaultTextStyle: TextStyle(fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize),
                               weekendTextStyle: TextStyle(fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize),
-                              outsideTextStyle:
-                                  TextStyle(fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize, color: Theme.of(context).colorScheme.surfaceVariant),
+                              outsideTextStyle: TextStyle(
+                                  fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize,
+                                  color: Theme.of(context).colorScheme.surfaceVariant),
                               // outsideDaysVisible: true,
-                              disabledTextStyle:
-                                  TextStyle(fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize, color: Theme.of(context).colorScheme.surfaceVariant),
+                              disabledTextStyle: TextStyle(
+                                  fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize,
+                                  color: Theme.of(context).colorScheme.surfaceVariant),
                               // disabledDecoration: const BoxDecoration(),
                             ),
                             onDaySelected: _onDaySelected,
@@ -594,7 +601,9 @@ class _CanlendarState extends State<Canlendar> {
                                               key: sfDateRangePickerButtonKey,
                                               child: Text(
                                                 '${day.year}년 ${day.month}월',
-                                                style: TextStyle(fontSize: Theme.of(context).textTheme.bodySmall?.fontSize, color: Colors.black),
+                                                style: TextStyle(
+                                                    fontSize: Theme.of(context).textTheme.bodySmall?.fontSize,
+                                                    color: Colors.black),
                                               ),
                                               onPressed: () {
                                                 /// 버튼의 위치를 구함
@@ -704,7 +713,9 @@ class _CanlendarState extends State<Canlendar> {
                                                     ? Center(
                                                         child: Text(
                                                         '${getKoreanTime().day}',
-                                                        style: TextStyle(color: Colors.white, fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize),
+                                                        style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize),
                                                       ))
                                                     : Container()),
                                             Expanded(
@@ -814,8 +825,7 @@ class _CanlendarState extends State<Canlendar> {
                               },
                             ),
                           );
-                  }),
-            ),
+                        })),
           ),
         ],
       ),

@@ -20,7 +20,6 @@ class BottomNavigationExample extends StatefulWidget {
 
 class _BottomNavigationExampleState extends State<BottomNavigationExample> {
   int _currentIndex = 0;
-  bool isReTap = false;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +41,7 @@ class _BottomNavigationExampleState extends State<BottomNavigationExample> {
         children: [
           Canlendar(
             useLightMode: widget.useLightMode,
-            isReTap: isReTap,
+            isReTap: true,
           ),
           Statistics(
             isReTap: true,

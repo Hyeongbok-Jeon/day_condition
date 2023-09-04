@@ -110,28 +110,50 @@ class _StatisticsState extends State<Statistics> {
                                   // if (mm > 0) {
                                   //   label += ' ${mm.toString()}M';
                                   // }
-                                  return Text(timeDiff != 0 ? label : '0');
+                                  return Text(timeDiff != 0 ? label : '');
                                 },
                               ),
                               width: 0.5,
+                              enableTooltip: true,
                             )
                           ],
                           primaryXAxis: DateTimeCategoryAxis(
-                            visibleMinimum: DateTime(sevenDaysAgo.year, sevenDaysAgo.month, sevenDaysAgo.day),
-                            dateFormat: DateFormat.d(),
-                            maximumLabels: 30,
-                            majorGridLines: const MajorGridLines(width: 0),
-                          ),
-                          primaryYAxis: NumericAxis(
-                              interval: 1,
+                              visibleMinimum: DateTime(sevenDaysAgo.year, sevenDaysAgo.month, sevenDaysAgo.day),
+                              visibleMaximum: DateTime(2023, 9, 4),
+                              dateFormat: DateFormat.d(),
+                              maximumLabels: 30,
                               majorGridLines: const MajorGridLines(width: 0),
-                              isVisible: false,
-                              maximum: 1000),
+                              axisLabelFormatter: (AxisLabelRenderDetails axisLabelRenderArgs) {
+                                return ChartAxisLabel(
+                                    '${axisLabelRenderArgs.text}일', const TextStyle(color: Colors.white));
+                              }),
+                          primaryYAxis: NumericAxis(
+                            interval: 1,
+                            majorGridLines: const MajorGridLines(width: 0),
+                            isVisible: false,
+                            // maximum: 1000
+                          ),
                           zoomPanBehavior: ZoomPanBehavior(
                             enablePanning: true,
                           ),
                           enableAxisAnimation: false,
                           // borderColor: Theme.of(context).colorScheme.onSurface,
+                          tooltipBehavior: TooltipBehavior(
+                            enable: false,
+                            builder: (dynamic data, dynamic point, dynamic series, int pointIndex, int seriesIndex) {
+                              double timeDiff = data.timeDiff;
+                              String label = '${(timeDiff ~/ 60).toString()}시간';
+                              int mm = (timeDiff % 60).truncate();
+                              if (mm > 0) {
+                                label += ' ${mm.toString()}분';
+                              }
+                              return Text(
+                                timeDiff != 0 ? label : '0',
+                                style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                              );
+                            },
+                            color: Colors.transparent,
+                          ),
                         ),
                       ),
                 const SizedBox(
@@ -170,38 +192,49 @@ class _StatisticsState extends State<Statistics> {
                               dataSource: chartData,
                               xValueMapper: (UserData data, _) => data.date,
                               yValueMapper: (UserData data, _) => data.energy,
-                              dataLabelSettings: const DataLabelSettings(
+                              dataLabelSettings: DataLabelSettings(
                                 isVisible: true,
-                                // builder:  (dynamic data, dynamic point, dynamic series, int pointIndex, int seriesIndex) {
-                                //   double timeDiff = data.timeDiff;
-                                //   String hh = (timeDiff ~/ 60).toString();
-                                //   int mm = (timeDiff % 60).truncate();
-                                //   String label = '${hh}';
-                                //   // if (mm > 0) {
-                                //   //   label += ' ${mm.toString()}M';
-                                //   // }
-                                //   return Text(timeDiff != 0 ? label : '0');
-                                // },
+                                builder:
+                                    (dynamic data, dynamic point, dynamic series, int pointIndex, int seriesIndex) {
+                                  int energy = data.energy;
+                                  return Text('${energy > 0 ? data.energy : ''}');
+                                },
                               ),
                               width: 3,
+                              enableTooltip: true,
                             )
                           ],
                           primaryXAxis: DateTimeCategoryAxis(
-                            visibleMinimum: DateTime(sevenDaysAgo.year, sevenDaysAgo.month, sevenDaysAgo.day),
-                            dateFormat: DateFormat.d(),
-                            maximumLabels: 30,
-                            majorGridLines: const MajorGridLines(width: 0),
-                          ),
-                          primaryYAxis: NumericAxis(
-                              interval: 1,
+                              visibleMinimum: DateTime(sevenDaysAgo.year, sevenDaysAgo.month, sevenDaysAgo.day),
+                              dateFormat: DateFormat.d(),
+                              maximumLabels: 30,
                               majorGridLines: const MajorGridLines(width: 0),
-                              isVisible: false,
-                              minimum: -10,
-                              maximum: 10),
+                              axisLabelFormatter: (AxisLabelRenderDetails axisLabelRenderArgs) {
+                                return ChartAxisLabel(
+                                    '${axisLabelRenderArgs.text}일', const TextStyle(color: Colors.white));
+                              }),
+                          primaryYAxis: NumericAxis(
+                            interval: 1,
+                            majorGridLines: const MajorGridLines(width: 0),
+                            isVisible: false,
+                            // minimum: -10,
+                            // maximum: 10
+                          ),
                           zoomPanBehavior: ZoomPanBehavior(
                             enablePanning: true,
                           ),
                           enableAxisAnimation: false,
+                          tooltipBehavior: TooltipBehavior(
+                            enable: false,
+                            builder: (dynamic data, dynamic point, dynamic series, int pointIndex, int seriesIndex) {
+                              print(data);
+                              return Text(
+                                '${data.energy}',
+                                style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                              );
+                            },
+                            color: Colors.transparent,
+                          ),
                           // borderColor: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),

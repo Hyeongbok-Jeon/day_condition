@@ -25,6 +25,7 @@ class _BottomNavigationExampleState extends State<BottomNavigationExample> {
   Widget build(BuildContext context) {
     Widget navigationBar = Focus(
       child: NavigationBar(
+        height: 80,
         selectedIndex: _currentIndex,
         onDestinationSelected: (index) {
           setState(() {

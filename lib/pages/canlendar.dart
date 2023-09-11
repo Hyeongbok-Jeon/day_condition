@@ -128,6 +128,7 @@ class _CanlendarState extends State<Canlendar> {
     int wakeupTimeMM = 0;
     int bedTimeMM = 0;
     dynamic energy = 3.0;
+    int timeDiff = 0;
     TextEditingController textEditingController = TextEditingController();
     final key = DateFormat('yyyyMMdd').format(selectedDay);
 
@@ -150,6 +151,11 @@ class _CanlendarState extends State<Canlendar> {
     DateTime bedTime = DateTime(selectedDay.year, selectedDay.month, selectedDay.day, bedTimeHH, bedTimeMM);
     String dayOfWeek = getDayOfWeekInKorean(selectedDay.weekday);
 
+    int dateCompareResult = wakeupTime.compareTo(bedTime);
+    timeDiff = dateCompareResult == -1
+        ? (24 * 60) - bedTime.difference(wakeupTime).inMinutes
+        : wakeupTime.difference(bedTime).inMinutes;
+
     /// Don't use 'BuildContext's across async gaps. (Documentation)  Try rewriting the code to not reference the 'BuildContext'.
     /// 위 에러 해결 코드
     if (!mounted) return;
@@ -161,7 +167,6 @@ class _CanlendarState extends State<Canlendar> {
       isScrollControlled: true,
       context: context,
       builder: (BuildContext context) {
-        int dateCompareResult = wakeupTime.compareTo(bedTime);
         return Container(
           constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.9),
           child: Padding(
@@ -213,9 +218,7 @@ class _CanlendarState extends State<Canlendar> {
                                         "wakeupTime": DateFormat('HH:mm').format(wakeupTime),
                                         "bedTime": DateFormat('HH:mm').format(bedTime),
                                         "energy": energy,
-                                        "timeDiff": dateCompareResult == -1
-                                            ? (24 * 60) - bedTime.difference(wakeupTime).inMinutes
-                                            : wakeupTime.difference(bedTime).inMinutes,
+                                        "timeDiff": timeDiff,
                                         'memo': textEditingController.text,
                                       }
                                     }).then((value) {

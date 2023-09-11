@@ -119,7 +119,7 @@ class _StatisticsState extends State<Statistics> {
                           ],
                           primaryXAxis: DateTimeCategoryAxis(
                               visibleMinimum: DateTime(sevenDaysAgo.year, sevenDaysAgo.month, sevenDaysAgo.day),
-                              visibleMaximum: DateTime(2023, 9, 4),
+                              // visibleMaximum: DateTime(2023, 9, 4),
                               dateFormat: DateFormat.d(),
                               maximumLabels: 30,
                               majorGridLines: const MajorGridLines(width: 0),
@@ -227,7 +227,6 @@ class _StatisticsState extends State<Statistics> {
                           tooltipBehavior: TooltipBehavior(
                             enable: false,
                             builder: (dynamic data, dynamic point, dynamic series, int pointIndex, int seriesIndex) {
-                              print(data);
                               return Text(
                                 '${data.energy}',
                                 style: TextStyle(color: Theme.of(context).colorScheme.primary),

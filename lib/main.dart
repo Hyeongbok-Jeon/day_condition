@@ -89,7 +89,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Day Condition',
+      title: '하루 컨디션',
       themeMode: themeMode,
       theme: ThemeData(
         useMaterial3: useMaterial3,

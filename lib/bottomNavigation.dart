@@ -23,16 +23,19 @@ class _BottomNavigationExampleState extends State<BottomNavigationExample> {
 
   @override
   Widget build(BuildContext context) {
-    Widget navigationBar = Focus(
-      child: NavigationBar(
-        height: 80,
-        selectedIndex: _currentIndex,
-        onDestinationSelected: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        destinations: exampleBarDestinations,
+    Widget navigationBar = Padding(
+      padding: const EdgeInsets.only(bottom: 0),
+      child: Focus(
+        child: NavigationBar(
+          height: 100,
+          selectedIndex: _currentIndex,
+          onDestinationSelected: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+          destinations: exampleBarDestinations,
+        ),
       ),
     );
 
@@ -56,22 +59,31 @@ class _BottomNavigationExampleState extends State<BottomNavigationExample> {
 }
 
 const List<Widget> exampleBarDestinations = [
-  NavigationDestination(
-    tooltip: '',
-    icon: Icon(Icons.calendar_month),
-    label: '캘린더',
-    selectedIcon: Icon(Icons.calendar_month),
+  Padding(
+    padding: EdgeInsets.only(bottom: 20),
+    child: NavigationDestination(
+      tooltip: '',
+      icon: Icon(Icons.calendar_month),
+      label: '캘린더',
+      selectedIcon: Icon(Icons.calendar_month),
+    ),
   ),
-  NavigationDestination(
-    tooltip: '',
-    icon: Icon(Icons.bar_chart),
-    label: '차트',
-    selectedIcon: Icon(Icons.bar_chart),
+  Padding(
+    padding: EdgeInsets.only(bottom: 20),
+    child: NavigationDestination(
+      tooltip: '',
+      icon: Icon(Icons.bar_chart),
+      label: '차트',
+      selectedIcon: Icon(Icons.bar_chart),
+    ),
   ),
-  NavigationDestination(
-    tooltip: '',
-    icon: Icon(Icons.settings),
-    label: '설정',
-    selectedIcon: Icon(Icons.settings),
+  Padding(
+    padding: EdgeInsets.only(bottom: 20),
+    child: NavigationDestination(
+      tooltip: '',
+      icon: Icon(Icons.settings),
+      label: '설정',
+      selectedIcon: Icon(Icons.settings),
+    ),
   )
 ];

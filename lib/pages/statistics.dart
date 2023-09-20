@@ -78,7 +78,7 @@ class _StatisticsState extends State<Statistics> {
                     decoration: borderForDebug,
                     child: Text(
                       "수면 시간",
-                      style: Theme.of(context).textTheme.titleLarge,
+                      style: Theme.of(context).textTheme.titleMedium,
                     )),
                 // const SizedBox(
                 //   height: 10,
@@ -86,7 +86,7 @@ class _StatisticsState extends State<Statistics> {
                 snapshot.isEmpty
                     ? Expanded(
                         child: Container(
-                          decoration: BoxDecoration(border: Border.all(color: Theme.of(context).colorScheme.onSurface)),
+                          decoration: BoxDecoration(border: Border.all(color: Theme.of(context).colorScheme.onBackground)),
                           child: const Center(
                             child: Text('No Data'),
                           ),
@@ -125,7 +125,7 @@ class _StatisticsState extends State<Statistics> {
                               majorGridLines: const MajorGridLines(width: 0),
                               axisLabelFormatter: (AxisLabelRenderDetails axisLabelRenderArgs) {
                                 return ChartAxisLabel(
-                                    '${axisLabelRenderArgs.text}일', const TextStyle(color: Colors.white));
+                                    '${axisLabelRenderArgs.text}일', TextStyle(color: Theme.of(context).colorScheme.onBackground));
                               }),
                           primaryYAxis: NumericAxis(
                             interval: 1,
@@ -149,7 +149,7 @@ class _StatisticsState extends State<Statistics> {
                               }
                               return Text(
                                 timeDiff != 0 ? label : '0',
-                                style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                                style: TextStyle(color: Theme.of(context).colorScheme.onBackground),
                               );
                             },
                             color: Colors.transparent,
@@ -173,12 +173,12 @@ class _StatisticsState extends State<Statistics> {
                     decoration: borderForDebug,
                     child: Text(
                       "컨디션",
-                      style: Theme.of(context).textTheme.titleLarge,
+                      style: Theme.of(context).textTheme.titleMedium,
                     )),
                 snapshot.isEmpty
                     ? Expanded(
                         child: Container(
-                          decoration: BoxDecoration(border: Border.all(color: Theme.of(context).colorScheme.onSurface)),
+                          decoration: BoxDecoration(border: Border.all(color: Theme.of(context).colorScheme.onBackground)),
                           child: const Center(
                             child: Text('No Data'),
                           ),
@@ -211,7 +211,7 @@ class _StatisticsState extends State<Statistics> {
                               majorGridLines: const MajorGridLines(width: 0),
                               axisLabelFormatter: (AxisLabelRenderDetails axisLabelRenderArgs) {
                                 return ChartAxisLabel(
-                                    '${axisLabelRenderArgs.text}일', const TextStyle(color: Colors.white));
+                                    '${axisLabelRenderArgs.text}일', TextStyle(color: Theme.of(context).colorScheme.onBackground));
                               }),
                           primaryYAxis: NumericAxis(
                             interval: 1,
@@ -229,7 +229,7 @@ class _StatisticsState extends State<Statistics> {
                             builder: (dynamic data, dynamic point, dynamic series, int pointIndex, int seriesIndex) {
                               return Text(
                                 '${data.energy}',
-                                style: TextStyle(color: Theme.of(context).colorScheme.primary),
+                                style: TextStyle(color: Theme.of(context).colorScheme.onBackground),
                               );
                             },
                             color: Colors.transparent,
@@ -239,7 +239,8 @@ class _StatisticsState extends State<Statistics> {
                       ),
               ],
             ),
-          )
+          ),
+          Expanded(flex: 1, child: SizedBox(),),
         ],
       ),
     );

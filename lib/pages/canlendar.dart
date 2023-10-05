@@ -482,354 +482,356 @@ class _CanlendarState extends State<Canlendar> {
     }
     return SingleChildScrollView(
       padding: const EdgeInsets.all(10),
-      child: Column(
-        children: [
-          Container(
-            decoration: borderForDebug,
-            height: 40,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                ElevatedButton(
-                  style: ButtonStyle(
-                    elevation: MaterialStateProperty.all(0),
-                    backgroundColor: MaterialStateProperty.all(Colors.transparent),
-                  ),
-                  onPressed: showSfDateRangePickerDialog,
-                  child: Row(
-                    children: [
-                      Container(
-                        decoration: borderForDebug,
-                        child: Text(
-                          '${_focusedDay.year}.${_focusedDay.month}',
-                          style: TextStyle(
-                              fontSize: Theme.of(context).textTheme.headlineSmall?.fontSize,
-                              color: Theme.of(context).colorScheme.onBackground,
-                              fontWeight: FontWeight.w900),
-                          key: sfDateRangePickerButtonKey,
-                        ),
-                      ),
-                      Container(
-                        decoration: borderForDebug,
-                        child: Icon(
-                          isSfDateRangePickerDialogOpen ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_right,
-                          color: Theme.of(context).colorScheme.onBackground,
-                          size: 15,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          Container(
-              height: MediaQuery.of(context).size.height - 130,
-              decoration: borderForDebug,
-              child: snapshot['settings'] == null
-                  ? const Center()
-                  : FutureBuilder(
-                      future: futureHoliday,
-                      builder: (context, holidayAsyncSnapshot) {
-                        return TableCalendar<Event>(
-                          headerVisible: false,
-                          shouldFillViewport: true,
-                          holidayPredicate: (day) => holidayPredicate(day, holidayAsyncSnapshot),
-                          // 공휴일 표시
-                          availableCalendarFormats: const {
-                            CalendarFormat.month: '월',
-                          },
-                          locale: 'ko_KR',
-                          // rowHeight: 80,
-                          daysOfWeekHeight: 30,
-                          firstDay: kFirstDay,
-                          lastDay: kLastDay,
-                          focusedDay: _focusedDay,
-                          // selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-                          // enabledDayPredicate: (day) => getKoreanTime().compareTo(day) != -1,
-                          // 날짜 비활성화
-                          calendarFormat: _calendarFormat,
-                          startingDayOfWeek: snapshot['settings']['startingDayOfWeek'] == 'sunday'
-                              ? StartingDayOfWeek.sunday
-                              : StartingDayOfWeek.monday,
-                          calendarStyle: CalendarStyle(
-                            cellAlignment: Alignment.topCenter,
-                            holidayTextStyle: TextStyle(
-                                color: Colors.red, fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize),
-                            holidayDecoration: const BoxDecoration(),
-                            selectedTextStyle: const TextStyle(),
-                            selectedDecoration: const BoxDecoration(),
-                            todayTextStyle: const TextStyle(),
-                            todayDecoration: const BoxDecoration(),
-                            tableBorder: TableBorder(
-                              horizontalInside: BorderSide(color: Theme.of(context).colorScheme.surfaceVariant),
-                            ),
-                            defaultTextStyle: TextStyle(fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize),
-                            weekendTextStyle: TextStyle(fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize),
-                            outsideTextStyle: TextStyle(
-                                fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize,
-                                color: Theme.of(context).colorScheme.surfaceVariant),
-                            // outsideDaysVisible: true,
-                            disabledTextStyle: TextStyle(
-                                fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize,
-                                color: Theme.of(context).colorScheme.surfaceVariant),
-                            // disabledDecoration: const BoxDecoration(),
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height - 110,
+        child: Column(
+          children: [
+            Expanded(
+              flex: 1,
+              // decoration: borderForDebug,
+              // height: 40,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  ElevatedButton(
+                    style: ButtonStyle(
+                      elevation: MaterialStateProperty.all(0),
+                      backgroundColor: MaterialStateProperty.all(Colors.transparent),
+                    ),
+                    onPressed: showSfDateRangePickerDialog,
+                    child: Row(
+                      children: [
+                        Container(
+                          decoration: borderForDebug,
+                          child: Text(
+                            '${_focusedDay.year}.${_focusedDay.month}',
+                            style: TextStyle(
+                                fontSize: Theme.of(context).textTheme.headlineSmall?.fontSize,
+                                color: Theme.of(context).colorScheme.onBackground,
+                                fontWeight: FontWeight.w900),
+                            key: sfDateRangePickerButtonKey,
                           ),
-                          onDaySelected: _onDaySelected,
-                          onFormatChanged: (format) {
-                            if (_calendarFormat != format) {
-                              setState(() {
-                                _calendarFormat = format;
-                              });
-                            }
-                          },
-                          onPageChanged: (focusedDay) {
-                            setState(() {
-                              _focusedDay = focusedDay;
-                            });
-                          },
-                          calendarBuilders: CalendarBuilders(
-                            headerTitleBuilder: (BuildContext context, DateTime day) {
-                              return Container(
-                                decoration: borderForDebug,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Container(
-                                        decoration: borderForDebug,
-                                        child: TextButton(
-                                            key: sfDateRangePickerButtonKey,
-                                            child: Text(
-                                              '${day.year}년 ${day.month}월',
-                                              style: TextStyle(
-                                                  fontSize: Theme.of(context).textTheme.bodySmall?.fontSize,
-                                                  color: Colors.black),
-                                            ),
-                                            onPressed: () {
-                                              /// 버튼의 위치를 구함
-                                              final RenderBox sfDateRangePickerButton =
-                                                  sfDateRangePickerButtonKey.currentContext!.findRenderObject()
-                                                      as RenderBox;
-                                              final RenderBox overlay =
-                                                  Overlay.of(context).context.findRenderObject() as RenderBox;
-                                              final buttonPosition =
-                                                  sfDateRangePickerButton.localToGlobal(Offset.zero, ancestor: overlay);
-                                              showDialog(
-                                                  context: context,
-                                                  builder: (BuildContext context) {
-                                                    return Transform.translate(
-                                                      offset: Offset(buttonPosition.dx,
-                                                          buttonPosition.dy + sfDateRangePickerButton.size.height),
-                                                      child: Dialog(
-                                                        /// insetPadding 설정으로 padding을 0으로 만들고 align을 topLeft로 설정해서
-                                                        /// 왼쪽 상단 모서리에서 dialog가 나타나게 셋팅
-                                                        insetPadding:
-                                                            const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-                                                        alignment: Alignment.topLeft,
-
-                                                        /// dialog의 크기를 제한
-                                                        /// width는 일정 크기 이상 작아지면 SfDateRangePicker의 min width의 영향으로
-                                                        /// 최소 크기에서 작아지지 않음
-                                                        child: SizedBox(
-                                                          height: 180,
-                                                          width: 0,
-                                                          child: SfDateRangePicker(
-                                                            view: DateRangePickerView.year,
-                                                            selectionMode: DateRangePickerSelectionMode.single,
-                                                            onViewChanged: (args) => {
-                                                              if (args.view == DateRangePickerView.month)
-                                                                {
-                                                                  Navigator.of(context).pop(),
-                                                                  setState(() {
-                                                                    ///
-                                                                    _focusedDay = DateTime(
-                                                                        args.visibleDateRange.endDate!.year,
-                                                                        args.visibleDateRange.endDate!.month,
-                                                                        _focusedDay.day);
-                                                                  })
-                                                                }
-                                                            },
-
-                                                            /// 오른쪽 상단 좌우 화살표
-                                                            showNavigationArrow: true,
-
-                                                            /// pick 가능한 최소, 최대 날짜 설정
-                                                            minDate: kFirstDay,
-                                                            maxDate: kLastDay,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    );
-                                                  });
-                                            })),
-                                  ],
-                                ),
-                              );
+                        ),
+                        Container(
+                          decoration: borderForDebug,
+                          child: Icon(
+                            isSfDateRangePickerDialogOpen ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_right,
+                            color: Theme.of(context).colorScheme.onBackground,
+                            size: 15,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              flex: 12,
+                // height: MediaQuery.of(context).size.height * 0.85,
+                // decoration: borderForDebug,
+                child: snapshot['settings'] == null
+                    ? const Center()
+                    : FutureBuilder(
+                        future: futureHoliday,
+                        builder: (context, holidayAsyncSnapshot) {
+                          return TableCalendar<Event>(
+                            headerVisible: false,
+                            shouldFillViewport: true,
+                            holidayPredicate: (day) => holidayPredicate(day, holidayAsyncSnapshot),
+                            // 공휴일 표시
+                            availableCalendarFormats: const {
+                              CalendarFormat.month: '월',
                             },
-                            markerBuilder: (context, day, events) {
-                              final key = DateFormat('yyyyMMdd').format(day);
-
-                              String? wakeupTime;
-                              String? bedTime;
-                              double? energy;
-                              String? memo;
-
-                              /// DB 연동
-                              if (snapshot.isNotEmpty) {
-                                if (snapshot['data'] != null) {
-                                  if (snapshot['data'][key] != null) {
-                                    final value = snapshot['data'][key];
-                                    wakeupTime = value['wakeupTime'];
-                                    bedTime = value['bedTime'];
-                                    energy = value['energy'].toDouble();
-                                    memo = value['memo'];
-                                  }
-                                }
+                            locale: 'ko_KR',
+                            // rowHeight: 80,
+                            daysOfWeekHeight: 30,
+                            firstDay: kFirstDay,
+                            lastDay: kLastDay,
+                            focusedDay: _focusedDay,
+                            // selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                            // enabledDayPredicate: (day) => getKoreanTime().compareTo(day) != -1,
+                            // 날짜 비활성화
+                            calendarFormat: _calendarFormat,
+                            startingDayOfWeek: snapshot['settings']['startingDayOfWeek'] == 'sunday'
+                                ? StartingDayOfWeek.sunday
+                                : StartingDayOfWeek.monday,
+                            calendarStyle: CalendarStyle(
+                              cellAlignment: Alignment.topCenter,
+                              holidayTextStyle: TextStyle(
+                                  color: Colors.red, fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize),
+                              holidayDecoration: const BoxDecoration(),
+                              selectedTextStyle: const TextStyle(),
+                              selectedDecoration: const BoxDecoration(),
+                              todayTextStyle: const TextStyle(),
+                              todayDecoration: const BoxDecoration(),
+                              tableBorder: TableBorder(
+                                horizontalInside: BorderSide(color: Theme.of(context).colorScheme.surfaceVariant),
+                              ),
+                              defaultTextStyle: TextStyle(fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize),
+                              weekendTextStyle: TextStyle(fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize),
+                              outsideTextStyle: TextStyle(
+                                  fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize,
+                                  color: Theme.of(context).colorScheme.surfaceVariant),
+                              // outsideDaysVisible: true,
+                              disabledTextStyle: TextStyle(
+                                  fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize,
+                                  color: Theme.of(context).colorScheme.surfaceVariant),
+                              // disabledDecoration: const BoxDecoration(),
+                            ),
+                            onDaySelected: _onDaySelected,
+                            onFormatChanged: (format) {
+                              if (_calendarFormat != format) {
+                                setState(() {
+                                  _calendarFormat = format;
+                                });
                               }
-
-                              return Padding(
-                                padding: const EdgeInsets.all(4),
-                                child: Container(
+                            },
+                            onPageChanged: (focusedDay) {
+                              setState(() {
+                                _focusedDay = focusedDay;
+                              });
+                            },
+                            calendarBuilders: CalendarBuilders(
+                              headerTitleBuilder: (BuildContext context, DateTime day) {
+                                return Container(
                                   decoration: borderForDebug,
-                                  child: Stack(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      DateFormat('yyyyMMdd').format(day) ==
-                                              DateFormat('yyyyMMdd').format(getKoreanTime())
-                                          ? Container(
-                                              height: 23,
-                                              decoration: const BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                color: Colors.blue,
+                                      Container(
+                                          decoration: borderForDebug,
+                                          child: TextButton(
+                                              key: sfDateRangePickerButtonKey,
+                                              child: Text(
+                                                '${day.year}년 ${day.month}월',
+                                                style: TextStyle(
+                                                    fontSize: Theme.of(context).textTheme.bodySmall?.fontSize,
+                                                    color: Colors.black),
                                               ),
-                                            )
-                                          : Container(),
-                                      Column(
-                                        children: [
-                                          Container(
-                                              decoration: borderForDebug,
-                                              height: 23,
-                                              child: DateFormat('yyyyMMdd').format(day) ==
-                                                      DateFormat('yyyyMMdd').format(getKoreanTime())
-                                                  ? Center(
-                                                      child: Text(
-                                                      '${getKoreanTime().day}',
-                                                      style: TextStyle(
-                                                          color: Colors.white,
-                                                          fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize),
-                                                    ))
-                                                  : Container()),
-                                          Expanded(
-                                            child: Column(
-                                              mainAxisAlignment: MainAxisAlignment.start,
-                                              children: [
-                                                if (bedTime != null)
-                                                  Padding(
-                                                    padding: const EdgeInsets.only(top: 5),
-                                                    child: SizedBox(
-                                                      height: 15,
-                                                      // padding: const EdgeInsets.fromLTRB(3, 0, 3, 0),
-                                                      child: Stack(alignment: Alignment.center, children: [
-                                                        Container(
-                                                          // color: Colors.indigo.shade400,
-                                                          decoration: const BoxDecoration(
-                                                            shape: BoxShape.rectangle,
-                                                            color: Color(0xFF28A0FF),
-                                                            borderRadius: BorderRadius.all(Radius.circular(2.0)),
-                                                          ),
-                                                        ),
-                                                        Text(
-                                                          bedTime,
-                                                          style: const TextStyle(
-                                                            color: Colors.white,
-                                                            fontSize: 10,
-                                                          ),
-                                                          textAlign: TextAlign.center,
-                                                        ),
-                                                      ]),
-                                                    ),
-                                                  ),
-                                                if (wakeupTime != null)
-                                                  Padding(
-                                                    padding: const EdgeInsets.only(top: 5),
-                                                    child: SizedBox(
-                                                      height: 15,
-                                                      // padding: const EdgeInsets.fromLTRB(3, 0, 3, 0),
-                                                      child: Stack(alignment: Alignment.center, children: [
-                                                        Container(
-                                                          decoration: const BoxDecoration(
-                                                            shape: BoxShape.rectangle,
-                                                            color: Color(0xFFFFDFB0),
-                                                            borderRadius: BorderRadius.all(Radius.circular(2.0)),
-                                                          ),
-                                                        ),
-                                                        Text(
-                                                          wakeupTime,
-                                                          style: const TextStyle(
-                                                            color: Colors.black,
-                                                            fontSize: 10,
-                                                          ),
-                                                          textAlign: TextAlign.center,
-                                                        ),
-                                                      ]),
-                                                    ),
-                                                  ),
-                                                Padding(
-                                                  padding: const EdgeInsets.only(top: 5),
-                                                  child: Container(
-                                                    decoration: borderForDebug,
-                                                    height: 15,
-                                                    child: Row(
-                                                      children: [
-                                                        /// Expanded 2개 배치 시 공간을 정확히 반으로 분배
-                                                        Expanded(
-                                                          child: energy != null
-                                                              ? Container(
-                                                                  decoration: borderForDebug,
-                                                                  child: Icon(Icons.circle,
-                                                                      color: energyToColor(energy), size: 10),
-                                                                )
-                                                              : Container(),
-                                                        ),
-                                                        Expanded(
-                                                          child: memo != null
-                                                              ? Container(
-                                                                  decoration: borderForDebug,
-                                                                  child:
+                                              onPressed: () {
+                                                /// 버튼의 위치를 구함
+                                                final RenderBox sfDateRangePickerButton =
+                                                    sfDateRangePickerButtonKey.currentContext!.findRenderObject()
+                                                        as RenderBox;
+                                                final RenderBox overlay =
+                                                    Overlay.of(context).context.findRenderObject() as RenderBox;
+                                                final buttonPosition =
+                                                    sfDateRangePickerButton.localToGlobal(Offset.zero, ancestor: overlay);
+                                                showDialog(
+                                                    context: context,
+                                                    builder: (BuildContext context) {
+                                                      return Transform.translate(
+                                                        offset: Offset(buttonPosition.dx,
+                                                            buttonPosition.dy + sfDateRangePickerButton.size.height),
+                                                        child: Dialog(
+                                                          /// insetPadding 설정으로 padding을 0으로 만들고 align을 topLeft로 설정해서
+                                                          /// 왼쪽 상단 모서리에서 dialog가 나타나게 셋팅
+                                                          insetPadding:
+                                                              const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
+                                                          alignment: Alignment.topLeft,
 
-                                                                      /// 공백만으로 이루어진 문자는 메모가 없는 것으로 간주
-                                                                      memo.replaceAll(' ', '') != ''
-                                                                          ? Container(
-                                                                              decoration: borderForDebug,
-                                                                              child: const Icon(
-                                                                                Icons.comment_outlined,
-                                                                                color: Colors.red,
-                                                                                size: 10,
-                                                                              ),
-                                                                            )
-                                                                          : null)
-                                                              : Container(),
-                                                        )
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                                          /// dialog의 크기를 제한
+                                                          /// width는 일정 크기 이상 작아지면 SfDateRangePicker의 min width의 영향으로
+                                                          /// 최소 크기에서 작아지지 않음
+                                                          child: SizedBox(
+                                                            height: 180,
+                                                            width: 0,
+                                                            child: SfDateRangePicker(
+                                                              view: DateRangePickerView.year,
+                                                              selectionMode: DateRangePickerSelectionMode.single,
+                                                              onViewChanged: (args) => {
+                                                                if (args.view == DateRangePickerView.month)
+                                                                  {
+                                                                    Navigator.of(context).pop(),
+                                                                    setState(() {
+                                                                      ///
+                                                                      _focusedDay = DateTime(
+                                                                          args.visibleDateRange.endDate!.year,
+                                                                          args.visibleDateRange.endDate!.month,
+                                                                          _focusedDay.day);
+                                                                    })
+                                                                  }
+                                                              },
+
+                                                              /// 오른쪽 상단 좌우 화살표
+                                                              showNavigationArrow: true,
+
+                                                              /// pick 가능한 최소, 최대 날짜 설정
+                                                              minDate: kFirstDay,
+                                                              maxDate: kLastDay,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    });
+                                              })),
                                     ],
                                   ),
-                                ),
-                              );
-                            },
-                          ),
-                        );
-                      })),
-        ],
+                                );
+                              },
+                              markerBuilder: (context, day, events) {
+                                final key = DateFormat('yyyyMMdd').format(day);
+
+                                String? wakeupTime;
+                                String? bedTime;
+                                double? energy;
+                                String? memo;
+
+                                /// DB 연동
+                                if (snapshot.isNotEmpty) {
+                                  if (snapshot['data'] != null) {
+                                    if (snapshot['data'][key] != null) {
+                                      final value = snapshot['data'][key];
+                                      wakeupTime = value['wakeupTime'];
+                                      bedTime = value['bedTime'];
+                                      energy = value['energy'].toDouble();
+                                      memo = value['memo'];
+                                    }
+                                  }
+                                }
+
+                                return Padding(
+                                  padding: const EdgeInsets.all(4),
+                                  child: Container(
+                                    decoration: borderForDebug,
+                                    child: Stack(
+                                      children: [
+                                        DateFormat('yyyyMMdd').format(day) ==
+                                                DateFormat('yyyyMMdd').format(getKoreanTime())
+                                            ? Container(
+                                                height: 23,
+                                                decoration: const BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color: Colors.blue,
+                                                ),
+                                              )
+                                            : Container(),
+                                        Column(
+                                          children: [
+                                            Container(
+                                                decoration: borderForDebug,
+                                                height: 23,
+                                                child: DateFormat('yyyyMMdd').format(day) ==
+                                                        DateFormat('yyyyMMdd').format(getKoreanTime())
+                                                    ? Center(
+                                                        child: Text(
+                                                        '${getKoreanTime().day}',
+                                                        style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: Theme.of(context).textTheme.bodyMedium?.fontSize),
+                                                      ))
+                                                    : Container()),
+                                            Expanded(
+                                              child: Column(
+                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                children: [
+                                                  if (bedTime != null)
+                                                    Padding(
+                                                      padding: const EdgeInsets.only(top: 5),
+                                                      child: SizedBox(
+                                                        height: 15,
+                                                        // padding: const EdgeInsets.fromLTRB(3, 0, 3, 0),
+                                                        child: Stack(alignment: Alignment.center, children: [
+                                                          Container(
+                                                            // color: Colors.indigo.shade400,
+                                                            decoration: const BoxDecoration(
+                                                              shape: BoxShape.rectangle,
+                                                              color: Color(0xFF28A0FF),
+                                                              borderRadius: BorderRadius.all(Radius.circular(2.0)),
+                                                            ),
+                                                          ),
+                                                          Text(
+                                                            bedTime,
+                                                            style: const TextStyle(
+                                                              color: Colors.white,
+                                                              fontSize: 10,
+                                                            ),
+                                                            textAlign: TextAlign.center,
+                                                          ),
+                                                        ]),
+                                                      ),
+                                                    ),
+                                                  if (wakeupTime != null)
+                                                    Padding(
+                                                      padding: const EdgeInsets.only(top: 5),
+                                                      child: SizedBox(
+                                                        height: 15,
+                                                        // padding: const EdgeInsets.fromLTRB(3, 0, 3, 0),
+                                                        child: Stack(alignment: Alignment.center, children: [
+                                                          Container(
+                                                            decoration: const BoxDecoration(
+                                                              shape: BoxShape.rectangle,
+                                                              color: Color(0xFFFFDFB0),
+                                                              borderRadius: BorderRadius.all(Radius.circular(2.0)),
+                                                            ),
+                                                          ),
+                                                          Text(
+                                                            wakeupTime,
+                                                            style: const TextStyle(
+                                                              color: Colors.black,
+                                                              fontSize: 10,
+                                                            ),
+                                                            textAlign: TextAlign.center,
+                                                          ),
+                                                        ]),
+                                                      ),
+                                                    ),
+                                                  Padding(
+                                                    padding: const EdgeInsets.only(top: 5),
+                                                    child: Container(
+                                                      decoration: borderForDebug,
+                                                      height: 15,
+                                                      child: Row(
+                                                        children: [
+                                                          /// Expanded 2개 배치 시 공간을 정확히 반으로 분배
+                                                          Expanded(
+                                                            child: energy != null
+                                                                ? Container(
+                                                                    decoration: borderForDebug,
+                                                                    child: Icon(Icons.circle,
+                                                                        color: energyToColor(energy), size: 10),
+                                                                  )
+                                                                : Container(),
+                                                          ),
+                                                          Expanded(
+                                                            child: memo != null
+                                                                ? Container(
+                                                                    decoration: borderForDebug,
+                                                                    child:
+
+                                                                        /// 공백만으로 이루어진 문자는 메모가 없는 것으로 간주
+                                                                        memo.replaceAll(' ', '') != ''
+                                                                            ? Container(
+                                                                                decoration: borderForDebug,
+                                                                                child: const Icon(
+                                                                                  Icons.comment_outlined,
+                                                                                  color: Colors.red,
+                                                                                  size: 10,
+                                                                                ),
+                                                                              )
+                                                                            : null)
+                                                                : Container(),
+                                                          )
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        })),
+          ],
+        ),
       ),
     );
   }

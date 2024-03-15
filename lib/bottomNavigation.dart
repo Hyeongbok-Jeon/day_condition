@@ -23,19 +23,16 @@ class _BottomNavigationExampleState extends State<BottomNavigationExample> {
 
   @override
   Widget build(BuildContext context) {
-    Widget navigationBar = Padding(
-      padding: const EdgeInsets.only(bottom: 0),
-      child: Focus(
-        child: NavigationBar(
-          height: 100,
-          selectedIndex: _currentIndex,
-          onDestinationSelected: (index) {
-            setState(() {
-              _currentIndex = index;
-            });
-          },
-          destinations: exampleBarDestinations,
-        ),
+    Widget navigationBar = Focus(
+      child: NavigationBar(
+        height: 90,
+        selectedIndex: _currentIndex,
+        onDestinationSelected: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        destinations: exampleBarDestinations,
       ),
     );
 
@@ -64,7 +61,7 @@ const List<Widget> exampleBarDestinations = [
     child: NavigationDestination(
       tooltip: '',
       icon: Icon(Icons.calendar_month),
-      label: '캘린더',
+      label: '',
       selectedIcon: Icon(Icons.calendar_month),
     ),
   ),
@@ -73,7 +70,7 @@ const List<Widget> exampleBarDestinations = [
     child: NavigationDestination(
       tooltip: '',
       icon: Icon(Icons.bar_chart),
-      label: '차트',
+      label: '',
       selectedIcon: Icon(Icons.bar_chart),
     ),
   ),
@@ -82,7 +79,7 @@ const List<Widget> exampleBarDestinations = [
     child: NavigationDestination(
       tooltip: '',
       icon: Icon(Icons.settings),
-      label: '설정',
+      label: '',
       selectedIcon: Icon(Icons.settings),
     ),
   )

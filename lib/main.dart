@@ -110,6 +110,26 @@ class _MyAppState extends State<MyApp> {
         Locale('en'),
       ],
       locale: const Locale('ko'),
+      builder: (context, child) {
+        return Stack(
+          children: [
+            Container(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              color: Colors.black,
+            ),
+            Center(
+              child: SizedBox(
+                width: 500,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 500),
+                  child: child,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

@@ -486,46 +486,46 @@ class _CanlendarState extends State<Canlendar> {
         height: MediaQuery.of(context).size.height - 110,
         child: Column(
           children: [
-            Expanded(
-              flex: 1,
-              // decoration: borderForDebug,
-              // height: 40,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  ElevatedButton(
-                    style: ButtonStyle(
-                      elevation: MaterialStateProperty.all(0),
-                      backgroundColor: MaterialStateProperty.all(Colors.transparent),
-                    ),
-                    onPressed: showSfDateRangePickerDialog,
-                    child: Row(
-                      children: [
-                        Container(
-                          decoration: borderForDebug,
-                          child: Text(
-                            '${_focusedDay.year}.${_focusedDay.month}',
-                            style: TextStyle(
-                                fontSize: Theme.of(context).textTheme.headlineSmall?.fontSize,
-                                color: Theme.of(context).colorScheme.onBackground,
-                                fontWeight: FontWeight.w900),
-                            key: sfDateRangePickerButtonKey,
-                          ),
-                        ),
-                        Container(
-                          decoration: borderForDebug,
-                          child: Icon(
-                            isSfDateRangePickerDialogOpen ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_right,
-                            color: Theme.of(context).colorScheme.onBackground,
-                            size: 15,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            // Expanded(
+            //   flex: 1,
+            //   // decoration: borderForDebug,
+            //   // height: 40,
+            //   child: Row(
+            //     mainAxisAlignment: MainAxisAlignment.start,
+            //     children: [
+            //       ElevatedButton(
+            //         style: ButtonStyle(
+            //           elevation: MaterialStateProperty.all(0),
+            //           backgroundColor: MaterialStateProperty.all(Colors.transparent),
+            //         ),
+            //         onPressed: showSfDateRangePickerDialog,
+            //         child: Row(
+            //           children: [
+            //             Container(
+            //               decoration: borderForDebug,
+            //               child: Text(
+            //                 '${_focusedDay.year}.${_focusedDay.month}',
+            //                 style: TextStyle(
+            //                     fontSize: Theme.of(context).textTheme.headlineSmall?.fontSize,
+            //                     color: Theme.of(context).colorScheme.onBackground,
+            //                     fontWeight: FontWeight.w900),
+            //                 key: sfDateRangePickerButtonKey,
+            //               ),
+            //             ),
+            //             Container(
+            //               decoration: borderForDebug,
+            //               child: Icon(
+            //                 isSfDateRangePickerDialogOpen ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_right,
+            //                 color: Theme.of(context).colorScheme.onBackground,
+            //                 size: 15,
+            //               ),
+            //             ),
+            //           ],
+            //         ),
+            //       ),
+            //     ],
+            //   ),
+            // ),
             Expanded(
               flex: 12,
                 // height: MediaQuery.of(context).size.height * 0.85,
@@ -536,7 +536,7 @@ class _CanlendarState extends State<Canlendar> {
                         future: futureHoliday,
                         builder: (context, holidayAsyncSnapshot) {
                           return TableCalendar<Event>(
-                            headerVisible: false,
+                            headerVisible: true,
                             shouldFillViewport: true,
                             holidayPredicate: (day) => holidayPredicate(day, holidayAsyncSnapshot),
                             // 공휴일 표시
@@ -604,10 +604,11 @@ class _CanlendarState extends State<Canlendar> {
                                           child: TextButton(
                                               key: sfDateRangePickerButtonKey,
                                               child: Text(
-                                                '${day.year}년 ${day.month}월',
+                                                '${day.year}.${day.month}',
                                                 style: TextStyle(
-                                                    fontSize: Theme.of(context).textTheme.bodySmall?.fontSize,
-                                                    color: Colors.black),
+                                                    fontSize: Theme.of(context).textTheme.headlineSmall?.fontSize,
+                                                    color: Theme.of(context).colorScheme.onBackground,
+                                                    fontWeight: FontWeight.w900),
                                               ),
                                               onPressed: () {
                                                 /// 버튼의 위치를 구함

@@ -80,9 +80,9 @@ class _StatisticsState extends State<Statistics> {
                       "수면 시간",
                       style: Theme.of(context).textTheme.titleMedium,
                     )),
-                // const SizedBox(
-                //   height: 10,
-                // ),
+                const SizedBox(
+                  height: 10,
+                ),
                 snapshot.isEmpty
                     ? Expanded(
                         child: Container(
@@ -175,6 +175,9 @@ class _StatisticsState extends State<Statistics> {
                       "컨디션",
                       style: Theme.of(context).textTheme.titleMedium,
                     )),
+                const SizedBox(
+                  height: 10,
+                ),
                 snapshot.isEmpty
                     ? Expanded(
                         child: Container(

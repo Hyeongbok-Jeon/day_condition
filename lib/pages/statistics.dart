@@ -94,7 +94,7 @@ class _StatisticsState extends State<Statistics> {
                       )
                     : Expanded(
                         child: SfCartesianChart(
-                          series: <ChartSeries>[
+                          series: <CartesianSeries>[
                             // Renders line chart
                             ColumnSeries<UserData, DateTime>(
                               dataSource: chartData,
@@ -118,7 +118,7 @@ class _StatisticsState extends State<Statistics> {
                             )
                           ],
                           primaryXAxis: DateTimeCategoryAxis(
-                              visibleMinimum: DateTime(sevenDaysAgo.year, sevenDaysAgo.month, sevenDaysAgo.day),
+                              initialVisibleMinimum: DateTime(sevenDaysAgo.year, sevenDaysAgo.month, sevenDaysAgo.day),
                               // visibleMaximum: DateTime(2023, 9, 4),
                               dateFormat: DateFormat.d(),
                               maximumLabels: 30,
@@ -189,7 +189,7 @@ class _StatisticsState extends State<Statistics> {
                       )
                     : Expanded(
                         child: SfCartesianChart(
-                          series: <ChartSeries>[
+                          series: <CartesianSeries>[
                             // Renders line chart
                             LineSeries<UserData, DateTime>(
                               dataSource: chartData,
@@ -208,7 +208,7 @@ class _StatisticsState extends State<Statistics> {
                             )
                           ],
                           primaryXAxis: DateTimeCategoryAxis(
-                              visibleMinimum: DateTime(sevenDaysAgo.year, sevenDaysAgo.month, sevenDaysAgo.day),
+                              initialVisibleMinimum: DateTime(sevenDaysAgo.year, sevenDaysAgo.month, sevenDaysAgo.day),
                               dateFormat: DateFormat.d(),
                               maximumLabels: 30,
                               majorGridLines: const MajorGridLines(width: 0),

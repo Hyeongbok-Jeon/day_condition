@@ -45,18 +45,26 @@ Future<void> main() async {
   // uid 없이 진행하면 모든 DB 경로가 루트('/')를 가리키게 되어, 데이터 초기화 시
   // 전체 데이터가 지워질 수 있다. 로그인에 실패하면 앱을 진행하지 않는다.
   if (G_uid == null || G_uid!.isEmpty) {
-    runApp(const LoginFailedApp());
+    runApp(const StartupErrorApp('로그인에 실패했습니다.\n네트워크 연결을 확인한 뒤 앱을 다시 실행해 주세요.'));
     return;
   }
 
-  // 기본 설정값 셋팅
-  final snapshotValue = <dynamic, dynamic>{};
-  final ref = FirebaseDatabase.instance.ref('$G_uid/settings');
-  final snapshot = await ref.get();
-  for (final child in snapshot.children) {
-    snapshotValue[child.key] = child.value;
+  // 기본 설정값 셋팅. DB에 연결할 수 없으면 빈 화면으로 멈추지 않고 안내한다.
+  try {
+    final snapshotValue = <dynamic, dynamic>{};
+    final ref = FirebaseDatabase.instance.ref('$G_uid/settings');
+    final snapshot = await ref.get().timeout(const Duration(seconds: 10));
+    for (final child in snapshot.children) {
+      snapshotValue[child.key] = child.value;
+    }
+    ref.update({'startingDayOfWeek': snapshotValue['startingDayOfWeek'] ?? 'sunday'});
+  } catch (e) {
+    if (kDebugMode) {
+      print('Database unavailable: $e');
+    }
+    runApp(const StartupErrorApp('서버에 연결할 수 없습니다.\n잠시 후 다시 시도해 주세요.'));
+    return;
   }
-  ref.update({'startingDayOfWeek': snapshotValue['startingDayOfWeek'] ?? 'sunday'});
 
   /// 지속성 동작
   // FirebaseDatabase.instance.setPersistenceEnabled(true);
@@ -141,21 +149,20 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-class LoginFailedApp extends StatelessWidget {
-  const LoginFailedApp({super.key});
+class StartupErrorApp extends StatelessWidget {
+  const StartupErrorApp(this.message, {super.key});
+
+  final String message;
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: Center(
           child: Padding(
-            padding: EdgeInsets.all(30),
-            child: Text(
-              '로그인에 실패했습니다.\n네트워크 연결을 확인한 뒤 앱을 다시 실행해 주세요.',
-              textAlign: TextAlign.center,
-            ),
+            padding: const EdgeInsets.all(30),
+            child: Text(message, textAlign: TextAlign.center),
           ),
         ),
       ),

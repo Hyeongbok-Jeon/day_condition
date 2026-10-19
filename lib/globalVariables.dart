@@ -9,7 +9,6 @@ var borderForDebug = G_isDebug
       )
     : null;
 
-String? G_uid = "";
 
 Color G_wakeUpColor = const Color(0xFFF8DAA0);
 Color G_sleepColor = Colors.indigo;

@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
 import '../../utils.dart';
 import '../globalVariables.dart';
-import 'package:day_condition/models/holiday.dart';
+import '../data/holidays.dart';
+import '../data/local_store.dart';
 
 class Canlendar extends StatefulWidget {
   Canlendar({Key? key, required this.useLightMode, required this.isReTap}) : super(key: key);
@@ -26,53 +26,41 @@ class Canlendar extends StatefulWidget {
 }
 
 class _CanlendarState extends State<Canlendar> {
-  final gUidRef = FirebaseDatabase.instance.ref('$G_uid');
-  final holidayInfoRef = FirebaseDatabase.instance.ref('holidayInfo');
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = getKoreanTime();
   bool isSfDateRangePickerDialogOpen = false;
   final GlobalKey sfDateRangePickerButtonKey = GlobalKey();
   Map<String, dynamic> snapshot = {};
-  Map<String, dynamic> holidaySnapshot = {};
-  late Future<List<Holiday>> futureHoliday;
+  /// 공휴일(`yyyyMMdd` → 이름). 저장해 둔 목록을 먼저 쓰고, 최신본을 받으면 바꾼다.
+  late Future<Map<String, String>> futureHoliday;
 
   @override
   void initState() {
     super.initState();
 
-    gUidRef.onValue.listen((DatabaseEvent event) {
-      setState(() {
-        snapshot.clear();
-        for (DataSnapshot child in event.snapshot.children) {
-          snapshot['${child.key}'] = child.value;
-        }
-      });
-    });
+    snapshot.addAll(LocalStore.instance.snapshot);
+    LocalStore.instance.addListener(_sync);
 
-    futureHoliday = fetchHoliday();
+    futureHoliday = Holidays.loadLocal();
+    Holidays.refresh().then((fresh) {
+      if (fresh != null && mounted) {
+        setState(() => futureHoliday = Future.value(fresh));
+      }
+    });
   }
 
   @override
   void dispose() {
+    LocalStore.instance.removeListener(_sync);
     super.dispose();
   }
 
-  Future<List<Holiday>> fetchHoliday() async {
-    List<Holiday> holidayList = [];
-
-    final holidayRef = FirebaseDatabase.instance.ref('holidayInfo');
-    final snapshot = await holidayRef.get();
-    if (snapshot.exists) {
-      for (DataSnapshot child in snapshot.children) {
-        holidayList.addAll(Holiday.holidayListfromDataSnapshot(child));
-      }
-    } else {
-      if (kDebugMode) {
-        print('No data available.');
-      }
-    }
-
-    return holidayList;
+  void _sync() {
+    setState(() {
+      snapshot
+        ..clear()
+        ..addAll(LocalStore.instance.snapshot);
+    });
   }
 
   void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
@@ -199,10 +187,9 @@ class _CanlendarState extends State<Canlendar> {
                               Container(
                                 decoration: borderForDebug,
                                 child: IconButton(
-                                  onPressed: () async => {
-                                    await gUidRef.child('data/$key').remove().then((value) {
-                                      Navigator.pop(context);
-                                    })
+                                  onPressed: () async {
+                                    await LocalStore.instance.removeEntry(key);
+                                    if (context.mounted) Navigator.pop(context);
                                   },
                                   icon: const Icon(
                                     Icons.delete,
@@ -213,9 +200,8 @@ class _CanlendarState extends State<Canlendar> {
                               Container(
                                 decoration: borderForDebug,
                                 child: IconButton(
-                                  onPressed: () async => {
-                                    await gUidRef.child('data').update({
-                                      key: {
+                                  onPressed: () async {
+                                    await LocalStore.instance.setEntry(key, {
                                         'date': selectedDay.toString(),
                                         "wakeupTime": DateFormat('HH:mm').format(wakeupTime),
                                         "bedTime": DateFormat('HH:mm').format(bedTime),
@@ -223,12 +209,8 @@ class _CanlendarState extends State<Canlendar> {
                                         // 창에서 바꾼 취침/기상 시간으로 저장 시점에 계산한다.
                                         "timeDiff": sleepMinutes(bedTime, wakeupTime),
                                         'memo': textEditingController.text,
-                                      }
-                                    }).then((value) {
-                                      setState(() {
-                                        Navigator.pop(context);
-                                      });
-                                    })
+                                    });
+                                    if (context.mounted) Navigator.pop(context);
                                   },
                                   icon: const Icon(
                                     Icons.check,
@@ -392,21 +374,12 @@ class _CanlendarState extends State<Canlendar> {
     }
   }
 
-  bool holidayPredicate(DateTime day, AsyncSnapshot holidayAsyncSnapshot) {
+  bool holidayPredicate(DateTime day, AsyncSnapshot<Map<String, String>> holidayAsyncSnapshot) {
     if (day.weekday == 7 && day.month == _focusedDay.month) {
       return true;
-    } else if (holidayAsyncSnapshot.hasData) {
-      bool isHoliday = false;
-      List<Holiday> holidayList = holidayAsyncSnapshot.data;
-      for (Holiday holiday in holidayList) {
-        if (DateFormat('yyyyMMdd').format(day) == holiday.locdate) {
-          isHoliday = true;
-        }
-      }
-      return isHoliday;
-    } else {
-      return false;
     }
+    final holidays = holidayAsyncSnapshot.data;
+    return holidays != null && holidays.containsKey(DateFormat('yyyyMMdd').format(day));
   }
 
   void showSfDateRangePickerDialog() async {
@@ -470,12 +443,6 @@ class _CanlendarState extends State<Canlendar> {
     });
   }
 
-  List<Holiday> getHolidayList() {
-    List<Holiday> holidayList = [];
-    // holidayList.addAll(Holiday.holidayListfromJson(holidaySnapshot));
-    return holidayList;
-  }
-
   @override
   Widget build(BuildContext context) {
     /// bottom navigation 캘린더 아이콘 클릭 시 현재 날짜로 이동
@@ -535,7 +502,7 @@ class _CanlendarState extends State<Canlendar> {
                 // decoration: borderForDebug,
                 child: snapshot['settings'] == null
                     ? const Center()
-                    : FutureBuilder(
+                    : FutureBuilder<Map<String, String>>(
                         future: futureHoliday,
                         builder: (context, holidayAsyncSnapshot) {
                           return TableCalendar<Event>(

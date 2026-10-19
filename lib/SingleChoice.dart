@@ -1,9 +1,7 @@
-import 'package:day_condition/models/userSetting.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-import 'globalVariables.dart';
+import 'data/local_store.dart';
 
 class SingleChoice extends StatefulWidget {
   const SingleChoice({super.key, required this.snapshot});
@@ -15,8 +13,6 @@ class SingleChoice extends StatefulWidget {
 }
 
 class _SingleChoiceState extends State<SingleChoice> {
-  final ref = FirebaseDatabase.instance.ref('$G_uid/settings');
-
   @override
   Widget build(BuildContext context) {
     return SegmentedButton<StartingDayOfWeek>(
@@ -30,9 +26,10 @@ class _SingleChoiceState extends State<SingleChoice> {
         widget.snapshot['startingDayOfWeek'] == 'sunday' ? StartingDayOfWeek.sunday : StartingDayOfWeek.monday
       },
       onSelectionChanged: (newSelection) {
-        ref.update({
-          'startingDayOfWeek': newSelection.first == StartingDayOfWeek.sunday ? 'sunday' : 'monday',
-        });
+        LocalStore.instance.setSetting(
+          'startingDayOfWeek',
+          newSelection.first == StartingDayOfWeek.sunday ? 'sunday' : 'monday',
+        );
       },
     );
   }

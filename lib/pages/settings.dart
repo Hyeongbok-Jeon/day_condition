@@ -1,8 +1,8 @@
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../SingleChoice.dart';
-import '../SwitchRow.dart';
+import '../data/local_store.dart';
 import '../globalVariables.dart';
 
 class Settings extends StatefulWidget {
@@ -20,25 +20,77 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
-  final ref = FirebaseDatabase.instance.ref('$G_uid');
   Map<String, dynamic> snapshot = {};
 
   @override
   void initState() {
     super.initState();
+    snapshot.addAll(LocalStore.instance.settings);
+    LocalStore.instance.addListener(_sync);
+  }
 
-    ref.child('settings').onValue.listen((DatabaseEvent event) {
-      setState(() {
-        snapshot.clear();
-        for (DataSnapshot child in event.snapshot.children) {
-          snapshot['${child.key}'] = child.value;
-        }
-      });
+  @override
+  void dispose() {
+    LocalStore.instance.removeListener(_sync);
+    super.dispose();
+  }
+
+  void _sync() {
+    setState(() {
+      snapshot
+        ..clear()
+        ..addAll(LocalStore.instance.settings);
     });
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  /// 전체 기록을 JSON으로 클립보드에 복사한다. 메모나 메신저에 붙여 넣어 보관하면 된다.
+  Future<void> _exportBackup() async {
+    await Clipboard.setData(ClipboardData(text: LocalStore.instance.exportJson()));
+    if (!mounted) return;
+    _showMessage('백업 데이터를 클립보드에 복사했습니다. 메모 등에 붙여 넣어 보관하세요.');
+  }
+
+  Future<void> _importBackup() async {
+    final controller = TextEditingController();
+    final json = await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('백업 불러오기'),
+          content: TextField(
+            controller: controller,
+            maxLines: 6,
+            decoration: const InputDecoration(
+              hintText: '보관해 둔 백업 데이터를 붙여 넣으세요.\n지금 기록은 모두 바뀝니다.',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text('취소')),
+            TextButton(onPressed: () => Navigator.pop(context, controller.text), child: const Text('불러오기')),
+          ],
+        );
+      },
+    );
+    if (json == null || json.trim().isEmpty) return;
+    try {
+      await LocalStore.instance.importJson(json.trim());
+      if (!mounted) return;
+      _showMessage('백업을 불러왔습니다.');
+    } on FormatException {
+      if (!mounted) return;
+      _showMessage('백업 데이터 형식이 올바르지 않습니다.');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final linkStyle =
+        Theme.of(context).textTheme.apply(bodyColor: Theme.of(context).colorScheme.primary).titleMedium;
     return Padding(
       padding: const EdgeInsets.all(30),
       child: Column(
@@ -75,13 +127,16 @@ class _SettingsState extends State<Settings> {
                           "시작 요일",
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
-                        snapshot['startingDayOfWeek'] == null
-                            ? const Center(
-                                child: CircularProgressIndicator(),
-                              )
-                            : SingleChoice(snapshot: snapshot),
+                        SingleChoice(snapshot: snapshot),
                       ],
                     )),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    TextButton(onPressed: _exportBackup, child: Text('백업 복사', style: linkStyle)),
+                    TextButton(onPressed: _importBackup, child: Text('백업 불러오기', style: linkStyle)),
+                  ],
+                ),
                 Center(
                   child: TextButton(
                     onPressed: () {
@@ -89,7 +144,6 @@ class _SettingsState extends State<Settings> {
                         context: context,
                         builder: (BuildContext context) {
                           return AlertDialog(
-                            // title: Text('Confirmation'),
                             content: const Text('데이터를 초기화 하시겠습니까?'),
                             actions: [
                               TextButton(
@@ -101,13 +155,7 @@ class _SettingsState extends State<Settings> {
                               ),
                               TextButton(
                                 onPressed: () async {
-                                  // uid가 비어 있으면 ref가 DB 루트를 가리키므로 절대 지우지 않는다.
-                                  if (G_uid == null || G_uid!.isEmpty) {
-                                    Navigator.pop(context);
-                                    return;
-                                  }
-                                  await ref.remove();
-                                  await ref.child('settings').update({'startingDayOfWeek': 'sunday'});
+                                  await LocalStore.instance.clear();
                                   if (context.mounted) Navigator.pop(context);
                                 },
                                 child: const Text('확인'),
@@ -117,13 +165,7 @@ class _SettingsState extends State<Settings> {
                         },
                       );
                     },
-                    child: Text(
-                      '데이터 초기화',
-                      style: Theme.of(context)
-                          .textTheme
-                          .apply(bodyColor: Theme.of(context).colorScheme.primary)
-                          .titleMedium,
-                    ),
+                    child: Text('데이터 초기화', style: linkStyle),
                   ),
                 ),
               ],

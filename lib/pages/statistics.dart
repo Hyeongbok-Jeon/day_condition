@@ -1,9 +1,9 @@
 import 'package:day_condition/utils.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
+import '../data/local_store.dart';
 import '../globalVariables.dart';
 import '../models/userData.dart';
 
@@ -17,7 +17,6 @@ class Statistics extends StatefulWidget {
 }
 
 class _StatisticsState extends State<Statistics> {
-  final ref = FirebaseDatabase.instance.ref('$G_uid');
   Map<String, dynamic> snapshot = {};
   late List<UserData> chartData;
 
@@ -25,13 +24,21 @@ class _StatisticsState extends State<Statistics> {
   void initState() {
     super.initState();
 
-    ref.child('data').onValue.listen((DatabaseEvent event) {
-      setState(() {
-        snapshot.clear();
-        for (DataSnapshot child in event.snapshot.children) {
-          snapshot['${child.key}'] = child.value;
-        }
-      });
+    snapshot.addAll(LocalStore.instance.data);
+    LocalStore.instance.addListener(_sync);
+  }
+
+  @override
+  void dispose() {
+    LocalStore.instance.removeListener(_sync);
+    super.dispose();
+  }
+
+  void _sync() {
+    setState(() {
+      snapshot
+        ..clear()
+        ..addAll(LocalStore.instance.data);
     });
   }
 

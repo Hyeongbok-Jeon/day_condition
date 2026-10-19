@@ -121,6 +121,13 @@ class _CanlendarState extends State<Canlendar> {
     }
   }
 
+  /// 취침 시각부터 기상 시각까지의 수면 시간(분). 기상이 취침보다 이르면 자정을 넘긴 것으로 본다.
+  int sleepMinutes(DateTime bedTime, DateTime wakeupTime) {
+    final bed = bedTime.hour * 60 + bedTime.minute;
+    final wake = wakeupTime.hour * 60 + wakeupTime.minute;
+    return (wake - bed + 24 * 60) % (24 * 60);
+  }
+
   /// 이벤트 등록 modal bottom sheet
   Future<void> setEvent(DateTime selectedDay) async {
     int wakeupTimeHH = 7;
@@ -128,7 +135,6 @@ class _CanlendarState extends State<Canlendar> {
     int wakeupTimeMM = 0;
     int bedTimeMM = 0;
     dynamic energy = 3.0;
-    int timeDiff = 0;
     TextEditingController textEditingController = TextEditingController();
     final key = DateFormat('yyyyMMdd').format(selectedDay);
 
@@ -151,10 +157,6 @@ class _CanlendarState extends State<Canlendar> {
     DateTime bedTime = DateTime(selectedDay.year, selectedDay.month, selectedDay.day, bedTimeHH, bedTimeMM);
     String dayOfWeek = getDayOfWeekInKorean(selectedDay.weekday);
 
-    int dateCompareResult = wakeupTime.compareTo(bedTime);
-    timeDiff = dateCompareResult == -1
-        ? (24 * 60) - bedTime.difference(wakeupTime).inMinutes
-        : wakeupTime.difference(bedTime).inMinutes;
 
     /// Don't use 'BuildContext's across async gaps. (Documentation)  Try rewriting the code to not reference the 'BuildContext'.
     /// 위 에러 해결 코드
@@ -218,7 +220,8 @@ class _CanlendarState extends State<Canlendar> {
                                         "wakeupTime": DateFormat('HH:mm').format(wakeupTime),
                                         "bedTime": DateFormat('HH:mm').format(bedTime),
                                         "energy": energy,
-                                        "timeDiff": timeDiff,
+                                        // 창에서 바꾼 취침/기상 시간으로 저장 시점에 계산한다.
+                                        "timeDiff": sleepMinutes(bedTime, wakeupTime),
                                         'memo': textEditingController.text,
                                       }
                                     }).then((value) {

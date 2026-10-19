@@ -100,12 +100,15 @@ class _SettingsState extends State<Settings> {
                                 child: const Text('취소'),
                               ),
                               TextButton(
-                                onPressed: () async => {
-                                  await ref.remove().then((value) {
-                                    ref.child('settings').update({'startingDayOfWeek': 'sunday'});
-                                  }).then((value) {
+                                onPressed: () async {
+                                  // uid가 비어 있으면 ref가 DB 루트를 가리키므로 절대 지우지 않는다.
+                                  if (G_uid == null || G_uid!.isEmpty) {
                                     Navigator.pop(context);
-                                  })
+                                    return;
+                                  }
+                                  await ref.remove();
+                                  await ref.child('settings').update({'startingDayOfWeek': 'sunday'});
+                                  if (context.mounted) Navigator.pop(context);
                                 },
                                 child: const Text('확인'),
                               ),

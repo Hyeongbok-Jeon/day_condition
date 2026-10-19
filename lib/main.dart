@@ -42,6 +42,13 @@ Future<void> main() async {
     }
   }
 
+  // uid 없이 진행하면 모든 DB 경로가 루트('/')를 가리키게 되어, 데이터 초기화 시
+  // 전체 데이터가 지워질 수 있다. 로그인에 실패하면 앱을 진행하지 않는다.
+  if (G_uid == null || G_uid!.isEmpty) {
+    runApp(const LoginFailedApp());
+    return;
+  }
+
   // 기본 설정값 셋팅
   final snapshotValue = <dynamic, dynamic>{};
   final ref = FirebaseDatabase.instance.ref('$G_uid/settings');
@@ -130,6 +137,28 @@ class _MyAppState extends State<MyApp> {
           ],
         );
       },
+    );
+  }
+}
+
+class LoginFailedApp extends StatelessWidget {
+  const LoginFailedApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        body: Center(
+          child: Padding(
+            padding: EdgeInsets.all(30),
+            child: Text(
+              '로그인에 실패했습니다.\n네트워크 연결을 확인한 뒤 앱을 다시 실행해 주세요.',
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
